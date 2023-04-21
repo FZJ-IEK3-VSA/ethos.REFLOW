@@ -5,7 +5,7 @@ dependencies:
   - python
   - pytest
   - pytest-cov
-  - plylint
+  - pylint
   - papermill
   - autopep8
   - jupyter
@@ -22,7 +22,7 @@ dependencies:
   - gdal=3.4.2
   - netCDF4>=1.5.3
   - xarray
-  - pylib=0.9.0
+  - pvlib=0.9.0
   - smopy
   - pip:
     - luigi
