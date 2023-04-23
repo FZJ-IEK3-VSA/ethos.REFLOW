@@ -2,7 +2,7 @@ import luigi
 import os
 
 ## PART 2 OF THE WORKFLOW ##
-## Previous: define_area.py
+## Previous: region_type.py
 ## Next: data_processing.py
 
 # set the output folder

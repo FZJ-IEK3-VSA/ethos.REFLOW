@@ -9,6 +9,7 @@ dependencies:
   - papermill
   - autopep8
   - jupyter
+  - jupyterlab
   - notebook
   - pip
   - matplotlib
