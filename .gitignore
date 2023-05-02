@@ -1,0 +1,3 @@
+**/.dockerignore
+**/.vscode
+**/__pycache__
