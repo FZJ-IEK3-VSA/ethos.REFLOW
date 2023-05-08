@@ -1,15 +1,20 @@
-image: continuumio/miniconda3:latest
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
+
+services:
+  - name: docker:19.03.15-dind
+    alias: docker
 
 stages:
   - build
   - test
   - push
 
-variables:
-  IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
-
 build:
   stage: build
+  image: continuumio/miniconda3
   script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
     - docker build -t -t $IMAGE_NAME .
@@ -19,9 +24,9 @@ build:
 
 test:
   stage: test
+  image: $IMAGE_NAME
   script:
     - docker run $IMAGE_NAME /bin/bash -c "conda run -n reflow pytest -v test.py"
-
 
 push:
   stage: push
