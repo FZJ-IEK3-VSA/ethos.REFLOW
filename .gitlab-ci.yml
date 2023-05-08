@@ -1,0 +1,24 @@
+stages:
+  - build
+  - test
+
+variables:
+  IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker build -t $IMAGE_NAME .
+    - docker push $IMAGE_NAME
+
+test:
+  stage: test
+  image:
+    name: $IMAGE_NAME
+    entrypoint: [""]
+  script:
+    - conda run -n reflow pytest -v test.py
