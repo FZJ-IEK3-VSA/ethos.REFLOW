@@ -16,16 +16,9 @@ if [ $CONDA_DEFAULT_ENV != $envname ]; then
     exit 1
 fi
 
-### LETS CHECK FOR MAMBA. If mamba is installed, we use that, otherwise revert to conda
-package_name="mamba"
-if conda list -n base | grep -q "$package_name"; then
-    echo "$package_name is installed: proceeding with $package_name installation"
-    conda install -c conda-forge gdal=3.4.2
-    mamba env update -n $envname -f requirements.yml
-else 
-    echo "proceeding with conda install"
-    conda env update -n $envname -f requirements.yml
-fi
+echo "proceeding with conda install"
+conda env update -n $envname -f requirements.yml
+
 cd ..
 cd iek3-models
 cd geokit 

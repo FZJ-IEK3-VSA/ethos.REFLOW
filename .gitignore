@@ -1,0 +1,6 @@
+.dockerignore
+ssh_key/id_ed25519
+**//ssh_key
+__pycache__
+.pytest_cache
+
