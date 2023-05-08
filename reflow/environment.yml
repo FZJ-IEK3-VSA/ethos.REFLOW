@@ -4,26 +4,26 @@ channels:
 dependencies:
   - python=3.10
   - gdal=3.4.2
-  - netCDF4>=1.5.3
-  - numpy<1.22.*
+  - netCDF4=1.6.0
+  - numpy=1.21.*
   - pandas=2.0
-  - scipy>1.10.*
+  - scipy>1.10
   - scikit-learn=1.2.2
   - pvlib=0.9.0
   - pytest
   - pytest-cov
-  - pylint
-  - papermill
+  - pylint=2.17.2
+  - papermill=2.3.4
   - autopep8
   - jupyter
   - jupyterlab
   - notebook
   - pip
-  - matplotlib
-  - descartes
+  - matplotlib=3.7.*
+  - descartes=1.1.0
   - openpyxl
-  - numba
-  - xarray
-  - smopy
+  - numba=0.56.4
+  - xarray=2023.4.2
+  - smopy=0.0.8
   - pip:
     - luigi

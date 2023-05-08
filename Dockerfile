@@ -23,8 +23,13 @@ RUN conda update -n base conda && \
 ENV ENVNAME=reflow
 
 # Create the Conda environment and install dependencies
-RUN conda env create -n %ENVNAME% && \
-    conda env update -n %ENVNAME% --file requirements.yml
+RUN conda create -n %ENVNAME% -c conda-forge python=3.10 gdal=3.4.2
+
+# install mamba
+RUN conda install -c conda-forge mamba
+
+# now complete the environment with the rest of the requirements file.
+RUN mamba env update -n %ENVNAME% --file requirements.yml --prune
 
 # activate the environment
 RUN echo "source activate %ENVNAME%" > ~/.bashrc
