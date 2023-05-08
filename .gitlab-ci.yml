@@ -1,3 +1,7 @@
+before_script:
+  - apt-get update
+  - apt-get install -y docker.io
+
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
