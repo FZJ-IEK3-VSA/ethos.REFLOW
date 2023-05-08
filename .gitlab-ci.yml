@@ -1,6 +1,7 @@
 stages:
   - build
   - test
+  - push
 
 variables:
   IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
