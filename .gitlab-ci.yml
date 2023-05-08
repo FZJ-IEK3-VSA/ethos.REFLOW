@@ -1,3 +1,5 @@
+image: continuumio/miniconda3:latest
+
 stages:
   - build
   - test
@@ -9,7 +11,7 @@ variables:
 build:
   stage: build
   script:
-    - docker login -u "t.pelser" -p "aQ4FwUZg19wCc%&*vX%s" jugit-registry.fz-juelich.de
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
     - docker build -t -t $IMAGE_NAME .
   artifacts:
     paths:
