@@ -7,18 +7,23 @@ variables:
 
 build:
   stage: build
-  image: docker:latest
-  services:
-    - docker:dind
   script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - docker build -t $IMAGE_NAME .
-    - docker push $IMAGE_NAME
+    - docker login -u "t.pelser" -p "aQ4FwUZg19wCc%&*vX%s" jugit-registry.fz-juelich.de
+    - docker build -t -t $IMAGE_NAME .
+  artifacts:
+    paths:
+      - Dockerfile
 
 test:
   stage: test
-  image:
-    name: $IMAGE_NAME
-    entrypoint: [""]
   script:
-    - conda run -n reflow pytest -v test.py
+    - docker run $IMAGE_NAME /bin/bash -c "conda run -n reflow pytest -v test.py"
+
+
+push:
+  stage: push
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker push $IMAGE_NAME
+  only:
+    - master
