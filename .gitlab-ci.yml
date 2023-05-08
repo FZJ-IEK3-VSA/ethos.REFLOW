@@ -1,3 +1,7 @@
+before_script:
+  - apt-get update
+  - apt-get install -y docker.io
+
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
@@ -17,7 +21,7 @@ build:
   image: continuumio/miniconda3
   script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
-    - docker build -t -t $IMAGE_NAME .
+    - docker build -t $IMAGE_NAME .
   artifacts:
     paths:
       - Dockerfile
