@@ -19,20 +19,20 @@ RUN conda update -n base conda && \
     conda install -n base conda-libmamba-solver && \
     conda config --set solver libmamba
 
-# set the environment name
-ENV ENVNAME=reflow
+# Create the Conda environment 
+RUN conda create -n reflow
 
-# Create the Conda environment and install dependencies
-RUN conda create -n %ENVNAME% -c conda-forge python=3.10 gdal=3.4.2
+# install gdal version 3.4.2
+RUN conda install -n reflow -c conda-forge gdal=3.4.2
 
 # install mamba
-RUN conda install -c conda-forge mamba
+RUN conda install -n base -c conda-forge mamba
 
 # now complete the environment with the rest of the requirements file.
-RUN mamba env update -n %ENVNAME% --file requirements.yml --prune
+RUN mamba env update -n reflow --file requirements.yml --prune
 
 # activate the environment
-RUN echo "source activate %ENVNAME%" > ~/.bashrc
+RUN echo "source activate reflow" > ~/.bashrc
 
 # Copy the subdirectories into the container
 COPY reflow/examples/ examples/
@@ -43,10 +43,9 @@ COPY reflow/utils/ utils/
 COPY ssh_key/id_ed25519 /root/.ssh/id_ed25519
 
 # set up the ssh agent and add the private key
-RUN eval "$(ssh-agent -s)" && \
-    chmod 600 /root/.ssh/id_ed25519 && \
-    ssh-add /root/.ssh/id_ed25519 && \
-    ssh-keyscan jugit.fz-juelich.de >> /root/.ssh/known_hosts
+RUN chmod 600 /root/.ssh/id_ed25519 && \
+    ssh-keyscan jugit.fz-juelich.de >> /root/.ssh/known_hosts && \
+    eval "$(ssh-agent -s)" && ssh-add /root/.ssh/id_ed25519
 
 # Clone the required repositories into the models folder using the ssh key
 RUN mkdir -p /reflow/models && \
@@ -55,9 +54,9 @@ RUN mkdir -p /reflow/models && \
     git clone git@jugit.fz-juelich.de:iek-3/shared-code/RESKit.git /reflow/models/reskit
 
 # install the repositories using pip install -e . to allow for changes to be made
-RUN pip install -e . /reflow/models/geokit && \
-    pip install -e . /reflow/models/glaes && \
-    pip install -e . /reflow/models/reskit
+RUN /bin/bash -c "conda run -n reflow pip install --no-deps -e /reflow/models/geokit"
+RUN /bin/bash -c "conda run -n reflow pip install --no-deps -e /reflow/models/glaes"
+RUN /bin/bash -c "conda run -n reflow pip install --no-deps -e /reflow/models/reskit"
 
 # copy the main.py file into the container
 COPY reflow/utils/main.py .
@@ -66,10 +65,10 @@ COPY reflow/utils/main.py .
 COPY test.py .
 
 # Run pytest to test the installation
-RUN pytest -v test.py
+RUN /bin/bash -c "conda run -n reflow pytest -v test.py"
 
 # Create a non-root user with an explicit UID (e.g., 5678), disable password authentication, and set an empty GECOS field
-RUN useradd --uid 5678 --password "" --gecos "" appuser
+RUN useradd --uid 5678 --password "" -c "" appuser
 
 # Change the ownership of the /app folder to the new user
 RUN chown -R appuser:appuser /reflow
