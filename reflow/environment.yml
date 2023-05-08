@@ -2,7 +2,14 @@ channels:
   - conda-forge
   - pvlib
 dependencies:
-  - python
+  - python=3.10
+  - gdal=3.4.2
+  - netCDF4>=1.5.3
+  - numpy<1.22.*
+  - pandas=2.0
+  - scipy>1.10.*
+  - scikit-learn=1.2.2
+  - pvlib=0.9.0
   - pytest
   - pytest-cov
   - pylint
@@ -14,17 +21,9 @@ dependencies:
   - pip
   - matplotlib
   - descartes
-  - pandas
   - openpyxl
-  - numpy<1.22
   - numba
-  - scipy
-  - scikit-learn
-  - gdal=3.4.2
-  - netCDF4>=1.5.3
   - xarray
-  - pvlib=0.9.0
   - smopy
   - pip:
     - luigi
-    - prefect
