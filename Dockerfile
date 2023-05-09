@@ -53,8 +53,8 @@ RUN /bin/bash -c "conda run -n reflow pip install --no-deps -e /reflow/models/ge
 RUN /bin/bash -c "conda run -n reflow pip install --no-deps -e /reflow/models/glaes"
 RUN /bin/bash -c "conda run -n reflow pip install --no-deps -e /reflow/models/reskit"
 
-# copy the main.py file into the container
-COPY reflow/utils/main.py .
+# copy the main.py file into the containers
+COPY reflow/main.py .
 
 # Copy the test file into the container
 COPY test.py .
