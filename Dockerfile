@@ -4,6 +4,9 @@ FROM continuumio/miniconda3:latest
 # set the working directory in the container
 WORKDIR /reflow
 
+# pass GITLAB_ACCESS_TOKEN as a build argument
+ARG GITLAB_ACCESS_TOKEN=glpat-ax4zeP7Fwwz_RYMHkod2
+
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -39,19 +42,11 @@ COPY reflow/examples/ examples/
 COPY reflow/testing/ testing/
 COPY reflow/utils/ utils/
 
-# Copy the private ssh key into the container
-COPY ssh_key/id_ed25519 /root/.ssh/id_ed25519
-
-# set up the ssh agent and add the private key
-RUN chmod 600 /root/.ssh/id_ed25519 && \
-    ssh-keyscan jugit.fz-juelich.de >> /root/.ssh/known_hosts && \
-    eval "$(ssh-agent -s)" && ssh-add /root/.ssh/id_ed25519
-
 # Clone the required repositories into the models folder using the ssh key
 RUN mkdir -p /reflow/models && \
-    git clone git@jugit.fz-juelich.de:iek-3/shared-code/geokit.git /reflow/models/geokit && \
-    git clone git@jugit.fz-juelich.de:iek-3/shared-code/glaes.git /reflow/models/glaes && \
-    git clone git@jugit.fz-juelich.de:iek-3/shared-code/RESKit.git /reflow/models/reskit
+    git clone https://oauth2:${GITLAB_ACCESS_TOKEN}@jugit.fz-juelich.de/iek-3/shared-code/geokit.git /reflow/models/geokit && \
+    git clone https://oauth2:${GITLAB_ACCESS_TOKEN}@jugit.fz-juelich.de/iek-3/shared-code/glaes.git /reflow/models/glaes && \
+    git clone https://oauth2:${GITLAB_ACCESS_TOKEN}@jugit.fz-juelich.de/iek-3/shared-code/RESKit.git /reflow/models/reskit
 
 # install the repositories using pip install -e . to allow for changes to be made
 RUN /bin/bash -c "conda run -n reflow pip install --no-deps -e /reflow/models/geokit"
