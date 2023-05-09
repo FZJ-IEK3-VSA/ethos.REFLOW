@@ -1,16 +1,35 @@
-image: docker:19.03.15
-
 services:
-  - docker:19.03.15-dind
-
-variables:
-  DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2375
+  - name: docker:19.03.15-dind
+    alias: docker
 
 stages:
-  - check_docker
+  - build
+  - test
+  - push
 
-check_docker:
-  stage: check_docker
+build:
+  stage: build
+  image: docker:19.03.15
+  before_script:
+    - export DOCKER_HOST=tcp://docker:2375
+    - export DOCKER_DRIVER=overlay2
   script:
-    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker build -t $IMAGE_NAME .
+  artifacts:
+    paths:
+      - Dockerfile
+
+test:
+  stage: test
+  image: $IMAGE_NAME
+  script:
+    - docker run $IMAGE_NAME /bin/bash -c "conda run -n reflow pytest -v test.py"
+
+push:
+  stage: push
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker push $IMAGE_NAME
+  only:
+    - master
