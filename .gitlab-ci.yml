@@ -1,3 +1,9 @@
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2375
+  CI_REGISTRY_IMAGE: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
+  IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
+
 services:
   - name: docker:19.03.15-dind
     alias: docker
@@ -10,9 +16,6 @@ stages:
 build:
   stage: build
   image: docker:19.03.15
-  before_script:
-    - export DOCKER_HOST=tcp://docker:2375
-    - export DOCKER_DRIVER=overlay2
   script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
     - docker build -t $IMAGE_NAME .
