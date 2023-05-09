@@ -70,8 +70,11 @@ RUN /bin/bash -c "conda run -n reflow pytest -v test.py"
 # Create a non-root user with an explicit UID (e.g., 5678), disable password authentication, and set an empty GECOS field
 RUN useradd --uid 5678 --password "" -c "" appuser
 
+# set the home directory to the /app folder
+RUN mkdir -p /home/appuser
+
 # Change the ownership of the /app folder to the new user
-RUN chown -R appuser:appuser /reflow
+RUN chown -R appuser:appuser /home/appuser && chmod 755 /home/appuser
 
 # Switch to the new user
 USER appuser
