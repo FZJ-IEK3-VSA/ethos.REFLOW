@@ -2,6 +2,7 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375
   CI_REGISTRY_IMAGE: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
+  TEMP_IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:temp
   IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:latest
 
 services:
@@ -18,21 +19,25 @@ build:
   image: docker:19.03.15
   script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
-    - docker build -t $IMAGE_NAME .
+    - docker build -t $TEMP_IMAGE_NAME .
+    - docker push $TEMP_IMAGE_NAME
   artifacts:
     paths:
       - Dockerfile
 
 test:
   stage: test
-  image: $IMAGE_NAME
+  image: docker:19.03.15
   script:
-    - docker run $IMAGE_NAME /bin/bash -c "conda run -n reflow pytest -v test.py"
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker pull $TEMP_IMAGE_NAME
+    - docker run $TEMP_IMAGE_NAME /bin/bash -c "conda run -n reflow pytest -v test.py"
 
 push:
   stage: push
   script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker tag $TEMP_IMAGE_NAME $IMAGE_NAME
     - docker push $IMAGE_NAME
   only:
     - master
