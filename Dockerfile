@@ -38,9 +38,10 @@ RUN mamba env update -n reflow --file requirements.yml --prune
 RUN echo "source activate reflow" > ~/.bashrc
 
 # Copy the subdirectories into the container
-COPY reflow/examples/ examples/
+COPY examples/ examples/
 COPY reflow/testing/ testing/
 COPY reflow/utils/ utils/
+COPY reflow/data/ data/
 
 # Clone the required repositories into the models folder using the ssh key
 RUN mkdir -p /reflow/models && \
