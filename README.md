@@ -23,7 +23,7 @@ Replace "<<your-image-name>>" with your desired image name.
 
 2. Run the Docker Image
 To run the Docker image, execute:
-```docker run -it -p 8501:8501 <<your-image-name>>```
+```docker run -it -p 8501:8501 your-image-name```
 
 
 ### For Development in VS Code
