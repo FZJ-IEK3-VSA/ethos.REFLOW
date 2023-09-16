@@ -25,6 +25,7 @@ Replace "your-image-name" with your desired image name.
 To run the Docker image, execute:
 ```docker run -it -p 8501:8501 your-image-name```
 
+This will start a Jupyter Notebook server on port 8888, which you can access via your web browser.
 
 ### For Development in VS Code
 1. Make sure that Docker Desktop is installed on your computer
