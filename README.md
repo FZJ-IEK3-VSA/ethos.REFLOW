@@ -17,9 +17,9 @@ REFLOW is a workflow manager tool designed to streamline and automate tasks rela
 ### For End Users: 
 1. Build the Docker Image
 To build the Docker image, navigate to the project root and run the following code:
-```docker build -t <<your-image-name>> .```
+```docker build -t your-image-name .```
 
-Replace "<<your-image-name>>" with your desired image name. 
+Replace "your-image-name" with your desired image name. 
 
 2. Run the Docker Image
 To run the Docker image, execute:
