@@ -7,14 +7,10 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
-# Install the requirements
-COPY /docker/requirements.txt .
-RUN pip install -r requirements.txt
-
-# install libmamba to speed up conda environment creation
-RUN conda update -n base conda && \ 
-    conda install -n base conda-libmamba-solver && \
-    conda config --set solver libmamba
+# Install the PIP requirements
+COPY requirements.yml .
+RUN micromamba install -y -n base -f requirements.yml && \
+    micromamba clean --all --yes
 
 WORKDIR /reflow
 COPY . /reflow

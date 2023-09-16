@@ -1,3 +1,0 @@
-## requirements file which includes luigi and can be run by docker
-
-luigi
