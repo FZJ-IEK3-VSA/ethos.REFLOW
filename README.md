@@ -11,15 +11,14 @@ REFLOW is a workflow manager tool designed to streamline and automate tasks rela
 
 ### Initial Setup
 1. Make sure that Docker Desktop is installed on your computer
-2. Install Dev Containers in VS Code. 
-3. Clone this repo to a directory of your choice using 
+2. Clone this repo to a directory of your choice using 
 ```git clone https://gitlab.com/your-repo-link.git```
 
 ### For End Users: 
 1. Build the Docker Image
 To build the Docker image, navigate to the project root and run the following code:
-```docker build -t <<your-image-name>> .
-```
+```docker build -t <<your-image-name>> .```
+
 Replace "<<your-image-name>>" with your desired image name. 
 
 2. Run the Docker Image
