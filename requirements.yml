@@ -1,29 +1,7 @@
 channels:
   - conda-forge
-  - pvlib
 dependencies:
   - python
-  - gdal=3.4.2
-  - netCDF4>1.5.3
-  - numpy<1.22
-  - pandas
-  - scipy
-  - scikit-learn
-  - pvlib=0.9.0
-  - pytest
-  - pytest-cov
-  - pylint
-  - papermill=2.3.4
-  - autopep8
-  - jupyter
-  - jupyterlab
-  - notebook
   - pip
-  - matplotlib
-  - descartes
-  - openpyxl
-  - numba
-  - xarray
-  - smopy
   - pip:
     - luigi

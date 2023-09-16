@@ -1,7 +1,0 @@
-﻿name,type,year,temp_extent,spat_extent,source,units,licesnse,version,crs,iek3_path
-global_boundaries,,,,,,,,,,
-era5,,,,,,,,,,
-merra2,,,,,,,,,,
-gwa,,,,,,,,,,
-osm,,,,,,,,,,
-world_topography,,,,,,,,,,

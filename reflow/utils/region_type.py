@@ -1,1 +1,0 @@
-# generates a shapefile and json dict to pass into "Download Data" based on the user input in Main.
