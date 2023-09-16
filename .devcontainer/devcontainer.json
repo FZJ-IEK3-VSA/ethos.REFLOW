@@ -27,7 +27,7 @@
 	// "postCreateCommand": "docker --version",
 
 	// Configure tool-specific properties.
-	// "customizations": {},
+	// "customizations": {},c:\Users\t.pelser\repos\shapefile-generator\LICENSE.txt
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
