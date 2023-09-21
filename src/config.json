@@ -1,0 +1,26 @@
+{
+    "paths": {
+        "data_dir": "path_to_data",
+        "output_dir": "output_path",
+        "gadm_version": "41"
+    },
+    "Task1": {
+        "install_dir": "path_to_installation",
+        "data_dir": "path/to/data",
+        "output_dir": "path/to/output",
+        "gadm_version": "41",
+        "shapefile_params": {
+            "region_name": "South Africa", 
+            "crs": "EPSG:22293",
+            "place_name": "Western Cape",
+            "admin_depth": 0,
+            "savefile": true,
+            "plot": false
+        }
+    },
+    "Task2_download-data": {
+        "install_dir": "path_to_installation",
+        "start_year": 2000,
+        "end_year": 2020
+    }
+}
