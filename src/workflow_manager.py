@@ -6,15 +6,17 @@ import os
 if __name__ == '__main__':
     config = read_config('src/config.json')
 
-    data_dir = config['paths']['data_dir']
-    output_dir = config['paths']['output_dir']
-    gadm_version = config['task1_params']['gadm_version']
-    shapefile_params = config['task1_params']['shapefile_params']
-    shapefiles_dir = config['task1_params']['output_dir']
+    data_dir = config['global_paths']['data_dir']
+    output_dir = config['global_paths']['output_dir']
+    install_dir = config['task1']['install_dir']
+    gadm_version = config['task1']['gadm_version']
+    shapefile_params = config['task1']['shapefile_params']
+    shapefiles_dir = config['task1']['output_dir']
 
     luigi.build([
         Task1(
             data_dir=data_dir,
+            install_dir=install_dir,
             output_dir=os.path.join(output_dir, shapefiles_dir),
             gadm_version=gadm_version,
             shapefile_params=shapefile_params

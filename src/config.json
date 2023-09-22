@@ -1,9 +1,9 @@
 {
-    "paths": {
+    "global_paths": {
         "data_dir": "C:\\Users\\t.pelser\\local_data\\data",
         "output_dir": "C:\\Users\\t.pelser\\local_data\\output"
     },
-    "Task1": {
+    "task1": {
         "install_dir": "C:\\Users\\t.pelser\\repos\\shapefile-generator",
         "gadm_version": "41",
         "output_dir": "shapefiles",
