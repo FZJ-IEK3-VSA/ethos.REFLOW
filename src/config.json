@@ -1,14 +1,12 @@
 {
     "paths": {
-        "data_dir": "path_to_data",
-        "output_dir": "output_path",
-        "gadm_version": "41"
+        "data_dir": "C:\\Users\\t.pelser\\local_data\\data",
+        "output_dir": "C:\\Users\\t.pelser\\local_data\\output"
     },
     "Task1": {
-        "install_dir": "path_to_installation",
-        "data_dir": "path/to/data",
-        "output_dir": "path/to/output",
+        "install_dir": "C:\\Users\\t.pelser\\repos\\shapefile-generator",
         "gadm_version": "41",
+        "output_dir": "shapefiles",
         "shapefile_params": {
             "region_name": "South Africa", 
             "crs": "EPSG:22293",
