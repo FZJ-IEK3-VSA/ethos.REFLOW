@@ -16,19 +16,19 @@
 	},
 
 	// Use this environment variable if you need to bind mount your local source code into a new container.
-	// "remoteEnv": {
-		// "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
-	// },
+	"remoteEnv": {
+		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [8501,8501]
+	"forwardPorts": [8501,8501],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "docker --version",
 
 	// Configure tool-specific properties.
-	// "customizations": {},c:\Users\t.pelser\repos\shapefile-generator\LICENSE.txt
+	// "customizations": {},
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+	"remoteUser": "root"
 }

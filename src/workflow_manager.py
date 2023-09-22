@@ -1,9 +1,15 @@
 import luigi
 from src.utils.Task1 import Task1
-from src.utils.utils import read_config
+from src.utils.utils import read_config, check_docker_access
 import os
 
 if __name__ == '__main__':
+    if check_docker_access():
+        print("Container has access to the Docker daemon.")
+    else:
+        print("Container does not have access to the Docker daemon.")
+
+
     config = read_config('src/config.json')
 
     data_dir = config['global_paths']['data_dir']
