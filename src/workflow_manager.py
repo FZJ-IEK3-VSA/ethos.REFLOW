@@ -1,5 +1,5 @@
 import luigi
-from src.utils.Task1_set_region import Task1
+from src.tasks.Task1_set_region import Task1
 from src.utils.utils import read_config, check_docker_access
 import os
 

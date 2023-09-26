@@ -1,9 +1,14 @@
 version: '3'
 services:
-  my-service:
+  reflow:
     build:
-    ports:
-      - "8501:8501"
-    volumes:
-      - C:\Users\t.pelser\repos\shapefile-generator:/data/shapefile-generator
-      - C:\Users\t.pelser\repos\reflow_reanalysis_downloader:/data/reanalysis_downloader
+      context: .
+      dockerfile: Dockerfile
+  shapefilegenerator:
+    build:
+      context: ${SHAPEFILE_GEN_PATH}
+      dockerfile: Dockerfile
+  reanalysis_downloader:
+    build:
+      context: $(REANALYSIS_DOWNLOADER_PATH)
+      dockerfile: Dockerfile
