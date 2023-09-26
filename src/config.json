@@ -5,15 +5,16 @@
     },
     "task1": {
         "install_dir": "C:\\Users\\t.pelser\\repos\\shapefile-generator",
+        "container_name": "shapefilegenerator",
         "gadm_version": "41",
-        "output_dir": "shapefiles",
+        "output_dir": "Task1",
         "shapefile_params": {
             "region_name": "South Africa", 
             "crs": "EPSG:22293",
             "place_name": "Western Cape",
             "admin_depth": 0,
             "savefile": true,
-            "plot": false
+            "plot": true
         }
     },
     "Task2_download-data": {

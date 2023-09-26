@@ -1,0 +1,9 @@
+version: '3'
+services:
+  my-service:
+    build:
+    ports:
+      - "8501:8501"
+    volumes:
+      - C:\Users\t.pelser\repos\shapefile-generator:/data/shapefile-generator
+      - C:\Users\t.pelser\repos\reflow_reanalysis_downloader:/data/reanalysis_downloader

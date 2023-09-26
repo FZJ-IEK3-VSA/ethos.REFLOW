@@ -3,11 +3,12 @@
 import docker
 import luigi
 import json
+import os
 
 class Task1(luigi.Task):
     # set all the paths for initialisation and the parameters for running the generator
-    container_name = luigi.Parameter()
     install_dir = luigi.Parameter()
+    container_name = luigi.Parameter()
     data_dir = luigi.Parameter()
     output_dir = luigi.Parameter()
     gadm_version = luigi.Parameter()
@@ -29,7 +30,7 @@ class Task1(luigi.Task):
             return True
         except docker.errors.NotFound:
             return False
-        
+    
     def _build_and_run_docker(self):
         """
         Build and run a Docker container named 'self.container_name' from a specified directory.
@@ -45,7 +46,24 @@ class Task1(luigi.Task):
         client = docker.from_env()
         tag_name = f"{self.container_name}:reflow"
         client.images.build(path=self.install_dir, tag=tag_name)
-        client.containers.run(tag_name, name=self.container_name, detach=True, tty=True)
+        client.containers.run(tag_name, name=self.container_name, detach=True, tty=True)    
+    
+    def output(self):
+        """
+        Dynamically finds a .shp file in the specified self.output_dir directory (excluding '_temp').
+        Returns a LocalTarget pointing to the found .shp file.
+        
+        Returns:
+            luigi.LocalTarget: A LocalTarget object pointing to the found .shp file.
+        """
+        for dir_name, _, file_names in os.walk(self.output_dir):
+            if "_temp" in dir_name:
+                continue
+            for file_name in file_names:
+                if file_name.endswith('.shp'):
+                    return luigi.LocalTarget(os.path.join(dir_name, file_name))
+        return None
+
 
     def run(self):
         """
@@ -73,7 +91,7 @@ class Task1(luigi.Task):
 
         # Initialise sg class within Docker container
         # This assumes that it is possible to send commands to the container's bash to initialise
-        init_command = f"python -c 'import os: from shpgen import ShapefileGenerator; sg = ShapefileGenerator(\"{self.data_dir}\", \"{self.output_dir}\", \"{self.gadm_version}\")'"
+        init_command = f"python -c 'import os; from shpgen import ShapefileGenerator; sg = ShapefileGenerator(\"{self.data_dir}\", \"{self.output_dir}\", \"{self.gadm_version}\")'"
         container.exec_run(cmd=["/bin/bash", "-c", init_command])
 
         # Import the shapefile_params from the config file
@@ -82,3 +100,18 @@ class Task1(luigi.Task):
         # Run the sg.return_shapefile from within Docker container using the params
         run_shapefile_command = f"python -c 'sg.return_shapefile(**{shapefile_params_str})'"
         container.exec_run(cmd=["/bin/bash", "-c", run_shapefile_command])
+
+    def complete(self):
+        """
+        Checks whether the task is complete based on the dynamic output() method.
+        Calls output() to get the LocalTarget and checks if it exists.
+        
+        Returns:
+            bool: True if the .shp file exists, False otherwise.
+        """
+        output_target = self.output()
+        if output_target is not None:
+            return output_target.exists()
+        else:
+            return False
+
