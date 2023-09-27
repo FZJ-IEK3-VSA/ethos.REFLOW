@@ -1,11 +1,12 @@
 {
     "global_paths": {
-        "data_dir": "C:\\Users\\t.pelser\\local_data\\data",
+        "data_dir": "C:\\Users\\t.pelser\\local_data\\input_data",
         "output_dir": "C:\\Users\\t.pelser\\local_data\\output"
     },
-    "task1": {
+    "Task1_shapefile-generator": {
         "install_dir": "C:\\Users\\t.pelser\\repos\\shapefile-generator",
-        "container_name": "shapefilegenerator",
+        "image_name": "shapefile_generator:latest",
+        "container_name": "shapefile_generator_container",
         "gadm_version": "41",
         "output_dir": "Task1",
         "shapefile_params": {

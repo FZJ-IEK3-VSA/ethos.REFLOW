@@ -4,11 +4,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      ports:
+        - "8501:8501"
+    image: reflow
   shapefilegenerator:
     build:
-      context: ${SHAPEFILE_GEN_PATH}
+      context: C:/Users/t.pelser/repos/shapefile-generator
       dockerfile: Dockerfile
+    image: shapefile_generator
   reanalysis_downloader:
     build:
-      context: $(REANALYSIS_DOWNLOADER_PATH)
+      context: C:/Users/t.pelser/repos/reflow_reanalysis_downloader
       dockerfile: Dockerfile
+    image: reanalysis_downloader
