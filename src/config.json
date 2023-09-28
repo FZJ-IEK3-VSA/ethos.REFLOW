@@ -19,8 +19,18 @@
         }
     },
     "Task2_download-data": {
-        "install_dir": "path_to_installation",
-        "start_year": 2000,
-        "end_year": 2020
+        "install_dir": "C:\\Users\\t.pelser\\repos\\reflow_reanalysis_downloader",
+        "image_name": "reanalysis_downloader:latest",
+        "container_name": "reanalysis_downloader_container",
+        "output_dir": "Task2",
+        "weather_data_params": {
+            "data_source": "ERA5",
+            "data_type": "wind",
+            "start_year": 2000,
+            "end_year": 2005,
+            "test": true,
+            "process_raw": true,
+            "delete_raw": true
+        }
     }
 }

@@ -91,7 +91,6 @@ class DockerManager:
     @staticmethod
     def attach_volumes(container_name, image_name, host_volume_mapping):
         client = docker.from_env()
-        container = client.containers.get(container_name)
 
         # Check if expected volumes are already attached to the container
         expected_volumes = list(host_volume_mapping.values())
@@ -113,3 +112,33 @@ class DockerManager:
         container.stop()
         container.remove()
         print(f"Container {container_name} stopped and removed.")
+
+    @staticmethod
+    def setup_container(container_name, image_name, install_dir, data_dir, output_dir):
+        """
+        Sets up the Docker container for the Luigi task.
+        
+        This method ensures that the Docker container specified by `self.container_name`
+        and `self.image_name` is up and running. It also maps the host volumes specified
+        by `self.data_dir` and `self.output_dir` to '/input' and '/output' respectively 
+        in the container.
+
+        Raises:
+            RuntimeError: If the container volumes are not correctly attached.
+        """
+        print("Doing the Docker stuff...")
+        # set the volume mapping for the container
+        host_volume_mapping = {
+            data_dir: {'bind': '/input', 'mode': 'rw'},
+            output_dir: {'bind': '/output', 'mode': 'rw'}
+        }
+
+        DockerManager.get_or_create_container(container_name, image_name, host_volume_mapping, install_dir)
+        expected_volumes = [vol['bind'] for vol in host_volume_mapping.values()]
+        if not DockerManager.check_volumes_attached(container_name, expected_volumes):
+            print("Volumes are not correctly attached. Recreating container...")
+            DockerManager.stop_and_remove_container(container_name)
+            DockerManager.create_container(container_name, image_name, host_volume_mapping)
+
+        else:
+            print("Volumes correctly attached to container.")

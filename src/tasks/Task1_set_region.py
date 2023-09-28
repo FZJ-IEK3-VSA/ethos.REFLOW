@@ -14,34 +14,23 @@ class Task1(luigi.Task):
     gadm_version = luigi.Parameter()
     shapefile_params = luigi.Parameter()
     
-    def setup_container(self):
+    
+    def output(self):
         """
-        Sets up the Docker container for the Luigi task.
+        Dynamically finds a .shp file in the specified self.output_dir directory (excluding '_temp').
+        Returns a LocalTarget pointing to the found .shp file.
         
-        This method ensures that the Docker container specified by `self.container_name`
-        and `self.image_name` is up and running. It also maps the host volumes specified
-        by `self.data_dir` and `self.output_dir` to '/input' and '/output' respectively 
-        in the container.
-
-        Raises:
-            RuntimeError: If the container volumes are not correctly attached.
+        Returns:
+            luigi.LocalTarget: A LocalTarget object pointing to the found .shp file.
         """
-        print("Doing the Docker stuff...")
-        # set the volume mapping for the container
-        host_volume_mapping = {
-            self.data_dir: {'bind': '/input', 'mode': 'rw'},
-            self.output_dir: {'bind': '/output', 'mode': 'rw'}
-        }
+        for dir_name, _, file_names in os.walk(self.output_dir):
+            if "_temp" in dir_name:
+                continue
+            for file_name in file_names:
+                if file_name.endswith('.shp'):
+                    return luigi.LocalTarget(os.path.join(dir_name, file_name))
+        return None
 
-        DockerManager.get_or_create_container(self.container_name, self.image_name, host_volume_mapping, self.install_dir)
-        expected_volumes = [vol['bind'] for vol in host_volume_mapping.values()]
-        if not DockerManager.check_volumes_attached(self.container_name, expected_volumes):
-            print("Volumes are not correctly attached. Recreating container...")
-            DockerManager.stop_and_remove_container(self.container_name)
-            DockerManager.create_container(self.container_name, self.image_name, host_volume_mapping)
-
-        else:
-            print("Volumes correctly attached to container.")
 
     def run(self):
         """
@@ -62,9 +51,10 @@ class Task1(luigi.Task):
         Raises:
             RuntimeError: If any step in the container setup or script execution fails.
         """
-        self.setup_container()
+        DockerManager.setup_container(self.container_name, self.image_name, self.install_dir, self.data_dir, self.output_dir)
         print("Container setup complete.")
-        # The container should now be correctly configured, so you can proceed to use it
+
+        # The container should now be correctly configured, so it can be used
         client = docker.from_env()
         container = client.containers.get(self.container_name)
         print("Running Task_1 container")
@@ -81,22 +71,6 @@ class Task1(luigi.Task):
         # Print the results for debugging
         # print("Exec output:", result.output.decode())
         # print("Exec exit code:", result.exit_code)
-
-    def output(self):
-        """
-        Dynamically finds a .shp file in the specified self.output_dir directory (excluding '_temp').
-        Returns a LocalTarget pointing to the found .shp file.
-        
-        Returns:
-            luigi.LocalTarget: A LocalTarget object pointing to the found .shp file.
-        """
-        for dir_name, _, file_names in os.walk(self.output_dir):
-            if "_temp" in dir_name:
-                continue
-            for file_name in file_names:
-                if file_name.endswith('.shp'):
-                    return luigi.LocalTarget(os.path.join(dir_name, file_name))
-        return None
 
     def complete(self):
         """
