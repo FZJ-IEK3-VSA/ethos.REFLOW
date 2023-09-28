@@ -1,7 +1,6 @@
 # task1.py
 import docker
 import luigi
-import json
 import os
 from src.utils.docker_management import DockerManager
 
@@ -15,24 +14,18 @@ class Task1(luigi.Task):
     gadm_version = luigi.Parameter()
     shapefile_params = luigi.Parameter()
     
-    def output(self):
-        """
-        Dynamically finds a .shp file in the specified self.output_dir directory (excluding '_temp').
-        Returns a LocalTarget pointing to the found .shp file.
-        
-        Returns:
-            luigi.LocalTarget: A LocalTarget object pointing to the found .shp file.
-        """
-        for dir_name, _, file_names in os.walk(self.output_dir):
-            if "_temp" in dir_name:
-                continue
-            for file_name in file_names:
-                if file_name.endswith('.shp'):
-                    return luigi.LocalTarget(os.path.join(dir_name, file_name))
-        return None
-
-
     def setup_container(self):
+        """
+        Sets up the Docker container for the Luigi task.
+        
+        This method ensures that the Docker container specified by `self.container_name`
+        and `self.image_name` is up and running. It also maps the host volumes specified
+        by `self.data_dir` and `self.output_dir` to '/input' and '/output' respectively 
+        in the container.
+
+        Raises:
+            RuntimeError: If the container volumes are not correctly attached.
+        """
         print("Doing the Docker stuff...")
         # set the volume mapping for the container
         host_volume_mapping = {
@@ -51,6 +44,24 @@ class Task1(luigi.Task):
             print("Volumes correctly attached to container.")
 
     def run(self):
+        """
+        Executes the main logic of the Luigi task in the Docker container.
+        
+        This method sets up the container using `setup_container()` and then runs a Python
+        script within the container. The script imports necessary modules, initializes the 
+        `ShapefileGenerator`, and runs its `return_shapefile` method with the parameters 
+        specified in `self.shapefile_params`.
+
+        Returns:
+            None
+        
+        Side-effects:
+            - Logs are printed for debugging.
+            - Files may be generated in the mapped volumes of the container.
+
+        Raises:
+            RuntimeError: If any step in the container setup or script execution fails.
+        """
         self.setup_container()
         print("Container setup complete.")
         # The container should now be correctly configured, so you can proceed to use it
@@ -68,8 +79,24 @@ class Task1(luigi.Task):
         result = container.exec_run(cmd=["/opt/conda/bin/python", "-c", init_command_escaped])
 
         # Print the results for debugging
-        print("Exec output:", result.output.decode())
-        print("Exec exit code:", result.exit_code)
+        # print("Exec output:", result.output.decode())
+        # print("Exec exit code:", result.exit_code)
+
+    def output(self):
+        """
+        Dynamically finds a .shp file in the specified self.output_dir directory (excluding '_temp').
+        Returns a LocalTarget pointing to the found .shp file.
+        
+        Returns:
+            luigi.LocalTarget: A LocalTarget object pointing to the found .shp file.
+        """
+        for dir_name, _, file_names in os.walk(self.output_dir):
+            if "_temp" in dir_name:
+                continue
+            for file_name in file_names:
+                if file_name.endswith('.shp'):
+                    return luigi.LocalTarget(os.path.join(dir_name, file_name))
+        return None
 
     def complete(self):
         """
