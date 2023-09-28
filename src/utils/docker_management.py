@@ -114,7 +114,7 @@ class DockerManager:
         print(f"Container {container_name} stopped and removed.")
 
     @staticmethod
-    def setup_container(container_name, image_name, install_dir, data_dir, output_dir):
+    def setup_container(container_name, image_name, install_dir, data_dir, output_dir, prev_task_output=None):
         """
         Sets up the Docker container for the Luigi task.
         
@@ -133,8 +133,13 @@ class DockerManager:
             output_dir: {'bind': '/output', 'mode': 'rw'}
         }
 
+        # if it is not Task1, add an extra volume
+        if prev_task_output:
+            host_volume_mapping[prev_task_output] = {'bind': '/prev_task_output', 'mode': 'rw'}
+
         DockerManager.get_or_create_container(container_name, image_name, host_volume_mapping, install_dir)
         expected_volumes = [vol['bind'] for vol in host_volume_mapping.values()]
+        
         if not DockerManager.check_volumes_attached(container_name, expected_volumes):
             print("Volumes are not correctly attached. Recreating container...")
             DockerManager.stop_and_remove_container(container_name)
