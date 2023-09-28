@@ -35,13 +35,25 @@ class DockerManager:
                 name=container_name,
                 volumes=host_volume_mapping,
                 detach=True,
-                tty=True
+                tty=True,
+                command='bash'
             )
+
+    @staticmethod
+    def ensure_container_running(container_name):
+        client = docker.from_env()
+        container = client.containers.get(container_name)
+        if container.status != 'running':
+            print("Container not running, starting container...")
+            container.start()
+        else:
+            print("Container already running.")
 
     @staticmethod
     def get_or_create_container(container_name, image_name, host_volume_mapping, install_dir=None):
         print("Checking if container exists...")
         if DockerManager.container_exists(container_name):
+            DockerManager.ensure_container_running(container_name)
             return
         print("Checking if image exists...")
         if DockerManager.image_exists(image_name):

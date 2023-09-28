@@ -56,24 +56,20 @@ class Task1(luigi.Task):
         # The container should now be correctly configured, so you can proceed to use it
         client = docker.from_env()
         container = client.containers.get(self.container_name)
-        print("Running shapefile generator container")
+        print("Running Task_1 container")
 
-        # Initialise ShapefileGenerator class within Docker container
-        init_command = f"python -c 'import os; from shpgen import ShapefileGenerator; sg = ShapefileGenerator(\"/input\", \"/output\", \"{self.gadm_version}\")'"
-        # start the container and run the init command
-        container.exec_run(cmd="bash", stdin=True, tty=True)
+        # set the command to initialise the generator
+        init_command = f'''import os
+        from shpgen import ShapefileGenerator
+        sg = ShapefileGenerator("/input", "/output", "{self.gadm_version}")
+        sg.return_shapefile(region='{self.shapefile_params['region_name']}', crs='{self.shapefile_params['crs']}', place='{self.shapefile_params['place_name']}', admin_depth={self.shapefile_params['admin_depth']}, savefile={self.shapefile_params['savefile']}, plot={self.shapefile_params['plot']})
+        '''
+        init_command_escaped = init_command.replace("\n", "; ")
+        result = container.exec_run(cmd=["/opt/conda/bin/python", "-c", init_command_escaped])
 
-        container.exec_run(cmd=["bash", "-c", init_command])
-
-        # Import the shapefile_params from the config file
-        shapefile_params_str = json.dumps(self.shapefile_params).replace("\"", "\\\"")
-
-        # Run the sg.return_shapefile from within Docker container using the params
-        run_shapefile_command = f"python -c 'sg.return_shapefile(**{shapefile_params_str})'"
-        print(run_shapefile_command)
-        print("sent run command")
-        container.exec_run(cmd=["/bin/bash", "-c", run_shapefile_command])
-        print("finished run command")
+        # Print the results for debugging
+        print("Exec output:", result.output.decode())
+        print("Exec exit code:", result.exit_code)
 
     def complete(self):
         """
