@@ -10,10 +10,10 @@
         "gadm_version": "41",
         "output_dir": "Task1",
         "shapefile_params": {
-            "region_name": "South Africa", 
-            "crs": "EPSG:22293",
-            "place_name": "Western Cape",
-            "admin_depth": 0,
+            "region_name": "DEU", 
+            "crs": "EPSG:4326",
+            "place_name": "None",
+            "admin_depth": 2,
             "savefile": true,
             "plot": true
         }
@@ -28,7 +28,7 @@
             "data_type": "wind",
             "start_year": 2000,
             "end_year": 2005,
-            "test": true,
+            "test": false,
             "process_raw": true,
             "delete_raw": true
         }

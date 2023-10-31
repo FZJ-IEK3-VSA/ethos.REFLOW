@@ -62,15 +62,11 @@ class Task1(luigi.Task):
         # set the command to initialise the generator
         init_command = f'''import os
         from shpgen import ShapefileGenerator
-        sg = ShapefileGenerator("/input", "/output", "{self.gadm_version}")
+        sg = ShapefileGenerator("/output", "{self.gadm_version}")
         sg.return_shapefile(region='{self.shapefile_params['region_name']}', crs='{self.shapefile_params['crs']}', place='{self.shapefile_params['place_name']}', admin_depth={self.shapefile_params['admin_depth']}, savefile={self.shapefile_params['savefile']}, plot={self.shapefile_params['plot']})
         '''
         init_command_escaped = init_command.replace("\n", "; ")
         result = container.exec_run(cmd=["/opt/conda/bin/python", "-c", init_command_escaped])
-
-        # Print the results for debugging
-        # print("Exec output:", result.output.decode())
-        # print("Exec exit code:", result.exit_code)
 
     def complete(self):
         """
