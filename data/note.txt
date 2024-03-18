@@ -1,0 +1,13 @@
+The input data lives here. This parent directory consists of the following subdirectories:
+- 'met_data' contains the meteorological data files. This is split into subdirectories for each data source, which in turn contain the raw and processed data under respective subdirectories.
+- 'exclusions_data' contains the geospatial data that are used to exclude certain areas from the analysis, which includes:
+    1. the raw data: /exclusions_data/raw
+    2. the processed data: /exclusions_data/processed
+    3. a _temp folder: /exclusions_data/_temp
+- 'project_data' contains other project-specific data, including: 
+    1. core geospatial that are used to set the project working region AND
+    2. any data that cannot be downloaded directly from a script, and has to be manually uploaded to the project directory
+
+Inside each of thse 
+
+These paths are defined in the `config.py` file, under the settings directory. If you make any changes to the directory structure, you will need to update the paths in the `config.py` file.
