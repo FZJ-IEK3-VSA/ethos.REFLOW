@@ -1,4 +1,4 @@
 Tristan Pelser - Lead Development
-Patrick Kuckertz - Supervision of PhD and Workflow
-Jann Weinand - Supervision of PhD
-Maximillian Hoffmann - Supervision of PhD
+Jann Weinand 
+Patrick Kuckertz 
+Detlef Stolten 
