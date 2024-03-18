@@ -2,11 +2,12 @@
 __pycache__
 .pytest_cache
 /data*
-!data/*/
+!data/note.txt
+!data/project_data/*
 /required_software*
 !required_software/*/
 output/north_sea_exclusions.tif
 *.png
 *.pptx
 /output*
-!output/*/
+!output/note.txt
