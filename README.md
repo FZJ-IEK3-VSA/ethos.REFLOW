@@ -21,7 +21,7 @@ REFLOW is a workflow manager tool designed to streamline and automate tasks rela
 ```bash
 git clone https://github.com/your-username/your-repo-name.git
 ```
-3. **Initialize Your Project into the empty repository:** Navigate to the main REFLOW repo (this repo) and run the initialize_project.py script by executing:
+3. **Initialize Your Project into the empty repository:** Navigate to the **main REFLOW repo (this repo)** and run the initialize_project.py script by executing:
 ```bash
 python initialize_project.py
 ```
@@ -31,7 +31,7 @@ You will be prompted to enter the name of your new project and the parent direct
 
 The script will copy the necessary files while excluding specific files and directories such as'example_workflows', 'contributors.txt', 'LICENSE.txt', and the .git directory.
 
-4. Navigate back to your own project repo to your first commit and push to the remote repository:
+4. Navigate back to **your own project repo** to your first commit and push to the remote repository:
 ```bash
 git add .
 ```
