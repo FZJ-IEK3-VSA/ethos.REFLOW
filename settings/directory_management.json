@@ -1,28 +1,24 @@
 {
   "output": {
-    "path": "output",
-    "geodata": "output/geodata",
-    "logs": "output/logs",
-    "plots": "output/plots",
-    "simulations": "output/simulations",
-    "report": "output/report.json"
+    "geodata": "geodata",
+    "logs": "logs",
+    "plots": "plots",
+    "simulations": "simulations",
+    "report": "report.json"
   },
   "data": {
-    "path": "data",
     "exclusion_data": {
-      "path": "data/exclusion_data",
-      "_temp": "data/exclusion_data/_temp",
-      "raw": "data/exclusion_data/raw",
-      "processed": "data/exclusion_data/processed"
+      "_temp": "_temp",
+      "raw": "raw",
+      "processed": "processed"
     },
-    "met_data": "data/met_data",
-    "project_data": "data/project_data"
+    "met_data": "met_data",
+    "project_data": "project_data"
   },
   "settings": {
-    "path": "settings",
-    "era5_settings": "settings/era5_settings.json",
-    "exclusion_settings": "settings/exclusion_settings.json",
-    "technologies": "settings/technologies.json"
+    "era5_settings": "era5_settings.json",
+    "exclusion_settings": "exclusion_settings.json",
+    "technologies": "technologies.json"
   },
   "scripts": "scripts",
   "utils": "utils"
