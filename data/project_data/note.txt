@@ -1,0 +1,3 @@
+This is where the project data lives, including:
+    1. The main geospatial data file that sets the project working area.
+    2. Any data which cannot be directly downloaded from the download scripts AND has a license which allows it to be reproduced. 
