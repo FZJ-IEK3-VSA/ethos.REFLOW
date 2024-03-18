@@ -14,7 +14,6 @@ config_loader = ConfigLoader()
 
 raw_output_dir = config_loader.get_path("data", "exclusion_data", "raw")
 project_data_dir = config_loader.get_path("data", "project_data")
-gadm_dir = os.path.join(project_data_dir, "gadm")
 
 country_settings_path = config_loader.get_path("settings", "country_settings")
 
@@ -36,4 +35,4 @@ with open(country_settings_path, 'r') as file:
 countries = country_settings["countries"]
 
 for country in countries:
-    download_gadm_data(country, gadm_version, gadm_dir)
+    download_gadm_data(country, gadm_version, project_data_dir)
