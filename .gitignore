@@ -14,3 +14,5 @@ __pycache__
 !output/note.txt
 # Except note.txt within the output/project_data
 !output/project_data/note.txt
+# and the note.txt within the output/logs
+!output/logs/note.txt

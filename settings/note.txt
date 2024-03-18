@@ -1,4 +1,4 @@
 These are the settings files used in the workflow. The settings files are descibed in json format. 
-The default files need to be edited with your assigned values. You can edit these default files as necessary, just make sure that any changes to the structure (e.g. key changes or new keys) are reflected in the respective task code.
+The default files need to be edited with your assigned values. You can edit these default files as necessary, just make sure that any changes to the structure (e.g. key changes or new keys) are reflected in the directory_management.json file.
 
 It is highly recommended to look at an example analysis before editing these files.
