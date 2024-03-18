@@ -1,0 +1,24 @@
+{   "vector": {
+        "vector_key1": {
+            "paths": [
+                "path_to_points",
+                "path_to_polygons"
+            ],
+            "buffer": "SET_BUFFER_VALUE_IN_M"
+        }
+    },
+    "raster": {
+        "raster_key1": {
+            "paths": [
+                "path_to_raster"
+            ],
+            "value": "SET_VALUE_TO_EXCLUDE",
+            "buffer": "SET_BUFFER_VALUE_IN_M"
+        }
+    },
+    "other": {
+        "min_distance_to_coast": {
+            "value": "SET_VALUE_TO_EXCLUDE"
+        }
+    }
+}
