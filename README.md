@@ -29,7 +29,7 @@ python initialize_project.py
 You will be prompted to enter the name of your new project and the parent directory where it should be created.
 **Make sure you enter the same project name as the empty repository you created in step 1.** 
 
-The script will copy the necessary files while excluding specific files and directories such as'example_workflows', 'contributors.txt', 'LICENSE.txt', and the .git directory.
+The script will copy the necessary files while excluding specific files and directories such as *'example_workflows'*, *'contributors.txt'*, *'LICENSE.txt'*, and the *.git* directory.
 
 4. Navigate back to **your own project repo** to your first commit and push to the remote repository:
 ```bash
