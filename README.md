@@ -1,6 +1,6 @@
 # REFLOW: Renewable Energy potentials workFLOW manager
 
-REFLOW is a workflow manager tool designed to streamline and automate tasks related to renewable energy potential analyses. It is built with Luigi and aims to provide an automated, robust framework for data ingestion, processing, analysis, validation and storage. It is build with transparency and reproducibility in mind. 
+REFLOW is a workflow manager tool designed to streamline and automate tasks related to renewable energy potential analyses. It is built with Luigi and aims to provide an automated, robust framework for data acquisition, processing, eligibility analysis, technology placements, simulations and visualizations. It is build with transparency and reproducibility in mind. 
 
 ## Requirements
 * Python
@@ -31,7 +31,7 @@ You will be prompted to enter the name of your new project and the parent direct
 
 The script will copy the necessary files while excluding specific files and directories such as *'example_workflows'*, *'contributors.txt'*, *'LICENSE.txt'*, and the *.git* directory.
 
-4. Navigate back to **your own project repo** to your first commit and push to the remote repository:
+4. Navigate back to **your own project repo** to make your first commit and then push to the remote repository:
 ```bash
 git add .
 ```
