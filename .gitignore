@@ -2,17 +2,17 @@
 __pycache__
 .pytest_cache
 /data*
-!/data/*/
+/output/*
 /required_software*
 !/required_software/*/
 *.png
 *.pptx
 
 # Ignore everything under the output directory
-/output/*
+!data/note.txt
 # Except note.txt at the root of output
 !output/note.txt
 # Except note.txt within the output/project_data
-!output/project_data/note.txt
+!data/project_data/note.txt
 # and the note.txt within the output/logs
 !output/logs/note.txt

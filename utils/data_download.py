@@ -1,6 +1,7 @@
 import requests
 import os
 import zipfile
+import logging
 
 def download_and_extract(url, folder, filename=None):
     """
@@ -12,7 +13,7 @@ def download_and_extract(url, folder, filename=None):
     """
     # Check if folder exists and has files
     if os.path.exists(folder) and os.listdir(folder):
-        print(f"Folder '{folder}' already exists and is not empty. Skipping download.")
+        logging.info(f"Folder '{folder}' already exists and is not empty. Skipping download.")
         return None
     
     # Ensuring the folder exists
@@ -26,7 +27,7 @@ def download_and_extract(url, folder, filename=None):
         local_filename = os.path.join(folder, url.split('/')[-1])
     
     # Downloading the file
-    print(f"Downloading {url} to {folder}...")
+    logging.info(f"Downloading {url} to {folder}...")
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
         with open(local_filename, 'wb') as f:
@@ -45,17 +46,19 @@ def download_and_extract(url, folder, filename=None):
 
 def download_gadm_data(country_abrv, gadm_version: str, data_dir):        
     # Create a temporary folder for the extracted data, in the _temp folder within the current directory
-    temp_folder = os.path.join(data_dir, f"_temp/{country_abrv}")
+    gadm_dir = os.path.join(data_dir, f"gadm")
+    temp_folder = os.path.join(gadm_dir, f"_temp/{country_abrv}")
     if not os.path.exists(temp_folder):
         os.makedirs(temp_folder)
     else:
-        print(f"Data for {country_abrv} already exists in temp folder.")
+        logging.info(f"Data for {country_abrv} already exists in temp folder.")
         return True
          
     # Download the ZIP file
-    print(f"Downloading data for {country_abrv}...")
+    logging.info(f"Using GADM version {gadm_version}.")
+    logging.info(f"Downloading data for {country_abrv}...")
     url = f"https://geodata.ucdavis.edu/gadm/gadm{gadm_version[0]}.{gadm_version[1]}/shp/gadm{gadm_version}_{country_abrv}_shp.zip"
-    print(url)
+    logging.info(url)
     zip_path = f"gadm{gadm_version}_{country_abrv}_shp.zip"
     
     # Download the ZIP file
@@ -64,7 +67,7 @@ def download_gadm_data(country_abrv, gadm_version: str, data_dir):
         with open(zip_path, 'wb') as file:
             file.write(response.content)
     else:
-        print(f"Failed to download data for {country_abrv}")
+        logging.error(f"Failed to download data for {country_abrv}")
         return False
         
     # Extract the ZIP file
@@ -72,15 +75,15 @@ def download_gadm_data(country_abrv, gadm_version: str, data_dir):
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(f"{temp_folder}/gadm{gadm_version}_{country_abrv}")
     except zipfile.BadZipFile:
-        print(f"Bad ZIP file for {country_abrv}.)")
+        logging.error(f"Bad ZIP file for {country_abrv}.)")
         return False
         
     # Delete the ZIP file
     try:
         os.remove(zip_path)
     except FileNotFoundError:
-        print(f"Could not delete ZIP file for {country_abrv}.")
+        logging.error(f"Could not delete ZIP file for {country_abrv}.")
 
-    print(f"Processed {country_abrv}.")
+    logging.info(f"Processed {country_abrv}.")
 
     return True

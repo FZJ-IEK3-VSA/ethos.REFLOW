@@ -15,32 +15,37 @@ class ConfigLoader:
             return json.load(file)
 
     def get_path(self, *keys):
-        # Initialize the path with the project root
-        path_accumulator = self.project_root
-
-        # Initialize the section of the config to start from
-        config_section = self.config
-
-        # Iterate over the keys
-        for key in keys:
-            # Navigate the configuration and build the path
-            if key in config_section:
-                # Update the path_accumulator if the key is found,
-                # but only append it if it's a deeper section, not just a file name.
-                # This assumes directory names in the JSON do not end in file extensions.
-                if isinstance(config_section[key], dict):
-                    path_accumulator = path_accumulator / key
-                    config_section = config_section[key]
-                elif '.' not in key:  # Assuming it's a directory if there's no file extension
-                    path_accumulator = path_accumulator / key
-                # If it's a file or a terminal directory, append its specific path
+            path_accumulator = self.project_root
+            config_section = self.config
+    
+            # Track if the final key directly maps to a string (path)
+            use_final_value = False
+            final_value = ""
+    
+            for key in keys:
+                if key in config_section:
+                    # Check if we're at the last key and it maps directly to a string
+                    if isinstance(config_section[key], str):
+                        final_value = config_section[key]
+                        use_final_value = True
+                        break
+                    # Otherwise, dive deeper into the configuration
+                    elif isinstance(config_section[key], dict):
+                        config_section = config_section[key]
+                # If a key isn't found, append it directly (assuming it's a directory)
                 else:
-                    path_accumulator = path_accumulator / config_section[key]
+                    path_accumulator /= key
+    
+            if use_final_value:
+                # Construct path using all keys (as directories) except for the last,
+                # append the final_value at the end.
+                return self.project_root / '/'.join(keys[:-1]) / final_value
             else:
-                # If the key is not found, assume it's a directory and append it
-                path_accumulator = path_accumulator / key
-
-        return path_accumulator
+                # If not using final_value, build the path from accumulated keys
+                for key in keys:
+                    path_accumulator /= key
+    
+            return path_accumulator
     
 
         

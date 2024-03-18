@@ -18,7 +18,8 @@
   "settings": {
     "era5_settings": "era5_settings.json",
     "exclusion_settings": "exclusion_settings.json",
-    "technologies": "technologies.json"
+    "technologies": "technologies.json",
+    "country_settings": "country_settings.json"
   },
   "scripts": "scripts",
   "utils": "utils"
