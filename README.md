@@ -4,7 +4,7 @@ REFLOW is a workflow manager tool designed to streamline and automate tasks rela
 
 ## Requirements
 * Python
-* An IDE (VS Code recommended)
+* An IDE (e.g. PyCharm, Visual Studio Code, etc.)
 * Docker Desktop if running in container
 
 ## Getting Started
