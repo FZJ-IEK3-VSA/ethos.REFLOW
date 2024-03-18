@@ -18,7 +18,7 @@ project_data_dir = config_loader.get_path("data", "project_data")
 country_settings_path = config_loader.get_path("settings", "country_settings")
 
 # configure logging
-logging.basicConfig(filename=os.path.join(config_loader.get_path("output"), 'logs', 'data_download.log'), 
+logging.basicConfig(filename=os.path.join(config_loader.get_path("output"), 'logs', '1_data_download.log'), 
                     level=logging.INFO,
                     format='%(asctime)s:%(levelname)s:%(message)s')
 

@@ -3,8 +3,6 @@ __pycache__
 .pytest_cache
 /data*
 /output/*
-/required_software*
-!/required_software/*/
 *.png
 *.pptx
 
