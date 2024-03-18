@@ -31,7 +31,7 @@ You will be prompted to enter the name of your new project and the parent direct
 
 The script will copy the necessary files while excluding specific files and directories such as'example_workflows', 'contributors.txt', 'LICENSE.txt', and the .git directory.
 
-4. Make your first commit and push to the remote repository:
+4. Navigate back to your own project repo to your first commit and push to the remote repository:
 ```bash
 git add .
 ```
