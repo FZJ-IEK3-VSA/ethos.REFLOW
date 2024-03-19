@@ -1,6 +1,6 @@
 {
     "countries": [
-        "CYP"
+        "USE_3_LETTER_ISO_COUNTRY_CODE"
     ],
     "zoom_level": 0,
     "crs": "EPSG:3035"

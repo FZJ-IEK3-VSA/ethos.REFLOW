@@ -51,9 +51,9 @@ def download_and_extract(url, folder, filename=None):
 def download_gadm_data(country_abrv, gadm_version: str, data_dir):        
     # Create a temporary folder for the extracted data, in the _temp folder within the current directory
     gadm_dir = os.path.join(data_dir, f"gadm")
-    temp_folder = os.path.join(gadm_dir, f"_temp/{country_abrv}")
-    if not os.path.exists(temp_folder):
-        os.makedirs(temp_folder)
+    country_folder = os.path.join(gadm_dir, country_abrv)
+    if not os.path.exists(country_folder):
+        os.makedirs(country_folder)
     else:
         logging.info(f"Data for {country_abrv} already exists in temp folder.")
         return True
@@ -71,13 +71,13 @@ def download_gadm_data(country_abrv, gadm_version: str, data_dir):
         with open(zip_path, 'wb') as file:
             file.write(response.content)
     else:
-        logging.error(f"Failed to download data for {country_abrv}")
+        logging.error(f"Failed to download data for {country_abrv}. Please ensure that the ISO code is correct.")
         return False
         
     # Extract the ZIP file
     try:
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(f"{temp_folder}/gadm{gadm_version}_{country_abrv}")
+            zip_ref.extractall(f"{country_folder}/gadm{gadm_version}_{country_abrv}")
     except zipfile.BadZipFile:
         logging.error(f"Bad ZIP file for {country_abrv}.)")
         return False
