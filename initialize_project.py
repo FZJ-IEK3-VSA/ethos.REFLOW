@@ -4,7 +4,7 @@ from pathlib import Path
 
 def copy_project(src, dest, project_name, exclusions):
     """
-    Copies the project from src to dest, applying exclusions.
+    Copies the project from src to dest, applying exclusions. Ensures .gitignore is explicitly copied.
 
     :param src: Source directory
     :param dest: Destination directory
@@ -17,16 +17,29 @@ def copy_project(src, dest, project_name, exclusions):
         return False
 
     os.makedirs(dest, exist_ok=True)
+    gitignore_path = None  # Variable to hold the path to .gitignore if found
+
     for root, dirs, files in os.walk(src, topdown=True):
         dirs[:] = [d for d in dirs if os.path.join(root, d).replace(src, '') not in exclusions]
+
         for file in files:
             file_path = os.path.join(root, file)
             relative_path = file_path.replace(src, '').lstrip(os.path.sep)
+            
+            # Check if the current file is .gitignore
+            if file == '.gitignore':
+                gitignore_path = os.path.join(dest, relative_path)
+            
             if any(excluded in file_path for excluded in exclusions):
                 continue
+
             dest_path = os.path.join(dest, relative_path)
             os.makedirs(os.path.dirname(dest_path), exist_ok=True)
             shutil.copy(file_path, dest_path)
+
+    # Check if .gitignore was found and copy it explicitly
+    if gitignore_path:
+        shutil.copy(os.path.join(src, '.gitignore'), gitignore_path)
 
     print(f"Project {project_name} has been initialized at {dest}.")
     return True
@@ -46,6 +59,7 @@ def main():
         os.path.join(current_directory, 'LICENSE.txt'),
         os.path.join(current_directory, '__pycache__'),
         os.path.join(current_directory, 'initialize_project.py'),
+        os.path.join(current_directory, 'README.md'),
         os.path.join(current_directory, '.git')  
     ]
 
