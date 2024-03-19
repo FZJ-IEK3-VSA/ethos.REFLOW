@@ -15,7 +15,13 @@ config_loader = ConfigLoader()
 raw_output_dir = config_loader.get_path("data", "exclusion_data", "raw")
 project_data_dir = config_loader.get_path("data", "project_data")
 
-country_settings_path = config_loader.get_path("settings", "country_settings")
+project_settings_path = config_loader.get_path("settings", "project_settings")
+
+# load the list of countries
+with open(project_settings_path, 'r') as file:
+    country_settings = json.load(file)
+
+countries = country_settings["countries"]
 
 # configure logging
 logging.basicConfig(filename=os.path.join(config_loader.get_path("output"), 'logs', '1_data_download.log'), 
@@ -28,11 +34,11 @@ logging.basicConfig(filename=os.path.join(config_loader.get_path("output"), 'log
 # Define the version of GADM data to download
 gadm_version = "41"
 
-# load the list of countries
-with open(country_settings_path, 'r') as file:
-    country_settings = json.load(file)
-
-countries = country_settings["countries"]
-
 for country in countries:
     download_gadm_data(country, gadm_version, project_data_dir)
+
+#### 2. Download and extract the exclusion data
+logging.info("Downloading and extracting exclusion data...")
+### 2.1. Example of downloading and extracting a single file
+# Link to information about the data = "https://example-URL.com"
+download_and_extract("https://example-URL.com", raw_output_dir)

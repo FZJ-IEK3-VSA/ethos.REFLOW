@@ -10,7 +10,7 @@ REFLOW is a workflow manager tool designed to streamline and automate tasks rela
 ## Getting Started
 
 ### Initial Setup
-1. Clone the repository to your local machine using:
+1. Clone this repository to your local machine using:
     ```bash
     git clone https://jugit.fz-juelich.de/iek-3/groups/data-and-model-integration/pelser/reflow.git
     ```

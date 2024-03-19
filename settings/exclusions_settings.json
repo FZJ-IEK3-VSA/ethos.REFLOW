@@ -1,19 +1,24 @@
 {   "vector": {
         "vector_key1": {
             "paths": [
-                "path_to_points",
-                "path_to_polygons"
+                "SET_PATH_TO_POINTS",
+                "SET_PATH_TO_POLYGONS"
             ],
             "buffer": "SET_BUFFER_VALUE_IN_M"
-        }
+        }   
     },
     "raster": {
         "raster_key1": {
             "paths": [
-                "path_to_raster"
+                "SET_PATH_TO_RASTER"
             ],
             "value": "SET_VALUE_TO_EXCLUDE",
             "buffer": "SET_BUFFER_VALUE_IN_M"
+        }
+    },
+    "region_borders": {
+        "area_1": {
+            "path": "SET_PATH_TO_BORDERS"
         }
     },
     "other": {

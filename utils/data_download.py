@@ -27,14 +27,18 @@ def download_and_extract(url, folder, filename=None):
         local_filename = os.path.join(folder, url.split('/')[-1])
     
     # Downloading the file
-    logging.info(f"Downloading {url} to {folder}...")
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        with open(local_filename, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                f.write(chunk)
+    try:
+        logging.info(f"Downloading {url} to {folder}...")
+        with requests.get(url, stream=True) as r:
+            r.raise_for_status()
+            with open(local_filename, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to download {url}. Error: {e}")
+        return None
 
-    # Checking if the file is a zip file
+    # Check if the file is a zip file
     if zipfile.is_zipfile(local_filename):
         with zipfile.ZipFile(local_filename, 'r') as zip_ref:
             zip_ref.extractall(folder)
