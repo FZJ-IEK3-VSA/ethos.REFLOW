@@ -1,0 +1,3 @@
+[submodule "example_workflows/offshore-north-sea"]
+	path = example_workflows/offshore-north-sea
+	url = https://jugit.fz-juelich.de/iek-3/groups/data-and-model-integration/pelser/reflow-offshore-north-sea.git
