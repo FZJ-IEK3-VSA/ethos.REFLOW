@@ -15,4 +15,5 @@ dependencies:
   - gdal
   - cdsapi
   - pip:
+    - luigi
     - netcdf4

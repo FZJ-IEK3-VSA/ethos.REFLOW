@@ -8,6 +8,9 @@ __pycache__
 
 # Ignore everything under the output directory
 !data/note.txt
+!data/exclusion_data/processed/note.txt
+!data/exclusion_data/raw/note.txt
+!data/met_data/note.txt
 # Except note.txt at the root of output
 !output/note.txt
 # Except note.txt within the output/project_data
