@@ -19,7 +19,6 @@ class VectorProcessor:
         self.default_crs = default_crs
         # set up logging in the VectorProcessor
         config_loader = ConfigLoader()
-        logging.basicConfig(filename=os.path.join(config_loader.get_path("output"), 'logs', '2_data_processing.log'))
 
     def reproject_vector(self, vector_data, crs=None):
         """
@@ -95,45 +94,36 @@ class VectorProcessor:
 
         return all_data_polygons, all_buffered_data
 
-    def merge_two_vectors_and_flatten(self, vector_one, vector_two, output_path, filename):
-        """
-        Merges two GeoDataFrame objects into one and attempts to flatten the geometry to a single polygon.
-
-        Parameters:
-        - vector_one: First GeoDataFrame.
-        - vector_two: Second GeoDataFrame.
-        - output_path: Directory path where the output file will be saved.
-        - filename: Name of the output file.
-        """
-        # Concatenate the two GeoDataFrames into one
-        merged_vector = gpd.GeoDataFrame(pd.concat([vector_one, vector_two], ignore_index=True), crs=vector_one.crs)
-
-        # Attempt to dissolve all geometries into a single geometry
-        dissolved = merged_vector.unary_union
-
-        # Determine if the dissolved geometry is a Polygon or MultiPolygon and handle accordingly
-        if isinstance(dissolved, Polygon):
-            # If it's a single Polygon, use it as is
-            single_polygon = dissolved
-        elif isinstance(dissolved, MultiPolygon):
-            # If it's a MultiPolygon, select the largest polygon based on area
-            single_polygon = max(dissolved, key=lambda a: a.area)
-        else:
-            # Log an error if the geometry is neither a Polygon nor a MultiPolygon
-            logging.error("The merged geometry is neither a Polygon nor a MultiPolygon.")
-            single_polygon = None
-
-        if single_polygon:
-            # Create a new GeoDataFrame with the single polygon if it exists
-            merged_vector = gpd.GeoDataFrame(gpd.GeoSeries(single_polygon), columns=['geometry'])
-            merged_vector.set_crs(vector_one.crs, inplace=True)
-            
-            # Save the GeoDataFrame to the specified file
-            output_filepath = os.path.join(output_path, filename)
-            merged_vector.to_file(output_filepath)
-            logging.info(f"Saved merged and flattened vector to {output_filepath}")
-        else:
-            # Log an error if no valid polygon geometry was generated
-            logging.error("No valid polygon geometry was generated.")
-
-        return merged_vector
+    def merge_two_vectors_and_flatten(self, vector_one, vector_two):
+            """
+            Merges two GeoDataFrame objects into one and attempts to flatten the geometry to a single polygon.
+    
+            Parameters:
+            - vector_one: First GeoDataFrame.
+            - vector_two: Second GeoDataFrame.
+            """
+            # Concatenate the two GeoDataFrames into one
+            merged_vector = gpd.GeoDataFrame(pd.concat([vector_one, vector_two], ignore_index=True), crs=vector_one.crs)
+    
+            # Attempt to dissolve all geometries into a single geometry
+            dissolved = merged_vector.unary_union
+    
+            # Determine if the dissolved geometry is a Polygon or MultiPolygon and handle accordingly
+            if isinstance(dissolved, Polygon):
+                # If it's a single Polygon, use it as is
+                single_polygon = dissolved
+            elif isinstance(dissolved, MultiPolygon):
+                # If it's a MultiPolygon, select the largest polygon based on area
+                single_polygon = max(dissolved, key=lambda a: a.area)
+            else:
+                # Log an error if the geometry is neither a Polygon nor a MultiPolygon
+                logging.error("The merged geometry is neither a Polygon nor a MultiPolygon.")
+                single_polygon = None
+    
+            if single_polygon:
+                # Create a new GeoDataFrame with the single polygon if it exists
+                merged_vector = gpd.GeoDataFrame(gpd.GeoSeries(single_polygon), columns=['geometry'])
+                merged_vector.set_crs(vector_one.crs, inplace=True)
+    
+            logging.info("Merged and flattened vector data.")
+            return merged_vector
