@@ -1,3 +1,4 @@
+import luigi
 import requests
 import os
 import zipfile
@@ -7,38 +8,53 @@ from utils.config import ConfigLoader
 from utils.data_download import download_gadm_data, download_and_extract
 import logging
 
-##################### DO NOT CHANGE #################################
+class DownloadExclusionsData(luigi.Task):
+    """
+    Luigi Task to download the exclusion data.
+    """
+    gadm_version = luigi.Parameter(default="41")
 
-#### directory management ####
-config_loader = ConfigLoader()
+    def requires(self):
+        """
+        Define any dependencies here. If this is a first step, return None 
+        """
+        return None
 
-raw_output_dir = config_loader.get_path("data", "exclusion_data", "raw")
-project_data_dir = config_loader.get_path("data", "project_data")
+    def output(self):
+        """
+        Output that signifies that the task has been completed. 
+        """
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'exclusions_data_download_complete.txt'))
+    
+    def run(self):
+        """
+        Main run method for the task. 
+        """
+        ##################### DO NOT CHANGE ######################################
 
-project_settings_path = config_loader.get_path("settings", "project_settings")
+        #### directory management ####
+        config_loader = ConfigLoader()
 
-# load the list of countries
-with open(project_settings_path, 'r') as file:
-    country_settings = json.load(file)
+        raw_output_dir = config_loader.get_path("data", "exclusion_data", "raw")
+        project_data_dir = config_loader.get_path("data", "project_data")
+        project_settings_path = config_loader.get_path("settings", "project_settings")
 
-countries = country_settings["countries"]
+        log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'DownloadExclusionsData.log')
+        logger = config_loader.setup_task_logging('DownloadExclusionsData', log_file)
+        logger.info("Starting DownloadExclusionsData task")
 
-# configure logging
-logging.basicConfig(filename=os.path.join(config_loader.get_path("output"), 'logs', '1_data_download.log'), 
-                    level=logging.INFO,
-                    format='%(asctime)s:%(levelname)s:%(message)s')
+        # load the list of countries
+        with open(project_settings_path, 'r') as file:
+            country_settings = json.load(file)
 
-############## MAIN WORKFLOW #################
+        countries = country_settings["countries"]
+        logger.info(f"List of countries: {countries}")
+        ###########################################################################
 
-### 1. Download GADM data
-# Define the version of GADM data to download
-gadm_version = "41"
+        # ############## MAIN WORKFLOW #################
 
-for country in countries:
-    download_gadm_data(country, gadm_version, project_data_dir)
+        ### ADD YOUR DOWNLOAD WORKFLOW HERE ###
 
-#### 2. Download and extract the exclusion data
-logging.info("Downloading and extracting exclusion data...")
-### 2.1. Example of downloading and extracting a single file
-# Link to information about the data = "https://example-URL.com"
-download_and_extract("https://example-URL.com", raw_output_dir)
+        # Signify that the task has been completed
+        with self.output().open('w') as f:
+            f.write('Exclusion data download complete.')
