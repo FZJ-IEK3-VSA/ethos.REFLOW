@@ -92,7 +92,7 @@ class ConfigLoader:
     
             data_paths = self.data_paths.get('project_data', {})
     
-            data_base_path = os.path.join(self.project_root, 'data')
+            data_base_path = os.path.join(self.project_root, 'data', 'project_data')
             if country_codes and zoom_level is not None:  # Handle GADM files by country code and zoom level
                 gadm_section = data_paths.get(parent_dir, {})
                 for code in country_codes:
@@ -103,10 +103,27 @@ class ConfigLoader:
                         continue
                     for gadm_key, gadm_value in country_section.items():
                         if 'files' in gadm_value:
-                            zoom_specific_files = [f for f in gadm_value['files'] if f'_{zoom_level}.' in f]
-                            for file_name in zoom_specific_files:
+                            zoom_specific_shp_files = [f for f in gadm_value['files'] if f'_{zoom_level}.' in f and f.lower().endswith('.shp')]
+                            for file_name in zoom_specific_shp_files:
                                 result_paths[code] = os.path.normpath(os.path.join(data_base_path, parent_dir, code, gadm_key, file_name))
     
             return result_paths
 
         
+    def setup_task_logging(self, task_name, log_file):
+            """Configure logging for a specific task."""
+            logger = logging.getLogger(task_name)
+            logger.setLevel(logging.INFO)
+            if not logger.handlers:
+                # Prevent adding multiple handlers to the same logger
+                file_handler = logging.FileHandler(log_file)
+                formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(message)s')
+                file_handler.setFormatter(formatter)
+                logger.addHandler(file_handler)
+            return logger
+        
+    def setup_global_logging(self, log_file):
+        """Configure global logging to capture all logs."""
+        logging.basicConfig(filename=log_file, level=logging.INFO,
+                            format='%(asctime)s:%(levelname)s:%(message)s')
+            

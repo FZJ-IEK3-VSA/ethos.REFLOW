@@ -9,16 +9,19 @@ import json
 from utils.config import ConfigLoader
 
 class VectorProcessor:
-    def __init__(self, default_crs="EPSG:3035"):
+    def __init__(self):
         """
         Initializes the VectorProcessor with a default CRS.
 
         Parameters:
         - default_crs: The default coordinate reference system in EPSG format.
         """
-        self.default_crs = default_crs
         # set up logging in the VectorProcessor
         config_loader = ConfigLoader()
+        project_settings_path = config_loader.get_path("settings", "project_settings")
+        with open(project_settings_path, 'r') as file:
+            project_settings = json.load(file)
+        self.default_crs = project_settings["crs"]
 
     def reproject_vector(self, vector_data, crs=None):
         """
@@ -34,6 +37,7 @@ class VectorProcessor:
         if vector_data.crs != crs:
             logging.info(f"CRS mismatch. Reprojecting to {crs}...")
             vector_data = vector_data.to_crs(crs)
+        logging.info(f"Reprojected to {crs}.")
         return vector_data
 
     def buffer_vector(self, vector_data, buffer_distance):
@@ -46,6 +50,7 @@ class VectorProcessor:
         """
         buffered_data = vector_data.buffer(buffer_distance)
         buffered_data_gpd = gpd.GeoDataFrame(geometry=buffered_data, crs=vector_data.crs)
+        logging.info(f"Buffered by {buffer_distance}.")
         return buffered_data_gpd
 
     def process_vector_data(self, data_dict, reference_polygon, buffer_distance, crs=None):
