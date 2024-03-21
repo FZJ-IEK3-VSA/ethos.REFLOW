@@ -12,6 +12,7 @@ class MainWorkflow(luigi.WrapperTask):
     Main workflow to run the full pipeline.
     """
     def requires(self):
+        # First task is the download of the exclusion data
         return [DownloadExclusionsData()]
 
 if __name__ == '__main__':

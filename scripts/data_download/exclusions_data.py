@@ -55,6 +55,10 @@ class DownloadExclusionsData(luigi.Task):
 
         ### ADD YOUR DOWNLOAD WORKFLOW HERE ###
 
+
+
+        ############ DO NOT CHANGE ################
         # Signify that the task has been completed
+        logger.info("Exclusion data download complete.")
         with self.output().open('w') as f:
             f.write('Exclusion data download complete.')
