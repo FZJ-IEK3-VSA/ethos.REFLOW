@@ -7,8 +7,8 @@ import json
 import logging
 import os
 
-#### THIS SCRIPT IS ONLY NECESSARY IF YOU ARE ADDING EXCLUSION BUFFERS TO YOUR REGIONAL DATA; 
-#### e.g. adding a buffer around coastlines to account for EEZ boundaries, or around national borders ####
+#### THIS SCRIPT MUST BE RUN AS IT IS A DEPENDENCY FOR THE NEXT TASK ####
+#### However, the main logic can be left blank if you do not need to add additional buffers to the regions - eg around coastlines or national borders ####  
 
 class ProcessRegionBuffers(luigi.Task):
     """
@@ -52,7 +52,9 @@ class ProcessRegionBuffers(luigi.Task):
         ############## MAIN WORKFLOW #################
 
         ### Add your logic for buffering the regions here ###
+        #### Leave blank if not running any coastline or border buffer processing ####
 
+        ############ DO NOT CHANGE ############
         # mark the task as complete
         logger.info("ProcessRegionBuffers task complete.")
         with self.output().open('w') as file:

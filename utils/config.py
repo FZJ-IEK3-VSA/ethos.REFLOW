@@ -24,37 +24,37 @@ class ConfigLoader:
             return json.load(file)
 
     def get_path(self, *keys):
-            path_accumulator = self.project_root
-            config_section = self.config
-    
-            # Track if the final key directly maps to a string (path)
-            use_final_value = False
-            final_value = ""
-    
-            for key in keys:
-                if key in config_section:
-                    # Check if we're at the last key and it maps directly to a string
-                    if isinstance(config_section[key], str):
-                        final_value = config_section[key]
-                        use_final_value = True
-                        break
-                    # Otherwise, dive deeper into the configuration
-                    elif isinstance(config_section[key], dict):
-                        config_section = config_section[key]
-                # If a key isn't found, append it directly (assuming it's a directory)
-                else:
-                    path_accumulator /= key
-    
-            if use_final_value:
-                # Construct path using all keys (as directories) except for the last,
-                # append the final_value at the end.
-                return self.project_root / '/'.join(keys[:-1]) / final_value
+        path_accumulator = self.project_root
+        config_section = self.config
+
+        # Track if the final key directly maps to a string (path)
+        use_final_value = False
+        final_value = ""
+
+        for key in keys:
+            if key in config_section:
+                # Check if we're at the last key and it maps directly to a string
+                if isinstance(config_section[key], str):
+                    final_value = config_section[key]
+                    use_final_value = True
+                    break
+                # Otherwise, dive deeper into the configuration
+                elif isinstance(config_section[key], dict):
+                    config_section = config_section[key]
+            # If a key isn't found, append it directly (assuming it's a directory)
             else:
-                # If not using final_value, build the path from accumulated keys
-                for key in keys:
-                    path_accumulator /= key
-    
-            return path_accumulator
+                path_accumulator /= key
+
+        if use_final_value:
+            # Construct path using all keys (as directories) except for the last,
+            # append the final_value at the end.
+            return self.project_root / '/'.join(keys[:-1]) / final_value
+        else:
+            # If not using final_value, build the path from accumulated keys
+            for key in keys:
+                path_accumulator /= key
+
+        return path_accumulator
     
     def update_data_paths(self):
         data_dir = self.project_root / 'data'
@@ -134,4 +134,22 @@ class ConfigLoader:
         """Configure global logging to capture all logs."""
         logging.basicConfig(filename=log_file, level=logging.INFO,
                             format='%(asctime)s:%(levelname)s:%(message)s')
+
+    def return_shp_file(self, parent_dir):
+        """
+        Returns the path of a shapefile in a given directory.
+        If multiple, returns a list. If none, returns None.
+        """
+        # Convert parent_dir to a Path object if it's not already one
+        parent_dir_path = Path(parent_dir) if not isinstance(parent_dir, Path) else parent_dir
         
+        # Find all shapefiles in the directory
+        shapefiles = list(parent_dir_path.glob('*.shp'))
+
+        # Return the appropriate value based on the number of shapefiles found
+        if not shapefiles:
+            return None
+        elif len(shapefiles) == 1:
+            return shapefiles[0]
+        else:
+            return shapefiles

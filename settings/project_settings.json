@@ -1,7 +1,11 @@
 {
     "countries": [
-        "USE_3_LETTER_ISO_COUNTRY_CODE"
+        "USE_3_LETTER_ISO_COUNTRY_CODES"
     ],
     "zoom_level": 0,
-    "crs": "EPSG:3035"
+    "crs": "EPSG:3035",
+    "gadm_version": 41,
+    "start_year": 2000,
+    "end_year": 2001,
+    "wind_speed_height": 100
 }
