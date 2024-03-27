@@ -55,6 +55,7 @@ class DownloadExclusionsData(luigi.Task):
 
         ### ADD YOUR DOWNLOAD WORKFLOW HERE ###
 
+        # to ensure good logging, remember to pass logger=logger into whichever class you are using 
 
 
         ############ DO NOT CHANGE ################

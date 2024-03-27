@@ -49,6 +49,8 @@ class ProcessERA5WindData(luigi.Task):
         #####################################################################################
 
         ############## MAIN WORKFLOW #################
+        # to ensure good logging, remember to pass logger=logger into whichever class you are using
+
         for year in range(start_year, end_year + 1):
             ### ADD YOUR PROCESSING LOGIC HERE ###
             ### EXAMPLE PROCESSING OF ERA5 WIND DATA FOR RESKIT MODEL BELOW ###

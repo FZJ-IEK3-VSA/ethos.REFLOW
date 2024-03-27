@@ -12,7 +12,7 @@ import pandas as pd
 import time
 import json
 from utils.config import ConfigLoader
-from utils.utils import check_files_exist, create_target_directories
+from utils.utils import check_files_exist, create_target_directories, rename_files_in_folder
 import fiona
 import logging
 import xarray as xr
@@ -37,6 +37,10 @@ class VectorProcessor:
         else:
             self.logger = logger
 
+        self.raw_data_dir = config_loader.get_path("data", "exclusion_data", "raw")
+        self.processed_dir = config_loader.get_path("data", "exclusion_data", "processed")
+        self.crs = project_settings["crs"]
+
     def reproject_vector(self, vector_data, crs=None):
         """
         Reprojects vector data to the specified CRS.
@@ -46,7 +50,7 @@ class VectorProcessor:
         - crs: The target coordinate reference system in EPSG format.
         """
         if crs is None:
-            crs = self.default_crs
+            crs = self.crs
 
         if vector_data.crs != crs:
             self.logger.info(f"CRS mismatch. Reprojecting to {crs}...")
@@ -123,10 +127,8 @@ class VectorProcessor:
         Tuple of GeoDataFrames: All processed vector data polygons and all buffered data.
         """
     
-        # Reproject the reference polygon to the target CRS
-        reference_polygon_reprojected = self.reproject_vector(reference_polygon)
         # Calculate and convert the bounding box of the reference polygon
-        bbox_polygon = self.calculate_bbox_polygon(reference_polygon_reprojected)
+        bbox_polygon = self.calculate_bbox_polygon(reference_polygon)
     
         data_polygons, buffered_data = [], []  # Initialize lists for processed data
     
@@ -143,7 +145,7 @@ class VectorProcessor:
             # Buffer and clip the buffered vector data
             self.logger.info(f"Buffering {identifier}...")
             buffered_vector_data = self.buffer_vector(vector_data_clipped, buffer_distance)
-            clipped_buffered_data = self.clip_vector_data(buffered_vector_data, reference_polygon_reprojected)
+            clipped_buffered_data = self.clip_vector_data(buffered_vector_data, reference_polygon)
     
             # Add processed data to lists
             self.logger.info(f"appending {identifier}.")
@@ -157,6 +159,9 @@ class VectorProcessor:
         all_buffered_data = self.merge_geo_dataframes(buffered_data)
 
         self.logger.info("Processed and merged all vector data.")
+        rename_files_in_folder(self.processed_dir)
+        self.logger.info("Renamed all files in the processed folder.")
+
         return all_data_polygons, all_buffered_data
     
 
@@ -278,6 +283,7 @@ class VectorProcessor:
         :param folder_path: Folder path where the processed files will be saved.
         :param crs: Coordinate Reference System to use for the datasets.
         """
+        # open the gdb file
         layers = fiona.listlayers(full_path)
         for layer_name in layers:
             gdf = gpd.read_file(full_path, driver="OpenFileGDB", layer=layer_name)
@@ -288,7 +294,7 @@ class VectorProcessor:
                 continue  # Skip this layer and move to the next one
             
             # Remove datetime fields
-            gdf = self.remove_datetime_fields(gdf, self.logger)
+            gdf = self.remove_datetime_fields(gdf)
     
             gdf = gdf.to_crs(self.crs)
             gdf_clipped = gpd.clip(gdf, region_gdf) # clip the geodataframe
@@ -297,7 +303,7 @@ class VectorProcessor:
     
             self.save_gdf_to_file(gdf_clipped, folder_path, file_name, file_format='shapefile')  # save as a shapefile
 
-    def clip_and_save_vector_datasets(self, vector_path_dict, region_gdf):
+    def clip_and_save_vector_datasets(self, vector_path_dict, main_polygon_path):
         """
         Processes and saves datasets for a dictionary of vector paths.
     
@@ -306,6 +312,8 @@ class VectorProcessor:
         :param folder_base_path: Base path for saving processed datasets.
         :param crs: Coordinate Reference System to use for the datasets.
         """
+        region_gdf = gpd.read_file(main_polygon_path)
+
         for key, path in vector_path_dict.items():
             self.logger.info(f"Processing {key}...")
     
@@ -319,9 +327,9 @@ class VectorProcessor:
                 continue
     
             if file_extension == '.gdb':
-                self.gbd_clip_to_shp_file(full_path_to_vector, region_gdf, output_folder_path, self.crs)
+                self.gbd_clip_to_shp_file(full_path_to_vector, region_gdf, output_folder_path)
             elif file_extension == '.shp':
-                self.clip_and_save_shp_file(full_path_to_vector, region_gdf, output_folder_path, self.crs)
+                self.clip_and_save_shp_file(full_path_to_vector, region_gdf, output_folder_path)
             else:
                 self.logger.info(f"Unsupported file format for {key}: {file_extension}")
 
@@ -336,6 +344,8 @@ class RasterProcesser:
         # set up logging in the VectorProcessor
         config_loader = ConfigLoader()
         project_settings_path = config_loader.get_path("settings", "project_settings")
+        self.output_dir = config_loader.get_path("data", "exclusion_data", "processed")
+        self.raw_data_dir = config_loader.get_path("data", "exclusion_data", "raw")
         with open(project_settings_path, 'r') as file:
             project_settings = json.load(file)
         self.default_crs = project_settings["crs"]
@@ -348,15 +358,27 @@ class RasterProcesser:
     def clip_raster_to_bbox(self, raster_path, bbox, output_path):
         """
         Clips a raster file to a specified bounding box.
-    
+
         :param raster_path: Path to the input raster file.
         :param bbox: Bounding box as a tuple (minx, miny, maxx, maxy).
         :param output_path: Path to save the clipped raster.
         """
-        # Check if the output directory exists, create it if not
-        output_dir = os.path.dirname(output_path)
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+
+        with rasterio.open(raster_path) as src:
+            # Create a GeoDataFrame with the bounding box
+            geo = gpd.GeoDataFrame({'geometry': [box(*bbox)]}, crs=src.crs)
+            
+            # Perform the clipping
+            out_image, out_transform = mask(src, geo.geometry, crop=True)
+            out_meta = src.meta.copy()
+            out_meta.update({"driver": "GTiff",
+                            "height": out_image.shape[1],
+                            "width": out_image.shape[2],
+                            "transform": out_transform})
+            
+            # Save the clipped raster
+            with rasterio.open(output_path, "w", **out_meta) as dest:
+                dest.write(out_image)
         
     def merge_rasters(self, raster_paths, output_path):
         """
@@ -412,7 +434,7 @@ class RasterProcesser:
             dest.write(summed_data)
         self.logger.info(f"Monthly rasters merged and saved to {output_path}")
 
-    def reproject_clip_raster(self, input_raster_path, target_crs, gdf, output_folder, output_filename):
+    def reproject_clip_raster(self, input_raster_path, gdf, output_dir=None, output_filename=None):
         """
         Reads a TIFF raster, reprojects it to a given CRS, clips it to the extent of a GeoPandas DataFrame,
         and saves the clipped raster in a specified output folder.
@@ -423,17 +445,15 @@ class RasterProcesser:
         :param output_folder: The folder where the clipped raster should be saved.
         :param output_filename: The filename for the saved clipped raster.
         """
-        # Ensure the output directory exists
-        os.makedirs(output_folder, exist_ok=True)
         
         self.logger.info("Reprojecting raster...")
         with rasterio.open(input_raster_path) as src:
             # Calculate the transformation and dimensions for the target CRS
             transform, width, height = calculate_default_transform(
-                src.crs, target_crs, src.width, src.height, *src.bounds)
+                src.crs, self.default_crs, src.width, src.height, *src.bounds)
             kwargs = src.meta.copy()
             kwargs.update({
-                'crs': target_crs,
+                'crs': self.default_crs,
                 'transform': transform,
                 'width': width,
                 'height': height
@@ -449,7 +469,7 @@ class RasterProcesser:
                         src_transform=src.transform,
                         src_crs=src.crs,
                         dst_transform=transform,
-                        dst_crs=target_crs,
+                        dst_crs=self.default_crs,
                         resampling=Resampling.nearest)
                     
                     # Clip the raster with the GeoDataFrame's geometry
@@ -462,12 +482,15 @@ class RasterProcesser:
                                      "transform": out_transform})
                     
                 # Save the clipped raster to the specified output folder
-                output_path = os.path.join(output_folder, output_filename)
+                if output_dir:
+                    output_path = os.path.join(self.output_dir, output_dir, output_filename)
+                else:
+                    output_path = os.path.join(self.output_dir, output_filename)
                 with rasterio.open(output_path, "w", **out_meta) as final_dest:
                     final_dest.write(out_image)
                 self.logger.info(f"Reprojected and clipped raster saved to {output_path}")
 
-    def process_and_save_bathymetry(self, bathymetry_path_dict, raw_data_dir, temp_dir, crs, north_sea_EEZ, output_folder, bbox, logger, filename=None):
+    def process_and_save_bathymetry(self, bathymetry_path_dict, main_region_polygon, bbox, filename=None):
         """
         Processes bathymetry raster files by clipping to a bounding box, merging, reprojecting, and clipping to a GeoDataFrame extent.
     
@@ -475,63 +498,68 @@ class RasterProcesser:
         :param script_dir: Base directory of the script for relative path calculations.
         :param temp_dir: Temporary directory for storing intermediate files.
         :param crs: Target Coordinate Reference System to use for the datasets.
-        :param north_sea_EEZ: GeoDataFrame representing the North Sea region.
+        :param main_region_polygon: GeoDataFrame representing the North Sea region.
         :param output_folder: Folder where the final processed raster will be saved.
         :param bbox: Bounding box for initial clipping in the format (min_lon, min_lat, max_lon, max_lat).
         """
-        # Ensure the temp and output directories exist
-        os.makedirs(temp_dir, exist_ok=True)
-        os.makedirs(output_folder, exist_ok=True)
 
         if not filename:
-            filename = "bathymetry.tif"
+            filename = "bathymetry_final.tif"
         
         clipped_raster_paths = []
-    
+        
+        bathymetry_output_dir = os.path.join(self.output_dir, "bathymetry")
+        # make the directory if it doesnt exist
+        os.makedirs(bathymetry_output_dir, exist_ok=True)
+
         # Clip each raster to the bounding box and save
         for key, path in bathymetry_path_dict.items():
-            logger.info(f"Processing {key}...")
-            raster_path = os.path.join(raw_data_dir, path)
-            output_path = os.path.join(temp_dir, key + ".tif")
+            self.logger.info(f"Processing {key}...")
+            raster_path = os.path.join(self.raw_data_dir, path)
+            output_path = os.path.join(bathymetry_output_dir, key + ".tif")
             self.clip_raster_to_bbox(raster_path, bbox, output_path)
             # Append the output path of the clipped raster to the list
             clipped_raster_paths.append(output_path)
     
         # Merge the clipped bathymetry rasters
-        merged_raster_path = os.path.join(output_folder, "bathymetry_merged.tif")
+        merged_raster_path = os.path.join(bathymetry_output_dir, "bathymetry_merged.tif")
         self.merge_rasters(clipped_raster_paths, merged_raster_path)
     
         # Reproject, clip and save the final raster
-        final_output_path = os.path.join(output_folder, filename)
-        self.reproject_clip_raster(merged_raster_path, crs, north_sea_EEZ, output_folder, filename, logger)
+        final_output_path = os.path.join(bathymetry_output_dir, filename)
+        self.reproject_clip_raster(merged_raster_path, main_region_polygon, output_dir_name=bathymetry_output_dir, filename=filename)
     
-        logger.info(f"Final bathymetry raster processed and saved to {final_output_path}")
+        self.logger.info(f"Final bathymetry raster processed and saved to {final_output_path}")
 
     
-    def process_and_save_shipping_lanes(self, input_paths, crs, north_sea_EEZ, output_folder, logger, filename=None):
+    def process_and_save_shipping_lanes(self, input_paths, main_region_polygon, filename=None):
         """
         Processes shipping lanes raster files by clipping to a bounding box, merging, reprojecting, and clipping to a GeoDataFrame extent.
     
         :param input_paths: List of paths to the monthly shipping lanes raster files.
         :param crs: Target Coordinate Reference System to use for the datasets.
-        :param north_sea_EEZ: GeoDataFrame representing the North Sea region.
+        :param main_region_polygon: GeoDataFrame representing the study region.
         :param output_folder: Folder where the final processed raster will be saved.
         :param filename: Name of the saved raster file.
         """
-        os.makedirs(output_folder, exist_ok=True)
 
         if not filename:
             filename = "shipping_lanes.tif"
-    
+
+        shipping_output_dir = os.path.join(self.output_dir, "shipping_lanes")
+
+        # make the directory if it doesnt exist
+        os.makedirs(shipping_output_dir, exist_ok=True)
+
         # Merge the monthly shipping lanes rasters first
-        merged_raster_path = os.path.join(output_folder, "shipping_lanes_unprojected.tif")
-        self.merge_monthly_rasters(input_paths, merged_raster_path, logger)
+        merged_raster_path = os.path.join(shipping_output_dir, "shipping_lanes_unprojected.tif")
+        self.merge_monthly_rasters(input_paths, merged_raster_path)
     
         # Reproject the raster and clip to the North Sea EEZ after merging
-        self.reproject_clip_raster(merged_raster_path, crs, north_sea_EEZ, output_folder, logger, filename)
+        self.reproject_clip_raster(merged_raster_path, main_region_polygon, shipping_output_dir, filename)
     
-        final_output_path = os.path.join(output_folder, filename)
-        logger.info(f"Annual shipping lanes raster processed and saved to {final_output_path}")
+        final_output_path = os.path.join(shipping_output_dir, filename)
+        self.logger.info(f"Annual shipping lanes raster processed and saved to {final_output_path}")
 
 class ERA5_RESKitWindProccessor():
     """

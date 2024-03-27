@@ -32,7 +32,7 @@ class ProcessExclusionsData(luigi.Task):
         """
         #### directory management ####
         config_loader = ConfigLoader()
-        vector_processor = VectorProcessor()
+        
 
         project_settings_path = config_loader.get_path("settings", "project_settings")
         exclusion_settings_path = config_loader.get_path("settings", "exclusions_settings")
@@ -49,7 +49,8 @@ class ProcessExclusionsData(luigi.Task):
             exclusion_settings = json.load(file)
 
         ############## MAIN WORKFLOW #################
-
+        # to ensure good logging, remember to pass logger=logger into whichever class you are using
+        vector_processor = VectorProcessor(logger=logger)
 
         ############ DO NOT CHANGE ############
         # mark the task as complete

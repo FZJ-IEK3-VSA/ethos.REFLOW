@@ -5,7 +5,7 @@ import requests
 import luigi
 from utils.config import ConfigLoader
 from utils.data_download import ERA5Downloader
-from scripts.data_processing.process_region_buffers import ProcessRegionBuffers
+from scripts.data_processing.process_project_data import ProcessRegionBuffers
 
 class DownloadMeterologicalData(luigi.Task):
     """
@@ -48,6 +48,8 @@ class DownloadMeterologicalData(luigi.Task):
 
         ############## MAIN WORKFLOW #################
         logging.info("Downloading meteorological data...")
+
+        # to ensure good logging, remember to pass logger=logger into whichever class you are using
 
         ### 1. Example SIMPLE DOWNLOAD OF meteorological data raster e.g. from Global Wind Atlas or New European Wind Atlas ### 
         # # Link to information about the data = "https://example-URL.com"

@@ -10,7 +10,7 @@ import os
 #### THIS SCRIPT MUST BE RUN AS IT IS A DEPENDENCY FOR THE NEXT TASK ####
 #### However, the main logic can be left blank if you do not need to add additional buffers to the regions - eg around coastlines or national borders ####  
 
-class ProcessRegionBuffers(luigi.Task):
+class ProcessProjectData(luigi.Task):
     """
     Luigi Task to process the region buffers for the project.
     """
@@ -24,7 +24,7 @@ class ProcessRegionBuffers(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'ProcessRegionBuffers_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'ProcessProjectData_complete.txt'))
 
     def run(self):
         """
@@ -41,9 +41,9 @@ class ProcessRegionBuffers(luigi.Task):
         raw_data_dir = config_loader.get_path("data", "exclusion_data", "raw")
         processed_data_dir = config_loader.get_path("data", "exclusion_data", "processed")
 
-        log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'ProcessRegionBuffers.log')
-        logger = config_loader.setup_task_logging('ProcessRegionBuffers', log_file)
-        logger.info("Starting ProcessRegionBuffers task")
+        log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'ProcessProjectData.log')
+        logger = config_loader.setup_task_logging('ProcessProjectData', log_file)
+        logger.info("Starting ProcessProjectData task")
 
         # load the exclusions dictionary
         with open(exclusion_settings_path, 'r') as file:
@@ -56,6 +56,6 @@ class ProcessRegionBuffers(luigi.Task):
 
         ############ DO NOT CHANGE ############
         # mark the task as complete
-        logger.info("ProcessRegionBuffers task complete.")
+        logger.info("ProcessProjectData task complete.")
         with self.output().open('w') as file:
             file.write('Complete')
