@@ -18,10 +18,20 @@ class ConfigLoader:
             return json.load(file)
 
     def _load_data_paths(self):
-        """Load the data paths from the data_paths.json file located in the settings directory."""
+        """
+        Load the data_paths.json file if it exists, otherwise create a default structure.
+        """
         data_paths_file = self.project_root / "settings" / "data_paths.json"
-        with open(data_paths_file, 'r') as file:
-            return json.load(file)
+        if not data_paths_file.exists():
+            logging.info(f"{data_paths_file} does not exist. Creating a default data_paths.json.")
+            # Create an empty or default data_paths.json structure here
+            default_data_paths = {}
+            with open(data_paths_file, 'w') as file:
+                json.dump(default_data_paths, file, indent=4)
+            return default_data_paths
+        else:
+            with open(data_paths_file, 'r') as file:
+                return json.load(file)
 
     def get_path(self, *keys):
         path_accumulator = self.project_root
@@ -57,7 +67,7 @@ class ConfigLoader:
         return path_accumulator
     
     def update_data_paths(self):
-        data_dir = self.project_root / 'data'
+        data_dir = self.project_root / 'data' 
         data_paths_file = self.project_root / 'settings' / 'data_paths.json'
     
         def list_files_recursive(path):
