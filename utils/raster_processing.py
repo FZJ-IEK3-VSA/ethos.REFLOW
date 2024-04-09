@@ -206,7 +206,7 @@ class RasterProcesser:
     
         # Reproject, clip and save the final raster
         final_output_path = os.path.join(bathymetry_output_dir, filename)
-        self.reproject_clip_raster(merged_raster_path, main_region_polygon, output_dir_name=bathymetry_output_dir, filename=filename)
+        self.reproject_clip_raster(merged_raster_path, main_region_polygon, output_dir=bathymetry_output_dir, output_filename=filename)
     
         self.logger.info(f"Final bathymetry raster processed and saved to {final_output_path}")
 

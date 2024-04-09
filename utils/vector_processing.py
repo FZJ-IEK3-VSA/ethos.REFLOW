@@ -3,6 +3,7 @@ import time
 import logging
 import numpy as np
 import rasterio
+from pyproj import Transformer
 from shapely.geometry import box, Polygon, MultiPolygon
 from rasterio.merge import merge
 from rasterio.warp import calculate_default_transform, reproject, Resampling
@@ -89,6 +90,39 @@ class VectorProcessor:
         bbox_polygon = box(*bbox)  # Convert bounding box to a polygon
         return bbox_polygon
     
+    def calculate_and_transform_bbox(self, reference_polygon, expand_size=0.0):
+        """
+        Calculate, transform, and optionally expand the bounding box of a reference polygon.
+
+        Parameters:
+        reference_polygon (gpd.GeoDataFrame): The reference polygon(s) GeoDataFrame.
+        expand_size (float): The amount to expand the bounding box by in degrees. Default is 0.0.
+
+        Returns:
+        tuple: The transformed and optionally expanded bounding box as (lon_min, lat_min, lon_max, lat_max).
+        """
+        # Calculate the bounding box as a polygon
+        calculated_bbox_polygon = self.calculate_bbox_polygon(reference_polygon)
+        
+        # Extract bounds and optionally expand
+        minx, miny, maxx, maxy = calculated_bbox_polygon.bounds
+        
+        # Initialize the transformer to convert from EPSG:3035 to EPSG:4326
+        transformer = Transformer.from_crs("EPSG:3035", "EPSG:4326", always_xy=True)
+        
+        # Transform the corners of the expanded bounding box
+        lon_min, lat_min = transformer.transform(minx, miny)
+        lon_max, lat_max = transformer.transform(maxx, maxy)
+
+        lon_min -= expand_size
+        lat_min -= expand_size
+        lon_max += expand_size
+        lat_max += expand_size
+        
+        # Return the transformed and expanded bounding box
+        bbox = (lon_min, lat_min, lon_max, lat_max)
+        return bbox
+
 
     def clip_vector_data(self, vector_data, reference_polygon):
         """

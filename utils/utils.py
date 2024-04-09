@@ -41,7 +41,6 @@ def rename_files_in_folder(folder_path):
                 os.rename(original_filepath, new_filepath)
                 print(f"Renamed '{filename}' to '{normalized_filename}' in '{root}'")
 
-
 def create_target_directories(output_dir, year):
     """
     Create the target directories for the year.

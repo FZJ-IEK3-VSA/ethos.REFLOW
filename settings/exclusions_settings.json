@@ -1,8 +1,8 @@
 {   "vector": {
         "vector_key1": {
             "paths": [
-                "SET_PATH_TO_POINTS",
-                "SET_PATH_TO_POLYGONS"
+                "SET_RELATIVE_PATH_TO_POINTS",
+                "SET_RELATIVE_PATH_TO_POLYGONS"
             ],
             "buffer": "SET_BUFFER_VALUE_AS_INT_IN_M"
         }   
@@ -10,20 +10,10 @@
     "raster": {
         "raster_key1": {
             "paths": [
-                "SET_PATH_TO_RASTER"
+                "SET_RELATIVE_PATH_TO_RASTER"
             ],
             "value": "SET_VALUE_AS_INT_TO_EXCLUDE",
             "buffer": "SET_BUFFER_VALUE_AS_INT_IN_M"
-        }
-    },
-    "region_borders": {
-        "area_1": {
-            "path": "SET_PATH_TO_BORDERS"
-        }
-    },
-    "other": {
-        "min_distance_to_coast": {
-            "value": "SET_VALUE_TO_EXCLUDE_AS_INT_IN_M"
         }
     }
 }

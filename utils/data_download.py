@@ -54,8 +54,14 @@ class DownloaderUtils():
         if filename:
             local_filename = os.path.join(folder, filename)
         else:   
-        # Define the local filename to save the downloaded file
-            local_filename = os.path.join(folder, url.split('/')[-1])
+            # Define the local filename to save the downloaded file based on the URL or a fallback
+            filename_from_url = url.split('/')[-1]
+            if filename_from_url:
+                local_filename = os.path.join(folder, filename_from_url)
+            else:
+                # Fallback filename if none is provided and the URL doesn't end with one
+                filename = "change_filename.zip"  
+                local_filename = os.path.join(folder, filename)
         
         # Downloading the file
         try:
