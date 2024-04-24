@@ -1,0 +1,20 @@
+{
+    "countries": [
+        "GBR",
+        "NOR",
+        "DEU",
+        "BEL",
+        "NLD",
+        "DNK",
+        "SWE",
+        "FRA"
+    ],
+    "zoom_level": 0,
+    "gadm_version": "41",
+    "crs": "EPSG:3035",
+    "start_year": 2013,
+    "end_year": 2023,
+    "wind_speed_height": 100,
+    "min_distance_to_coast": 22224,
+    "scenario": "1000m_depth"
+}
