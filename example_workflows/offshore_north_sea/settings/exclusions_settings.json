@@ -1,0 +1,91 @@
+{   "vector": {
+    "coast_boundary": {
+        "paths": ["north_sea_coastal_buffers/north_sea_coastal_buffers_22km.shp"],
+        "buffer": 0
+    },
+    "cultural_heritage":  {
+        "paths": ["cultural_heritage/EMODnet_HA_Heritage_Shipwrecks_20220720_point.shp"], 
+        "buffer": 100
+    },
+    "desalination_plants": {
+        "paths": ["desalination_plants/Locations_Desalination_Plants_20210830_point.shp"], 
+        "buffer": 200
+    },
+    "dumped_munitions": {
+        "paths": [
+            "dumped_munitions/EMODnet_HA_WasteDisposal_DumpedMunitions_pg_20220623_polygon.shp",
+            "dumped_munitions/EMODnet_HA_WasteDisposal_DumpedMunitions_pt_20220623_point.shp"
+        ], 
+        "buffer": 300
+    },
+    "existing_wind_farms_points": {
+        "paths": [
+            "existing_wind_farms/EMODnet_HA_Energy_WindFarms_pt_20231124_point.shp"
+        ], 
+        "buffer": 1500,
+        "where": "STATUS='Production' OR STATUS='Construction'"
+    },
+    "existing_wind_farms_polygons": {
+        "paths": ["existing_wind_farms/EMODnet_HA_Energy_WindFarms_pg_20231124_polygon.shp"], 
+        "buffer": 1500,
+        "where": "STATUS='Production' OR STATUS='Construction'"
+    },
+    "military_areas_points": {
+        "paths": ["military_areas/EMODnet_HA_MilitaryAreas_pt_20221216_point.shp"], 
+        "buffer": 400
+    },
+    "military_areas_polygon": {
+        "paths": ["military_areas/EMODnet_HA_MilitaryAreas_pg_20221216_polygon.shp"], 
+        "buffer": 0
+    },
+    "ocean_energy_projects": {
+        "paths": [
+            "ocean_energy_projects/EMODnet_HA_OceanEnergy_Projects_Locations_20231120_point.shp",
+            "ocean_energy_projects/EMODnet_HA_OceanEnergy_TestSites_20231120_polygon.shp"
+        ], 
+        "buffer": 500
+    },
+    "oil_and_gas": {
+        "paths": ["oil_and_gas/EMODnet_HA_OG_Active_Licences_20230228_polygon.shp"],
+        "buffer": 0
+    },
+    "pipelines": {
+        "paths": ["pipelines/EMODnet_HA_Pipelines_20230705_linestring.shp"],
+        "buffer": 500
+    },
+    "power_cables": {
+        "paths": [
+            "power_cables/DE_BSH_CONTIS_High_Voltage_CablesLine_linestring.shp",
+            "power_cables/NL_Rijkswaterstaat_Electra_kabels_noordzee_linestring.shp",
+            "power_cables/NO_NVE_Sjkabel_linestring.shp"
+        ],
+        "buffer": 500
+    },
+    "protected_areas": {
+        "paths": ["protected_areas/EMODnet_HA_Environment_WDPA_Sep2023_20230911_multipolygon.shp"],
+        "buffer": 1000
+    },
+    "telecommunication_cables": {
+        "paths": [
+            "telecommunication_cables/DE_BSH_CONTIS_Data_CablesLine_linestring.shp",
+            "telecommunication_cables/FR_SHOM_Cables_telecommunication_linestring.shp",
+            "telecommunication_cables/FR_SIGCables_Submarine_Cables_Routes_linestring.shp",
+            "telecommunication_cables/NL_Rijkswaterstaat_Telecom_kabels_noordzee_linestring.shp",
+            "telecommunication_cables/UK_OGA_Fibre_Cables_linestring.shp"
+        ],
+        "buffer": 500
+    }
+},
+"raster": {
+    "bathymetry": {
+        "paths": ["bathymetry/north_sea_bathymetry.tif"],
+        "value": "[--1000)",
+        "buffer": 0
+    },
+    "shipping_lanes": {
+        "paths": ["shipping_lanes/north_sea_shipping_lanes_2022.tif"],
+        "value": "[-0],[1000-]",
+        "buffer": 500
+    }
+}
+}
