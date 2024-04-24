@@ -23,6 +23,14 @@ This example of the REFLOW workflow is designed to assess the technical wind pot
     ```
 
 ### Running the workflow
+- IMPORTANT FOR DOWNLOADING ERA5 DATA:
+    1. First, you will need to ensure that you have an account set up with the Corpernicus Climate Data Store (CDS) and have the required API key. You can sign up for an account by following [these instructions](https://cds.climate.copernicus.eu/api-how-to).
+    2. Once you have generated your own API key, navigate to the settings/era5_settings.json file and update the "cds_api_key" field with your own API key.
+- IMPORTANT DATA REQUIRED FOR THE WORKFLOW:
+    1. Due to data size constraints on Github, there is a single file we cannot upload and which is not possible to include in the automated data download script. Therefore you will need to download this manually from [this link](https://www.marineregions.org/download_file.php?name=World_EEZ_v12_20231025.zip).
+    2. IT IS ESSENTIAL that the files are extracted into the folder: /data/project_data/World_EEZ_v12_20231025/ - make sure that this IS NOT extracted to /data/project_data/World_EEZ_v12_20231025/World_EEZ_v12_20231025/ as this will cause the workflow to fail.
+- PLEASE ENSURE THAT THE TWO STEPS ABOVE ARE COMPLETED BEFORE RUNNING THE WORKFLOW. IT WILL FAIL IF NOT.
+-----------------------------------------------------------------
 - To run the workflow, you can use the `bash_task.sh` script. This script will run the workflow in the correct order.
 - If you prefer to set up the environment manually, you can then run the workflow by activating the "reflow-main" conda environment:
     ```bash
