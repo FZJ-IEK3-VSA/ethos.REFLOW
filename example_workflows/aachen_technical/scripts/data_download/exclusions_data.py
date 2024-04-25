@@ -5,7 +5,7 @@ import zipfile
 import json
 from pathlib import Path
 from utils.config import ConfigLoader
-from utils.data_download import download_gadm_data, download_and_extract
+from utils.data_download import DownloaderUtils
 import logging
 
 class DownloadExclusionsData(luigi.Task):
@@ -33,22 +33,25 @@ class DownloadExclusionsData(luigi.Task):
         ##################### DO NOT CHANGE ######################################
 
         #### directory management ####
-        config_loader = ConfigLoader()
-
-        raw_output_dir = config_loader.get_path("data", "exclusion_data", "raw")
-        project_data_dir = config_loader.get_path("data", "project_data")
-        project_settings_path = config_loader.get_path("settings", "project_settings")
+        config_loader = ConfigLoader()       
 
         log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'DownloadExclusionsData.log')
         logger = config_loader.setup_task_logging('DownloadExclusionsData', log_file)
-        logger.info("Starting DownloadExclusionsData task")
+        logger.info("Starting DownloadExclusionsData task")        
 
-        # load the list of countries
-        with open(project_settings_path, 'r') as file:
-            country_settings = json.load(file)
+        # load the project settings
+        with open(config_loader.get_path("settings", "project_settings"), 'r') as file:
+            project_settings = json.load(file)
 
-        countries = country_settings["countries"]
+        download_utils = DownloaderUtils(logger=logger)
+
+        gadm_version = project_settings["gadm_version"]
+        countries = project_settings["countries"]
         logger.info(f"List of countries: {countries}")
+
+        exclusion_data_vector_paths = {}
+        exclusion_data_raster_paths = {}
+
         ###########################################################################
 
         # ############## MAIN WORKFLOW #################
@@ -58,7 +61,7 @@ class DownloadExclusionsData(luigi.Task):
         ##### FIRST, we will download the GADM data for Germany ####
 
         for country in countries:
-            download_gadm_data(country, self.gadm_version, raw_output_dir, logger) 
+            download_utils.download_gadm_data(country) 
 
         # to ensure good logging, remember to pass logger=logger into whichever class you are using 
 

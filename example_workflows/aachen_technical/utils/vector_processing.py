@@ -368,3 +368,28 @@ class VectorProcessor:
                     self.clip_and_save_shp_file(full_path_to_vector, region_gdf, output_folder_path)
                 else:
                     self.logger.info(f"Unsupported file format for {key}: {file_extension}")
+
+    def extract_subpolygon(self, vector_data, attribute, value):
+        """
+        Extracts a subpolygon from a GeoDataFrame based on a specified attribute and value.
+
+        Parameters:
+        - vector_data: A GeoDataFrame representing the vector data.
+        - attribute: The attribute column to search in.
+        - value: The value to search for in the attribute column.
+
+        Returns:
+        - GeoDataFrame containing the extracted subpolygon(s) that match the search criteria.
+        """
+        if attribute not in vector_data.columns:
+            self.logger.error(f"Attribute '{attribute}' not found in the vector data.")
+            return None
+
+        filtered_data = vector_data[vector_data[attribute] == value]
+
+        if filtered_data.empty:
+            self.logger.info(f"No data found for {attribute} = {value}.")
+            return None
+
+        self.logger.info(f"Extracted subpolygon for {attribute} = {value}.")
+        return filtered_data

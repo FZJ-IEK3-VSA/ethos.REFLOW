@@ -1,6 +1,6 @@
 from utils.config import ConfigLoader
-from utils.data_processing import VectorProcessor
-from scripts.data_download.exclusions_data import DownloadExclusionsData
+from utils.vector_processing import VectorProcessor
+from scripts.data_download.project_data import DownloadProjectData
 import geopandas as gpd
 import luigi
 import json
@@ -18,7 +18,7 @@ class ProcessProjectData(luigi.Task):
         """
         This task requires the DownloadExclusionsData task to be completed.
         """
-        return [DownloadExclusionsData()]
+        return [DownloadProjectData()]
 
     def output(self):
         """
@@ -33,26 +33,45 @@ class ProcessProjectData(luigi.Task):
         ################## DO NOT CHANGE ############################
         #### directory management ####
         config_loader = ConfigLoader()
-        vector_processor = VectorProcessor()
 
         project_settings_path = config_loader.get_path("settings", "project_settings")
-        exclusion_settings_path = config_loader.get_path("settings", "exclusions_settings")
         project_data_dir = config_loader.get_path("data", "project_data")
-        raw_data_dir = config_loader.get_path("data", "exclusion_data", "raw")
-        processed_data_dir = config_loader.get_path("data", "exclusion_data", "processed")
 
         log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'ProcessProjectData.log')
         logger = config_loader.setup_task_logging('ProcessProjectData', log_file)
         logger.info("Starting ProcessProjectData task")
 
-        # load the exclusions dictionary
-        with open(exclusion_settings_path, 'r') as file:
-            exclusion_settings = json.load(file)
+        vector_processor = VectorProcessor(logger=logger)
+        
+        # load the list of countries and zoom level 
+        with open(project_settings_path, 'r') as file:
+            project_settings = json.load(file)
+
+        countries = project_settings["countries"]  ## in this example there is only one country
+        zoom = project_settings["zoom_level"]
+        crs = project_settings["crs"]
+        place = project_settings["place"]  # this is Aachen for our example but can be changed. 
+        place_short = project_settings["place_name_short"]  # this is the short name for the place - used for file naming
 
         ############## MAIN WORKFLOW #################
 
-        ### Add your logic for buffering the regions here ###
-        #### Leave blank if not running any coastline or border buffer processing ####
+        ## first load the GADM data for Germany at the correct zoom level ##
+        germany_gdf = gpd.read_file(config_loader.get_gadm_file_paths('gadm', ['DEU'], zoom)['DEU'])
+
+        ### here we will extract the region from the country polygon and save to the MAIN POLYGON folder ##
+        place_gdf = vector_processor.extract_subpolygon(germany_gdf, 'NAME_2', place)
+
+        ## now we need to convert the extracted polygon to the correct CRS ##
+        logger.info(f"CRS of the extracted polygon: {place_gdf.crs}")
+        place_gdf = place_gdf.to_crs(crs)
+        logger.info(f"Converted CRS of the extracted polygon: {place_gdf.crs}")
+       
+        ## save the extracted polygon to the MAIN POLYGON folder ##
+        main_region_dir = os.path.join(project_data_dir, 'MAIN_REGION_POLYGON')
+        if not os.path.exists(main_region_dir):
+            os.makedirs(main_region_dir)
+
+        place_gdf.to_file(os.path.join(main_region_dir, f'{place_short}.shp'))
 
         ############ DO NOT CHANGE ############
         # mark the task as complete

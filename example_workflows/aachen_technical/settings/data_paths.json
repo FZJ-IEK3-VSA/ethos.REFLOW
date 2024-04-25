@@ -1,0 +1,72 @@
+{
+    "files": [
+        "note.txt"
+    ],
+    "exclusion_data": {
+        "files": [
+            "note.txt"
+        ],
+        "processed": {
+            "files": [
+                "note.txt"
+            ]
+        },
+        "raw": {
+            "files": [
+                "note.txt"
+            ]
+        }
+    },
+    "project_data": {
+        "files": [
+            "note.txt"
+        ],
+        "MAIN_REGION_POLYGON": {
+            "files": [
+                "aachenShapefile.prj",
+                "aachenShapefile.qpj",
+                "aachenShapefile.shx",
+                "aachenShapefile.dbf",
+                "aachenShapefile.shp"
+            ]
+        },
+        "gadm": {
+            "DEU": {
+                "gadm41_DEU": {
+                    "files": [
+                        "gadm41_DEU_2.dbf",
+                        "gadm41_DEU_0.shx",
+                        "gadm41_DEU_3.dbf",
+                        "gadm41_DEU_1.shx",
+                        "gadm41_DEU_4.prj",
+                        "gadm41_DEU_3.shx",
+                        "gadm41_DEU_0.prj",
+                        "gadm41_DEU_1.dbf",
+                        "gadm41_DEU_4.cpg",
+                        "gadm41_DEU_2.cpg",
+                        "gadm41_DEU_3.shp",
+                        "gadm41_DEU_4.shx",
+                        "gadm41_DEU_2.shp",
+                        "gadm41_DEU_3.prj",
+                        "gadm41_DEU_2.prj",
+                        "gadm41_DEU_1.cpg",
+                        "gadm41_DEU_1.shp",
+                        "gadm41_DEU_0.dbf",
+                        "gadm41_DEU_3.cpg",
+                        "gadm41_DEU_2.shx",
+                        "gadm41_DEU_0.cpg",
+                        "gadm41_DEU_4.dbf",
+                        "gadm41_DEU_0.shp",
+                        "gadm41_DEU_4.shp",
+                        "gadm41_DEU_1.prj"
+                    ]
+                }
+            }
+        }
+    },
+    "met_data": {
+        "files": [
+            "note.txt"
+        ]
+    }
+}
