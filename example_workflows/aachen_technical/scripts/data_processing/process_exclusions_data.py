@@ -63,8 +63,10 @@ class ProcessExclusionsData(luigi.Task):
         osm = pyrosm.OSM(fp)
 
         logger.info("OSM object loaded.")
-        landuse = osm.get_landuse()
-        landuse.plot(column='landuse', legend=True, figsize=(10,6))
+        boundaries = osm.get_boundaries(name="Aachen")
+        logger.info("Boundaries loaded.")
+
+        boundaries.plot(facecolor="none", edgecolor="blue", figsize=(10,6))
 
         # show the plot
         plt.show()
