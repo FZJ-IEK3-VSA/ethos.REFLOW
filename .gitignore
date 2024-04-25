@@ -18,4 +18,4 @@ __pycache__
 # and the note.txt within the output/logs
 !output/logs/note.txt
 eez_v12*
-example_workflows/aachen_technical/settings/data_paths.json
+/settings/data_paths.json
