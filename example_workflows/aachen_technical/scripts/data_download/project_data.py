@@ -24,7 +24,7 @@ class DownloadProjectData(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'project_data_download_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'DownloadProjectData_complete.txt'))
     
     def run(self):
         """

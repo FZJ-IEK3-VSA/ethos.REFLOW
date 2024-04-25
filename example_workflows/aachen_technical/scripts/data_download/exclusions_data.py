@@ -6,7 +6,9 @@ import json
 from pathlib import Path
 from utils.config import ConfigLoader
 from utils.data_download import DownloaderUtils
+from scripts.data_processing.process_project_data import ProcessProjectData
 import logging
+from pyrosm import get_data
 
 class DownloadExclusionsData(luigi.Task):
     """
@@ -18,13 +20,13 @@ class DownloadExclusionsData(luigi.Task):
         """
         Define any dependencies here. If this is a first step, return None 
         """
-        return None
+        return [ProcessProjectData()]
 
     def output(self):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'exclusions_data_download_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'DownloadExclusionsData_complete.txt'))
     
     def run(self):
         """
@@ -39,6 +41,8 @@ class DownloadExclusionsData(luigi.Task):
         logger = config_loader.setup_task_logging('DownloadExclusionsData', log_file)
         logger.info("Starting DownloadExclusionsData task")        
 
+        raw_data_dir = config_loader.get_path("data", "exclusion_data", "raw")
+
         # load the project settings
         with open(config_loader.get_path("settings", "project_settings"), 'r') as file:
             project_settings = json.load(file)
@@ -49,6 +53,8 @@ class DownloadExclusionsData(luigi.Task):
         countries = project_settings["countries"]
         logger.info(f"List of countries: {countries}")
 
+        place_name = project_settings["place_name_short"]
+
         exclusion_data_vector_paths = {}
         exclusion_data_raster_paths = {}
 
@@ -57,13 +63,12 @@ class DownloadExclusionsData(luigi.Task):
         # ############## MAIN WORKFLOW #################
 
         ### ADD YOUR DOWNLOAD WORKFLOW HERE ###
-        
-        ##### FIRST, we will download the GADM data for Germany ####
+         # to ensure good logging, remember to pass logger=logger into whichever class you are using 
 
-        for country in countries:
-            download_utils.download_gadm_data(country) 
+        ##### Now we will download the OSM data ####
 
-        # to ensure good logging, remember to pass logger=logger into whichever class you are using 
+        fp = get_data(place_name, directory=raw_data_dir)
+        logger.info(f"OSM data downloaded.")
 
         ############ DO NOT CHANGE ################
         # Signify that the task has been completed
