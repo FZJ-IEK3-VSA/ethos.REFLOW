@@ -1,0 +1,19 @@
+name: reflow-main
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - pip
+  - geopandas
+  - pandas
+  - fiona
+  - matplotlib
+  - xarray
+  - rasterio
+  - shapely
+  - pyproj
+  - gdal
+  - cdsapi
+  - pip:
+    - luigi
+    - netcdf4

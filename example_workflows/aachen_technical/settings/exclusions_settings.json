@@ -1,0 +1,19 @@
+{   "vector": {
+        "vector_key1": {
+            "paths": [
+                "SET_RELATIVE_PATH_TO_POINTS",
+                "SET_RELATIVE_PATH_TO_POLYGONS"
+            ],
+            "buffer": "SET_BUFFER_VALUE_AS_INT_IN_M"
+        }   
+    },
+    "raster": {
+        "raster_key1": {
+            "paths": [
+                "SET_RELATIVE_PATH_TO_RASTER"
+            ],
+            "value": "SET_VALUE_AS_INT_TO_EXCLUDE",
+            "buffer": "SET_BUFFER_VALUE_AS_INT_IN_M"
+        }
+    }
+}
