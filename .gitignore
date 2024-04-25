@@ -17,3 +17,4 @@ __pycache__
 !data/project_data/note.txt
 # and the note.txt within the output/logs
 !output/logs/note.txt
+eez_v12*
