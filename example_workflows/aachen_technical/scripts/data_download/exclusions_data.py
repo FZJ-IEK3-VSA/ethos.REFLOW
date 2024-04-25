@@ -54,9 +54,13 @@ class DownloadExclusionsData(luigi.Task):
         # ############## MAIN WORKFLOW #################
 
         ### ADD YOUR DOWNLOAD WORKFLOW HERE ###
+        
+        ##### FIRST, we will download the GADM data for Germany ####
+
+        for country in countries:
+            download_gadm_data(country, self.gadm_version, raw_output_dir, logger) 
 
         # to ensure good logging, remember to pass logger=logger into whichever class you are using 
-
 
         ############ DO NOT CHANGE ################
         # Signify that the task has been completed

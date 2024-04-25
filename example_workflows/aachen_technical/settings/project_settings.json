@@ -1,8 +1,8 @@
 {
     "countries": [
-        "USE_3_LETTER_ISO_COUNTRY_CODES"
+        "DEU"
     ],
-    "zoom_level": 0,
+    "zoom_level": 2,
     "crs": "EPSG:3035",
     "gadm_version": 41,
     "start_year": 2000,
