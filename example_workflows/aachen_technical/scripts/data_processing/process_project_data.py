@@ -50,16 +50,17 @@ class ProcessProjectData(luigi.Task):
         countries = project_settings["countries"]  ## in this example there is only one country
         zoom = project_settings["zoom_level"]
         crs = project_settings["crs"]
-        place = project_settings["place"]  # this is Aachen for our example but can be changed. 
+        place = project_settings["GID_2"]  # this is Aachen for our example but can be changed. 
         place_short = project_settings["place_name_short"]  # this is the short name for the place - used for file naming
 
         ############## MAIN WORKFLOW #################
 
         ## first load the GADM data for Germany at the correct zoom level ##
+        logger.info(f"Loading GADM data for Germany at zoom level {zoom} from {config_loader.get_gadm_file_paths('gadm', ['DEU'], zoom)['DEU']}")
         germany_gdf = gpd.read_file(config_loader.get_gadm_file_paths('gadm', ['DEU'], zoom)['DEU'])
 
         ### here we will extract the region from the country polygon and save to the MAIN POLYGON folder ##
-        place_gdf = vector_processor.extract_subpolygon(germany_gdf, 'NAME_2', place)
+        place_gdf = vector_processor.extract_subpolygon(germany_gdf, 'GID_2', place)
 
         ## now we need to convert the extracted polygon to the correct CRS ##
         logger.info(f"CRS of the extracted polygon: {place_gdf.crs}")

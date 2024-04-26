@@ -51,7 +51,7 @@ class ProcessExclusionsData(luigi.Task):
         with open(project_settings_path, 'r') as file:
             project_settings = json.load(file)
         
-        place_name = project_settings["place_name_short"]
+        place_name = project_settings["OSM_region_name"]
 
         ############## MAIN WORKFLOW #################
         # to ensure good logging, remember to pass logger=logger into whichever class you are using

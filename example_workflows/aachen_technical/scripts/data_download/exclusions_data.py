@@ -8,7 +8,6 @@ from utils.config import ConfigLoader
 from utils.data_download import DownloaderUtils
 from scripts.data_processing.process_project_data import ProcessProjectData
 import logging
-from pyrosm import get_data
 
 class DownloadExclusionsData(luigi.Task):
     """
@@ -42,6 +41,8 @@ class DownloadExclusionsData(luigi.Task):
         logger.info("Starting DownloadExclusionsData task")        
 
         raw_data_dir = config_loader.get_path("data", "exclusion_data", "raw")
+        # create the raw data directory if it does not exist
+        os.makedirs(raw_data_dir, exist_ok=True)
 
         # load the project settings
         with open(config_loader.get_path("settings", "project_settings"), 'r') as file:
@@ -53,7 +54,7 @@ class DownloadExclusionsData(luigi.Task):
         countries = project_settings["countries"]
         logger.info(f"List of countries: {countries}")
 
-        place_name = project_settings["place_name_short"]
+        place_name = project_settings["OSM_region_name"]
 
         exclusion_data_vector_paths = {}
         exclusion_data_raster_paths = {}
@@ -67,11 +68,15 @@ class DownloadExclusionsData(luigi.Task):
 
         ##### Now we will download the OSM data ####
 
-        fp = get_data(place_name, directory=raw_data_dir)
+        # Download the OSM data
+        logger.info(f"Downloading OSM data for {place_name}")
+        download_utils.download_and_extract("https://download.geofabrik.de/europe/germany/nordrhein-westfalen/koeln-regbez-latest.osm.pbf", raw_data_dir)
         logger.info(f"OSM data downloaded.")
 
         ############ DO NOT CHANGE ################
         # Signify that the task has been completed
+        config_loader.update_data_paths()
+
         logger.info("Exclusion data download complete.")
         with self.output().open('w') as f:
             f.write('Exclusion data download complete.')

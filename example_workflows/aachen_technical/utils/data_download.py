@@ -102,7 +102,7 @@ class DownloaderUtils():
         zip_path = f"gadm{self.gadm_version}_{country_abrv}_shp.zip"
         
         # Download the ZIP file
-        response = requests.get(url)
+        response = requests.get(url, timeout=30)
         if response.status_code == 200:
             with open(zip_path, 'wb') as file:
                 file.write(response.content)
