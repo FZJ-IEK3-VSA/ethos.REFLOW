@@ -60,36 +60,48 @@ class ProcessExclusionsData(luigi.Task):
         # to ensure good logging, remember to pass logger=logger into whichever class you are using
         
         # load up the raw exclusion data
-        fp = os.path.join(raw_data_dir, f"{region_name}.osm.pbf")
+        # fp = os.path.join(raw_data_dir, f"{region_name}.osm.pbf")
 
-        # initialize the OSM object
-        osm = pyrosm.OSM(fp)
+        # # initialize the OSM object
+        # osm = pyrosm.OSM(fp)
 
-        logger.info("OSM object loaded.")
-        landuse = osm.get_landuse()
+        # logger.info("OSM object loaded.")
+        # landuse = osm.get_landuse()
         
-        residential = landuse[landuse["landuse"] == "residential"]
+        # residential = landuse[landuse["landuse"] == "residential"]
 
-        residential = residential.to_crs("EPSG:3035")
-        logger.info(f"residential data loaded. CRS: {residential.crs}")
+        # residential = residential.to_crs("EPSG:3035")
+        # logger.info(f"Data loaded. CRS: {residential.crs}")
 
-        logger.info("Clip residential data to the main region.")
-        #clipped_residential = gpd.clip(residential, main_region)
-        clipped_residential = residential
-        logger.info("Data clipped.")
+        # # Check if the clipped GeoDataFrame is not empty
+        # if not residential.empty:
+        #     # Save to a Shapefile
+        #     vector_processor.save_geodataframe(residential, os.path.join(raw_data_dir, "residential.shp"))
+        #     logger.info("Data saved")
+        # else:
+        #     logger.error("No data after clipping with the main region.")
 
-        # Check if the clipped GeoDataFrame is not empty
-        if not clipped_residential.empty:
-            # Save to a Shapefile
-            clipped_residential.to_file(os.path.join(processed_data_dir, "clipped_residential.shp"))
-            logger.info("Clipped clipped_residential data saved to file.")
-        else:
-            logger.error("No data after clipping with the main region.")
+        # load the clipped data
+        # search for different geometry types
+        geometry_types = ["polygon", "point", "linestring"]
+        for geometry_type in geometry_types:
+            if not os.path.exists(os.path.join(raw_data_dir, f"residential_{geometry_type}.shp")):
+                logger.error(f"Data not found for geometry type: {geometry_type}")
+                continue
+            geometry = gpd.read_file(os.path.join(raw_data_dir, f"residential_{geometry_type}.shp"))
 
-        #landuse.plot(facecolor="none", edgecolor="blue", figsize=(10,6))
+            logger.info("Flattening the geometry")
+            geometry = vector_processor.flatten_multipolygons(geometry)
 
-        # show the plot
-        plt.show()
+            logger.info(f"Clipping geometry type: {geometry_type}")
+            
+            clipped_geometry = gpd.clip(geometry, main_region)
+            if not clipped_geometry.empty:
+                vector_processor.save_geodataframe(clipped_geometry, os.path.join(processed_data_dir, f"residential.shp"))
+                logger.info(f"Data saved for geometry type: {geometry_type}")
+            else:
+                logger.error(f"No data after clipping with the main region for geometry type: {geometry_type}")
+                continue
 
         ############ DO NOT CHANGE ############
         # mark the task as complete

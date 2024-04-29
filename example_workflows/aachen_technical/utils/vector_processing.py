@@ -4,7 +4,7 @@ import logging
 import numpy as np
 import rasterio
 from pyproj import Transformer
-from shapely.geometry import box, Polygon, MultiPolygon
+from shapely.geometry import box, Polygon, MultiPolygon, LineString, Point, GeometryCollection
 from rasterio.merge import merge
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.mask import mask
@@ -16,6 +16,9 @@ from utils.config import ConfigLoader
 from utils.utils import check_files_exist, create_target_directories, rename_files_in_folder
 import fiona
 import logging
+from collections import Counter
+import fiona
+from fiona.crs import from_epsg
 import xarray as xr
 
 class VectorProcessor:
@@ -393,3 +396,67 @@ class VectorProcessor:
 
         self.logger.info(f"Extracted subpolygon for {attribute} = {value}.")
         return filtered_data
+    
+    def extract_epsg_code(self, epsg_string):
+    # Split the string on ':' and extract the second part which should be the numeric code
+        parts = epsg_string.split(':')
+        if len(parts) == 2 and parts[0].upper() == 'EPSG':
+            try:
+                # Convert the string number to an integer
+                epsg_code = int(parts[1])
+                return epsg_code
+            except ValueError:
+                raise ValueError("Invalid EPSG code provided.")
+        else:
+            raise ValueError("EPSG string format is incorrect.")
+    
+    
+    def flatten_multipolygons(self, gdf):
+        # This will store each row with possibly expanded multipolygons as separate polygons
+        new_rows = []
+        
+        for _, row in gdf.iterrows():
+            geom = row.geometry
+            if isinstance(geom, MultiPolygon):
+                # If the geometry is a MultiPolygon, expand it into individual Polygons
+                for poly in geom:
+                    new_row = row.copy()
+                    new_row.geometry = poly
+                    new_rows.append(new_row)
+            else:
+                # If it's not a MultiPolygon, just append it as is
+                new_rows.append(row)
+        
+        # Create a new GeoDataFrame
+        new_gdf = gpd.GeoDataFrame(new_rows, crs=gdf.crs)
+        return new_gdf
+        
+    def save_geodataframe(self, gdf, filepath):
+        # Determine the geometry types and group by these types
+        grouped = gdf.groupby(gdf.geometry.geom_type)
+
+        for geom_type, group in grouped:
+            if geom_type == "GeometryCollection":
+                self.logger.error(f"Unhandled GeometryCollection found in data, cannot save to Shapefile.")
+                continue  # Skip saving this group
+            # Define the filepath for each geometry type
+            type_specific_filepath = f"{filepath.rsplit('.', 1)[0]}_{geom_type.lower()}.shp"
+
+            # Define the schema based on the DataFrame structure
+            schema = {
+                'geometry': geom_type,
+                'properties': {name: 'str' for name in group.columns.drop('geometry')}
+            }
+
+            # Log the operation
+            self.logger.info(f"Saving {geom_type} data to {type_specific_filepath}")
+
+            # Save the GeoDataFrame to a Shapefile with the correct schema
+            group.to_file(
+                type_specific_filepath,
+                driver='ESRI Shapefile',
+                schema=schema,
+                crs=group.crs
+            )
+
+            self.logger.info(f"Data saved successfully to {type_specific_filepath}")
