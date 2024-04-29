@@ -11,5 +11,24 @@
     "OSM_region_name": "koeln-regbez-latest",
     "start_year": 2000,
     "end_year": 2001,
-    "wind_speed_height": 100
+    "wind_speed_height": 100,
+    "landuse_exclusions": [
+        "commercial", 
+        "residential", 
+        "industrial",
+        "landfill",
+        "military", 
+        "forest",
+        "railway",
+        "highway",
+        "street",
+        "water_storage",
+        "reservoir"
+    ],
+    "nature_exclusions": [
+        "wetland",
+        "cliff",
+        "sand",
+        "water"
+    ]
 }

@@ -1,10 +1,10 @@
 {   "vector": {
-        "vector_key1": {
+        "residential": {
             "paths": [
-                "SET_RELATIVE_PATH_TO_POINTS",
-                "SET_RELATIVE_PATH_TO_POLYGONS"
+                "residential_multipolygon.shp",
+                "residential_polygon.shp"
             ],
-            "buffer": "SET_BUFFER_VALUE_AS_INT_IN_M"
+            "buffer": 200
         }   
     },
     "raster": {

@@ -56,52 +56,103 @@ class ProcessExclusionsData(luigi.Task):
         place_name = project_settings["place_name_short"]
         main_region = gpd.read_file(os.path.join(project_data_dir, "MAIN_REGION_POLYGON", f"{place_name}.shp"))
 
+        landuse_exclusions = project_settings["landuse_exclusions"]
+        nature_exclusions = project_settings["nature_exclusions"]
+
         ############## MAIN WORKFLOW #################
         # to ensure good logging, remember to pass logger=logger into whichever class you are using
-        
-        # load up the raw exclusion data
-        # fp = os.path.join(raw_data_dir, f"{region_name}.osm.pbf")
-
-        # # initialize the OSM object
-        # osm = pyrosm.OSM(fp)
-
-        # logger.info("OSM object loaded.")
-        # landuse = osm.get_landuse()
-        
-        # residential = landuse[landuse["landuse"] == "residential"]
-
-        # residential = residential.to_crs("EPSG:3035")
-        # logger.info(f"Data loaded. CRS: {residential.crs}")
-
-        # # Check if the clipped GeoDataFrame is not empty
-        # if not residential.empty:
-        #     # Save to a Shapefile
-        #     vector_processor.save_geodataframe(residential, os.path.join(raw_data_dir, "residential.shp"))
-        #     logger.info("Data saved")
-        # else:
-        #     logger.error("No data after clipping with the main region.")
-
-        # load the clipped data
-        # search for different geometry types
         geometry_types = ["polygon", "point", "linestring"]
-        for geometry_type in geometry_types:
-            if not os.path.exists(os.path.join(raw_data_dir, f"residential_{geometry_type}.shp")):
-                logger.error(f"Data not found for geometry type: {geometry_type}")
-                continue
-            geometry = gpd.read_file(os.path.join(raw_data_dir, f"residential_{geometry_type}.shp"))
+        # load up the raw exclusion data
+        fp = os.path.join(raw_data_dir, f"{region_name}.osm.pbf")
 
-            logger.info("Flattening the geometry")
-            geometry = vector_processor.flatten_multipolygons(geometry)
+        # initialize the OSM object
+        osm = pyrosm.OSM(fp)
 
-            logger.info(f"Clipping geometry type: {geometry_type}")
-            
-            clipped_geometry = gpd.clip(geometry, main_region)
-            if not clipped_geometry.empty:
-                vector_processor.save_geodataframe(clipped_geometry, os.path.join(processed_data_dir, f"residential.shp"))
-                logger.info(f"Data saved for geometry type: {geometry_type}")
+        logger.info("OSM object loaded.")
+        
+        #### START by processing the nature data ####
+        ### 1. load the data, convert to correct CRS, and save as shp files for each type of nature data type
+        nature = osm.get_natural()
+        logger.info("Nature data loaded.")
+        # print all the nature types in the logger
+        
+        for nature_type in nature_exclusions:
+            nature_type_data = nature[nature["natural"] == nature_type]
+            if not nature_type_data.empty:
+                nature_type_data = nature_type_data.to_crs("EPSG:3035")
+                vector_processor.save_geodataframe(nature_type_data, os.path.join(raw_data_dir, f"{nature_type}.shp"))
+                logger.info(f"Data saved for nature type: {nature_type}")
             else:
-                logger.error(f"No data after clipping with the main region for geometry type: {geometry_type}")
+                logger.error(f"No data found for nature type: {nature_type}")
                 continue
+
+        ### 2. Clip the nature data to the main Aachen polygon
+        # search for different geometry types in the nature data
+        for nature_type in nature_exclusions:
+            for geometry_type in geometry_types:
+                if not os.path.exists(os.path.join(raw_data_dir, f"{nature_type}_{geometry_type}.shp")):
+                    logger.error(f"Data not found for nature type: {nature_type} and geometry type: {geometry_type}")
+                    continue
+                geometry = gpd.read_file(os.path.join(raw_data_dir, f"{nature_type}_{geometry_type}.shp"))
+
+                logger.info("Flattening the geometry")
+                geometry = vector_processor.flatten_multipolygons(geometry)
+
+                logger.info(f"Clipping geometry type: {geometry_type}")
+                clipped_geometry = gpd.clip(geometry, main_region)
+
+                if not clipped_geometry.empty:
+                    vector_processor.save_geodataframe(clipped_geometry, os.path.join(processed_data_dir, f"{nature_type}.shp"))
+                    logger.info(f"Data saved for nature type: {nature_type} and geometry type: {geometry_type}")
+                else:
+                    logger.error(f"No data after clipping with the main region for nature type: {nature_type} and geometry type: {geometry_type}")
+                    continue
+        
+        ### Next process for the landuse data
+        landuse = osm.get_landuse()
+        logger.info("Landuse data loaded.")
+
+        ### 1. load the landuse data for each data type, convert to correct CRS and save as shp files
+        for landuse_type in landuse_exclusions:
+            landuse_type_data = landuse[landuse["landuse"] == landuse_type]
+            if not landuse_type_data.empty:
+                landuse_type_data = landuse_type_data.to_crs("EPSG:3035")
+                vector_processor.save_geodataframe(landuse_type_data, os.path.join(raw_data_dir, f"{landuse_type}.shp"))
+                logger.info(f"Data saved for landuse type: {landuse_type}")
+            else:
+                logger.error(f"No data found for landuse type: {landuse_type}")
+                continue
+        
+        ### 2. Clip the landuse data to the main Aachen polygon
+        # search for different geometry types in the landuse data
+        for landuse_type in landuse_exclusions:
+            for geometry_type in geometry_types:
+                try:
+                    logger.info(f"Processing landuse type: {landuse_type} and geometry type: {geometry_type}")
+                    if not os.path.exists(os.path.join(raw_data_dir, f"{landuse_type}_{geometry_type}.shp")):
+                        logger.error(f"Data not found for landuse type: {landuse_type} and geometry type: {geometry_type}")
+                        continue
+                    geometry = gpd.read_file(os.path.join(raw_data_dir, f"{landuse_type}_{geometry_type}.shp"))
+
+                    logger.info("Flattening the geometry")
+                    geometry = vector_processor.flatten_multipolygons(geometry)
+
+                    if geometry_type == "polygon" and landuse_type in ["military"]:
+                        # add a small buffer around the military polygons
+                        geometry = geometry.buffer(0)
+
+                    logger.info(f"Clipping geometry type: {geometry_type}")
+                    clipped_geometry = gpd.clip(geometry, main_region)
+
+                    if not clipped_geometry.empty:
+                        vector_processor.save_geodataframe(clipped_geometry, os.path.join(processed_data_dir, f"{landuse_type}.shp"))
+                        logger.info(f"Data saved for landuse type: {landuse_type} and geometry type: {geometry_type}")
+                    else:
+                        logger.error(f"No data after clipping with the main region for landuse type: {landuse_type} and geometry type: {geometry_type}")
+                        continue
+                except Exception as e:
+                    logger.error(f"Error processing landuse type: {landuse_type} and geometry type: {geometry_type}, error: {e}")
+                    continue
 
         ############ DO NOT CHANGE ############
         # mark the task as complete
