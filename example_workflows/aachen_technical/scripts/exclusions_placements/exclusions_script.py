@@ -28,19 +28,13 @@ project_settings_path = config_loader.get_path("settings", "project_settings")
 with open(project_settings_path, 'r') as file:
     project_settings = json.load(file)
 
-start_year = project_settings["start_year"]
-end_year = project_settings["end_year"]
 project_crs = project_settings["crs"]
 
 exclusions_settings_path = config_loader.get_path("settings", "exclusions_settings")
 with open(exclusions_settings_path, 'r') as file:
     exclusions_settings = json.load(file)
 
-# append the processed directory path to the paths in the exclusions_settings dictionary:
-for category in ["vector", "raster"]:
-    for key, value in exclusions_settings[category].items():
-        updated_paths = [os.path.join(processed_dir, path) for path in value["paths"]]
-        exclusions_settings[category][key]["paths"] = updated_paths
+
 
 technology_config_path = config_loader.get_path("settings", "technologies")
 with open(technology_config_path, 'r') as file:
@@ -54,7 +48,7 @@ rotor_diameter = technology_config["wind"]["rotor_diameter"]
 
 ## in the line below, you should only update the last part of the path - ie the name of the shapefile that you want to use as the main region polygon
 # in this case, "north_sea_polygon.shp" 
-main_region_polygon = os.path.join(config_loader.get_path("data", "project_data"), "MAIN_REGION_POLYGON", "north_sea_polygon.shp") 
+main_region_polygon = os.path.join(config_loader.get_path("data", "project_data"), "MAIN_REGION_POLYGON", "Aachen.shp") 
 
 #####################################################################################
 ############## MAIN WORKFLOW #################
@@ -66,9 +60,23 @@ main_region_polygon = os.path.join(config_loader.get_path("data", "project_data"
 ###############################################################################################################
 #####################  SAVE THE PLACEMENTS TO A CSV FILE ##############################################
 
-print("Saving the turbine placements...")
+logger.info("Performing the exclusions...")
+logger.info("Initializing the exclusion calculator...")
 
-# enter logic to export placements to a csv
+# initialize the exclusion calculator
+ec = gl.ExclusionCalculator(main_region_polygon, srs = int(project_crs.split(":")[1]), pixelRes=100, limitOne=False)
+
+# Initialize the exclusion report dictionary
+exclusion_report = {
+    "vector_exclusions": {},
+    "raster_exclusions": {}
+}
+
+# append the processed directory path to the paths in the exclusions_settings dictionary:
+for category in ["vector"]:
+    for key, value in exclusions_settings[category].items():
+        updated_paths = [os.path.join(processed_dir, path) for path in value["paths"]]
+        exclusions_settings[category][key]["paths"] = updated_paths
 
 
 ##############################################################################################

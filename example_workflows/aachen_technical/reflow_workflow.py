@@ -4,6 +4,7 @@ import logging
 import os
 
 # Import the tasks
+from scripts.environment_setup.env_setup_luigi_task import SetupEnvironments
 from scripts.data_download.project_data import DownloadProjectData
 from scripts.data_processing.process_project_data import ProcessProjectData
 from scripts.data_download.exclusions_data import DownloadExclusionsData
@@ -16,7 +17,7 @@ class MainWorkflow(luigi.WrapperTask):
     """
     def requires(self):
         # First task is the download of the exclusion data
-        return [ProcessExclusionsData()]
+        return [SetupEnvironments()]
 
 if __name__ == '__main__':
     # Set up basic logging

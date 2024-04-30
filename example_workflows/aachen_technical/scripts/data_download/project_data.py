@@ -7,6 +7,7 @@ from pathlib import Path
 from utils.config import ConfigLoader
 from utils.data_download import DownloaderUtils
 import logging
+from scripts.environment_setup.env_setup_luigi_task import SetupEnvironments
 
 class DownloadProjectData(luigi.Task):
     """
@@ -18,7 +19,7 @@ class DownloadProjectData(luigi.Task):
         """
         Define any dependencies here. If this is a first step, return None 
         """
-        return None
+        return [SetupEnvironments()]
 
     def output(self):
         """

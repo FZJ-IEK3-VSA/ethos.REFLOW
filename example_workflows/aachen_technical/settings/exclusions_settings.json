@@ -1,19 +1,64 @@
-{   "vector": {
-        "residential": {
-            "paths": [
-                "residential_multipolygon.shp",
-                "residential_polygon.shp"
-            ],
+{   
+    "vector": {
+        "commercial": {
+            "paths": [],
             "buffer": 200
-        }   
-    },
-    "raster": {
-        "raster_key1": {
-            "paths": [
-                "SET_RELATIVE_PATH_TO_RASTER"
-            ],
-            "value": "SET_VALUE_AS_INT_TO_EXCLUDE",
-            "buffer": "SET_BUFFER_VALUE_AS_INT_IN_M"
+        },
+        "residential": {
+            "paths": [],
+            "buffer": 200
+        },
+        "industrial": {
+            "paths": [],
+            "buffer": 200
+        },
+        "landfill": {
+            "paths": [],
+            "buffer": 200
+        },
+        "military": {
+            "paths": [],
+            "buffer": 200
+        },
+        "forest": {
+            "paths": [],
+            "buffer": 200
+        },
+        "railway": {
+            "paths": [],
+            "buffer": 200
+        },
+        "highway": {
+            "paths": [],
+            "buffer": 200
+        },
+        "street": {
+            "paths": [],
+            "buffer": 200
+        },
+        "water_storage": {
+            "paths": [],
+            "buffer": 200
+        },
+        "reservoir": {
+            "paths": [],
+            "buffer": 200
+        },
+        "wetland": {
+            "paths": [],
+            "buffer": 200
+        },
+        "cliff": {
+            "paths": [],
+            "buffer": 200
+        },
+        "sand": {
+            "paths": [],
+            "buffer": 200
+        },
+        "water": {
+            "paths": [],
+            "buffer": 200
         }
     }
 }
