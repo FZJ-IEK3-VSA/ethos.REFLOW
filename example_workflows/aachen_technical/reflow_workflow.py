@@ -9,7 +9,7 @@ from scripts.data_download.project_data import DownloadProjectData
 from scripts.data_processing.process_project_data import ProcessProjectData
 from scripts.data_download.exclusions_data import DownloadExclusionsData
 from scripts.data_processing.process_exclusions_data import ProcessExclusionsData
-
+from scripts.exclusions_placements.exclusions_luigi_task import PerformEligibiliyAnalysisPlacements
 
 class MainWorkflow(luigi.WrapperTask):
     """
@@ -17,7 +17,7 @@ class MainWorkflow(luigi.WrapperTask):
     """
     def requires(self):
         # First task is the download of the exclusion data
-        return [SetupEnvironments()]
+        return [PerformEligibiliyAnalysisPlacements()]
 
 if __name__ == '__main__':
     # Set up basic logging

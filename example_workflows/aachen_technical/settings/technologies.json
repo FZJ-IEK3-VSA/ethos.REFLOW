@@ -1,20 +1,8 @@
 {   "wind": {
-        "hub_height": "SET_HUB_HEIGHT",
-        "capacity": "SET_CAPACITY",
-        "rotor_diameter": "SET_ROTOR_DIAMETER",
-        "turbine_spacing": "SET_TURBINE_SPACING",
-        "turbine_spacing_downwind": "SET_TURBINE_SPACING_DOWNWIND",
-        "turbine_spacing_crosswind": "SET_TURBINE_SPACING_CROSSWIND",
-        "turbine_name": "SET_TURBINE_NAME"
-    },
-    "solar": {
-        "tilt": "SET_TILT",
-        "azimuth": "SET_AZIMUTH",
-        "capacity": "SET_CAPACITY",
-        "panel_type": "SET_PANEL_TYPE",
-        "panel_spacing": "SET_PANEL_SPACING",
-        "panel_spacing_downwind": "SET_PANEL_SPACING_DOWNWIND",
-        "panel_spacing_crosswind": "SET_PANEL_SPACING_CROSSWIND",
-        "panel_name": "SET_PANEL_NAME"
+        "hub_height": 110,
+        "capacity": 5500,
+        "rotor_diameter": 164,
+        "turbine_spacing": 1640,
+        "turbine_name": "Theoretical_Turbine"
     }
 }
