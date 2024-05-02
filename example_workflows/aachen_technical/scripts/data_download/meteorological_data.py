@@ -5,7 +5,6 @@ import requests
 import luigi
 from utils.config import ConfigLoader
 from utils.data_download import ERA5Downloader
-from scripts.data_processing.process_project_data import ProcessRegionBuffers
 
 class DownloadMeterologicalData(luigi.Task):
     """
@@ -16,7 +15,7 @@ class DownloadMeterologicalData(luigi.Task):
         """
         This task requires the ProcessRegionBuffers task to be completed.
         """
-        return [ProcessRegionBuffers()]
+        return None
     
     def output(self):
         """
@@ -44,46 +43,45 @@ class DownloadMeterologicalData(luigi.Task):
         logger = config_loader.setup_task_logging('DownloadMeterologicalData', log_file)
         logger.info("Starting DownloadMeterologicalData task")  
         
-        #####################################################################################
-
+        ####################################################################################
         ############## MAIN WORKFLOW #################
-        logging.info("Downloading meteorological data...")
+        logger.info("Downloading meteorological data...")
 
-        # to ensure good logging, remember to pass logger=logger into whichever class you are using
+        ############## 1. Download NEW EUROPEAN WIND ATLAS data ##############
+        # Link to datasource info: https://globalwindatlas.info/
+        print("Downloading the New European Wind Atlas data...")
+        api_url = "https://wps.neweuropeanwindatlas.eu/api/mesoscale-atlas/v1/get-data-bbox?southBoundLatitude=50.457504&northBoundLatitude=50.996472&westBoundLongitude=5.806274&eastBoundLongitude=6.536865&height=100&variable=wind_speed_mean"
 
-        ### 1. Example SIMPLE DOWNLOAD OF meteorological data raster e.g. from Global Wind Atlas or New European Wind Atlas ### 
-        # # Link to information about the data = "https://example-URL.com"
-        # api_url = "https://example-URL.com"
+        # Specify the directory and file name for the downloaded data
+        file_name = "newa_wind_speed_mean_100m.tif"
+        file_path = os.path.join(met_data_dir, file_name)
 
-        # # specify the filename and directory to save the data
-        # filename = "example_data.tif"
-        # output_dir = os.path.join(met_data_dir, "example-datasource")
-        # local_filename = os.path.join(output_dir, filename)
+        # Perform the API request
+        response = requests.get(api_url)
 
-        # # ensure that the target directory exists
-        # if not os.path.exists(os.path.dirname(output_dir)):
-        #     os.makedirs(os.path.dirname(output_dir))
+        # Check if the request was successful
+        if response.status_code == 200:
+            # Write the response content to a file
+            with open(file_path, 'wb') as file:
+                file.write(response.content)
+            logger.info(f"Download of {file_name} successful.")
+        else:
+            logger.error(f"Failed to download data. Status code: {response.status_code}")
 
-        # # Perform the API request
-        # response = requests.get(api_url)
+        ############### 2. DOWNLOAD OF ERA5 data from CDSAPI service ##############
+        try:
+            ERA5_downloader = ERA5Downloader(main_polygon_fname="Aachen.shp", logger=logger)
+        except Exception as e:  
+            logger.error(f"Failed to initialize ERA5Downloader. Please check filename. Error: {e} More information in the MainWorkflow.log file.")
+            return 
 
-        # # Check if the request was successful
-        # if response.status_code == 200:
-        #     # Write the response content to a file
-        #     with open(local_filename, 'wb') as file:
-        #         file.write(response.content)
-        #     logging.info("Download successful.")
-        # else:
-        #     logging.error(f"Failed to download data. Status code: {response.status_code}")
+        try:
+            ERA5_downloader.download_ERA5_data(expanded_distance=8)
+        except Exception as e:  
+            logger.error(f"Failed to download ERA5 data. Please check the logs for more information. Error: {e}")
+            return
 
-
-        ### 2. Example DOWNLOAD OF meteorological data from ERA5 API service ###
-
-        # ERA5_downloader = ERA5Downloader(filename="north_sea_polygon.tif", logger=logger)
-
-        # ERA5_downloader.download_era5_data()
-
-        ## ASignal that the task is complete
-        logger.info("Downloading Meterological Data task complete.")
+        ## Signal that the task is complete
+        logger.info("Downloading Meteorological Data task complete.")
         with self.output().open('w') as f:
-            f.write('Download Meterological Data task complete.')
+            f.write('Download Meteorological Data task complete.')

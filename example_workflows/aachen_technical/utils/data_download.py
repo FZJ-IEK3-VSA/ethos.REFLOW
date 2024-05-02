@@ -172,7 +172,7 @@ class ERA5Downloader():
         polygon = gpd.read_file(self.main_region_polygon)
         return polygon.total_bounds
 
-    def convert_polygon_extent_to_ERA5(self, expanded_distance=8):
+    def convert_polygon_extent_to_ERA5(self, expanded_distance):
         """
         Converts a bounding box to an extent that can be used for the ERA5 API. 
         Expands the bounding box by the specified distance in degrees.

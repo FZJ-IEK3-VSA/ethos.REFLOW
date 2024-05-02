@@ -9,8 +9,8 @@
     "place_name_short": "Aachen",
     "GID_2": "DEU.10.47_1",
     "OSM_region_name": "koeln-regbez-latest",
-    "start_year": 2000,
-    "end_year": 2001,
+    "start_year": 2016,
+    "end_year": 2016,
     "wind_speed_height": 100,
     "landuse_exclusions": [
         "commercial", 

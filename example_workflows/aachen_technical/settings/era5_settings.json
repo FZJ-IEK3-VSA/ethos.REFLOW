@@ -1,13 +1,15 @@
 {
   "ERA5_ENDPOINT": "https://cds.climate.copernicus.eu/api/v2",
-  "ERA5_API_KEY": "SET_YOUR_API_KEY_HERE",
+  "ERA5_API_KEY": "175894:f486dc74-a65c-4a29-94f8-3877788ead6e",
   "ERA5_WIND_DATA_TYPES": [
-    ["reanalysis-era5-single-levels", "VARIABLE_1"],
-    ["reanalysis-era5-single-levels", "VARIABLE_2"]
+    ["reanalysis-era5-single-levels", "100m_u_component_of_wind"],
+    ["reanalysis-era5-single-levels", "100m_v_component_of_wind"],
+    ["reanalysis-era5-single-levels", "boundary_layer_height"],
+    ["reanalysis-era5-single-levels", "2m_temperature"],
+    ["reanalysis-era5-single-levels", "surface_pressure"]
   ],
   "ERA5_SETTINGS": {
-    "year_start": "SET_START_YEAR_AS_INTEGER",
-    "year_end": "SET_END_YEAR_AS_INTEGER",
+    "version": "v25052023",
     "months_to_download": [
       "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"
     ],
