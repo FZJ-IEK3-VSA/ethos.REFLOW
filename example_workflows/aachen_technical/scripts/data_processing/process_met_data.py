@@ -3,7 +3,7 @@ import os
 from utils.config import ConfigLoader
 from scripts.data_download.meteorological_data import DownloadMeterologicalData
 import logging
-from utils.data_processing import ERA5_RESKitWindProccessor
+from utils.ERA5_processing import ERA5_RESKitWindProccessor
 import json
 
 class ProcessERA5WindData(luigi.Task):
@@ -49,18 +49,12 @@ class ProcessERA5WindData(luigi.Task):
         #####################################################################################
 
         ############## MAIN WORKFLOW #################
-        # to ensure good logging, remember to pass logger=logger into whichever class you are using
-
         for year in range(start_year, end_year + 1):
-            ### ADD YOUR PROCESSING LOGIC HERE ###
-            ### EXAMPLE PROCESSING OF ERA5 WIND DATA FOR RESKIT MODEL BELOW ###
-            
-            # logger.info(f"Processing ERA5 wind data for {year}...")
-            # # Process the wind data
-            # wind_processor = ERA5_RESKitWindProccessor()
-            # wind_processor.process_wind(year)
-            
-            pass # remove this line when adding your processing logic
+            logger.info(f"Processing ERA5 wind data for {year}...")
+
+            # Process the wind data
+            wind_processor = ERA5_RESKitWindProccessor(logger=logger)
+            wind_processor.process_wind(year)
 
         # update data paths
         config_loader.update_data_paths()

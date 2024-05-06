@@ -5,7 +5,7 @@ import zipfile
 import json
 from pathlib import Path
 from utils.config import ConfigLoader
-from utils.data_download import DownloaderUtils
+from utils.data_download import DownloaderUtils, ERA5Downloader
 from scripts.data_processing.process_project_data import ProcessProjectData
 import logging
 
@@ -70,8 +70,24 @@ class DownloadExclusionsData(luigi.Task):
 
         # Download the OSM data
         logger.info(f"Downloading OSM data for {place_name}")
-        download_utils.download_and_extract("https://download.geofabrik.de/europe/germany/nordrhein-westfalen/koeln-regbez-latest.osm.pbf", raw_data_dir)
+        filepath = download_utils.download_file("https://download.geofabrik.de/europe/germany/nordrhein-westfalen/koeln-regbez-latest.osm.pbf", raw_data_dir)
+        if filepath:
+            download_utils.extract_file(filepath, raw_data_dir)
         logger.info(f"OSM data downloaded.")
+
+        ### Download the CCI data from Corpernicus ###
+        logger.info("Downloading CCI data...")
+        try:
+            ERA5_downloader = ERA5Downloader(main_polygon_fname="Aachen.shp", logger=logger)
+        except Exception as e:  
+            logger.error(f"Failed to initialize ERA5Downloader. Please check filename. Error: {e} More information in the MainWorkflow.log file.")
+            return 
+        
+        try:
+            ERA5_downloader.download_CCI_data(expanded_distance=8)
+        except Exception as e:  
+            logger.error(f"Failed to download ERA5 data. Please check the logs for more information. Error: {e}")
+            return
 
         ############ DO NOT CHANGE ################
         # Signify that the task has been completed

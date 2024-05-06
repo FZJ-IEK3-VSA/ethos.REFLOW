@@ -12,21 +12,31 @@ from utils.config import ConfigLoader
 ############ directory management and global variables ############
 config_loader = ConfigLoader()
 output_dir = config_loader.get_path("output")
-placements_path = os.path.join(output_dir, "geodata", "turbine_placements_4326.csv")
-placements = pd.read_csv(placements_path)
+
 met_data_dir = config_loader.get_path("data", "met_data")
 newa_100m_path = os.path.join(met_data_dir, "newa_wind_speed_mean_100m.tif")
-report_path = os.path.join(output_dir, "report.json")
-
 project_settings_path = config_loader.get_path("settings", "project_settings")
 
 with open(project_settings_path) as file:
     project_settings = json.load(file)
 
+##### running multiple scenarios for exlucsions
+scenario = project_settings["scenario"]
+
 # configure logging
 log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'PerformSimulations.log')
 logger = config_loader.setup_task_logging('PerformSimulations', log_file)
 logger.info("Starting PerformSimulations task")  
+
+
+exclusions_settings_path = config_loader.get_path("settings", "exclusions_settings")
+with open(exclusions_settings_path, 'r') as file:
+    exclusions_settings = json.load(file)
+
+placements_path = os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv")
+placements = pd.read_csv(placements_path)
+
+report_path = os.path.join(output_dir, f"report_{scenario}.json")
 
 ## set the year
 years = range(project_settings["start_year"], project_settings["end_year"] + 1)
@@ -34,7 +44,7 @@ years = range(project_settings["start_year"], project_settings["end_year"] + 1)
 ##########################################################################################
 ############################ DEFINE THE RESKIT WORKFLOW ##############################
 
-def north_sea_offshore_wind_sim(
+def aachen_onshore_wind_sim(
     placements,
     era5_path,
     newa_100m_path,
@@ -42,7 +52,7 @@ def north_sea_offshore_wind_sim(
     output_variables=None
 ):
     """
-    Simulates offshore wind generation using NASA's ERA5 database [1].
+    Simulates onshore wind generation using NASA's ERA5 database [1].
 
     Parameters
     ----------
@@ -185,24 +195,24 @@ for year in years:
     logger.info(f"Simulating the year {year}...")
     # run the simulation
     era5_path = os.path.join(met_data_dir, "ERA5", "processed", f"{year}")
-    xds = north_sea_offshore_wind_sim(placements, era5_path, newa_100m_path, output_netcdf_path=os.path.join(output_netcdf_directory, f"wind_power_era5_{year}.nc"))
+    xds = aachen_onshore_wind_sim(placements, era5_path, newa_100m_path, output_netcdf_path=os.path.join(output_netcdf_directory, f"wind_power_era5_{year}_{scenario}.nc"))
 
 #######################################################################################
 ############################# CALCULATE FLH  #########################################
 
 for year in years:
     # in case this was run before, we load up the file instead of using the xds variable directly
-    xds = xr.open_dataset(os.path.join(output_netcdf_directory, f"wind_power_era5_{year}.nc"))
+    xds = xr.open_dataset(os.path.join(output_netcdf_directory, f"wind_power_era5_{year}_{scenario}.nc"))
 
     ## calculate the FLH and Generation
     logger.info("Calculating the Full Load Hours and annual Generation per turbine...")
     placements = calculate_flh_generation(xds, placements, turbine_availablilty=0.97, array_efficiency=0.9, year=year)
 
     # save the placements
-    placements.to_csv(os.path.join(output_dir, "geodata", "turbine_placements_4326.csv"), index=False)
+    placements.to_csv(os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv"), index=False)
 
     # load the placements
-    placements = pd.read_csv(os.path.join(output_dir, "geodata", "turbine_placements_4326.csv"))
+    placements = pd.read_csv(os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv"))
 
     # calculate the total generation
     total_generation = placements[f"Generation_{year}_MWh"].sum() / 1e6
@@ -222,8 +232,7 @@ for year in years:
     with open(report_path, 'w') as file:
         json.dump(report, file, indent=4)
 
-# calculate the OVERALL mean CF and generation - do this outside the main loop in case certain years are calculated separately
-        
+# calculate the OVERALL mean CF and generation 
 # initialize the sums
 total_generation_sum = 0
 mean_capacity_factor_sum = 0
