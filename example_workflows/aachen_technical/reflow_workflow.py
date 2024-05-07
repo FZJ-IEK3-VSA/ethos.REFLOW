@@ -13,6 +13,7 @@ from scripts.exclusions_placements.exclusions_luigi_task import PerformEligibili
 from scripts.data_download.meteorological_data import DownloadMeterologicalData
 from scripts.data_processing.process_met_data import ProcessERA5WindData
 from scripts.data_processing.convert_placements import ConvertPlacementsToEPSG4326
+from scripts.data_processing.convert_cci_to_tif import ConvertCCItoTIF
 from scripts.simulations.simulations_luigi_task import PerformSimulations
 
 class MainWorkflow(luigi.WrapperTask):
@@ -21,7 +22,7 @@ class MainWorkflow(luigi.WrapperTask):
     """
     def requires(self):
         # First task is the download of the exclusion data
-        return [DownloadExclusionsData()]
+        return [PerformSimulations()]
 
 if __name__ == '__main__':
     # Set up basic logging

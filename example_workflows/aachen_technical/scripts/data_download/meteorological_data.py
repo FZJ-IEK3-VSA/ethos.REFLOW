@@ -50,7 +50,7 @@ class DownloadMeterologicalData(luigi.Task):
         ############## 1. Download NEW EUROPEAN WIND ATLAS data ##############
         # Link to datasource info: https://globalwindatlas.info/
         print("Downloading the New European Wind Atlas data...")
-        api_url = "https://wps.neweuropeanwindatlas.eu/api/mesoscale-atlas/v1/get-data-bbox?southBoundLatitude=50.457504&northBoundLatitude=50.996472&westBoundLongitude=5.806274&eastBoundLongitude=6.536865&height=100&variable=wind_speed_mean"
+        api_url = "https://wps.neweuropeanwindatlas.eu/api/mesoscale-atlas/v1/get-data-bbox?southBoundLatitude=49.001844&northBoundLatitude=52.643063&westBoundLongitude=4.0979&eastBoundLongitude=10.656738&height=100&variable=wind_speed_mean"
 
         # Specify the directory and file name for the downloaded data
         file_name = "newa_wind_speed_mean_100m.tif"
@@ -68,7 +68,7 @@ class DownloadMeterologicalData(luigi.Task):
         else:
             logger.error(f"Failed to download data. Status code: {response.status_code}")
 
-        ############### 2. DOWNLOAD OF ERA5 data from CDSAPI service ##############
+        # ############### 2. DOWNLOAD OF ERA5 data from CDSAPI service ##############
         try:
             ERA5_downloader = ERA5Downloader(main_polygon_fname="Aachen.shp", logger=logger)
         except Exception as e:  
@@ -76,7 +76,7 @@ class DownloadMeterologicalData(luigi.Task):
             return 
 
         try:
-            ERA5_downloader.download_ERA5_data(expanded_distance=8)
+            ERA5_downloader.download_ERA5_data(expanded_distance=1)
         except Exception as e:  
             logger.error(f"Failed to download ERA5 data. Please check the logs for more information. Error: {e}")
             return

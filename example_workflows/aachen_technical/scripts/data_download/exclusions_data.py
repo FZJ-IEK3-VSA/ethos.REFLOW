@@ -44,6 +44,10 @@ class DownloadExclusionsData(luigi.Task):
         # create the raw data directory if it does not exist
         os.makedirs(raw_data_dir, exist_ok=True)
 
+        met_data_dir = config_loader.get_path("data", "met_data")
+        # create the met data directory if it does not exist
+        os.makedirs(met_data_dir, exist_ok=True)
+
         # load the project settings
         with open(config_loader.get_path("settings", "project_settings"), 'r') as file:
             project_settings = json.load(file)
@@ -64,18 +68,18 @@ class DownloadExclusionsData(luigi.Task):
         # ############## MAIN WORKFLOW #################
 
         ### ADD YOUR DOWNLOAD WORKFLOW HERE ###
-         # to ensure good logging, remember to pass logger=logger into whichever class you are using 
+        # to ensure good logging, remember to pass logger=logger into whichever class you are using 
 
-        ##### Now we will download the OSM data ####
+        ##### First we will download the OSM data ####
 
         # Download the OSM data
-        logger.info(f"Downloading OSM data for {place_name}")
-        filepath = download_utils.download_file("https://download.geofabrik.de/europe/germany/nordrhein-westfalen/koeln-regbez-latest.osm.pbf", raw_data_dir)
-        if filepath:
-            download_utils.extract_file(filepath, raw_data_dir)
-        logger.info(f"OSM data downloaded.")
+        # logger.info(f"Downloading OSM data for {place_name}")
+        # filepath = download_utils.download_file("https://download.geofabrik.de/europe/germany/nordrhein-westfalen/koeln-regbez-latest.osm.pbf", raw_data_dir)
+        # if filepath:
+        #     download_utils.extract_file(filepath, raw_data_dir)
+        # logger.info(f"OSM data downloaded.")
 
-        ### Download the CCI data from Corpernicus ###
+        ### Now we will download the CCI (satellite land cover) data from Corpernicus ###
         logger.info("Downloading CCI data...")
         try:
             ERA5_downloader = ERA5Downloader(main_polygon_fname="Aachen.shp", logger=logger)
@@ -86,7 +90,7 @@ class DownloadExclusionsData(luigi.Task):
         try:
             ERA5_downloader.download_CCI_data(expanded_distance=8)
         except Exception as e:  
-            logger.error(f"Failed to download ERA5 data. Please check the logs for more information. Error: {e}")
+            logger.error(f"Failed to download CCI data. Please check the logs for more information. Error: {e}")
             return
 
         ############ DO NOT CHANGE ################

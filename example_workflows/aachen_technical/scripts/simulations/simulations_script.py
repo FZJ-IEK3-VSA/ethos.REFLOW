@@ -15,13 +15,11 @@ output_dir = config_loader.get_path("output")
 
 met_data_dir = config_loader.get_path("data", "met_data")
 newa_100m_path = os.path.join(met_data_dir, "newa_wind_speed_mean_100m.tif")
+esa_cci_path = os.path.join(met_data_dir, "CCI", "2016", "C3S-LC-L4-LCCS-Map-300m-P1Y-2016-v2.1.1.tif")
 project_settings_path = config_loader.get_path("settings", "project_settings")
 
 with open(project_settings_path) as file:
     project_settings = json.load(file)
-
-##### running multiple scenarios for exlucsions
-scenario = project_settings["scenario"]
 
 # configure logging
 log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'PerformSimulations.log')
@@ -33,10 +31,10 @@ exclusions_settings_path = config_loader.get_path("settings", "exclusions_settin
 with open(exclusions_settings_path, 'r') as file:
     exclusions_settings = json.load(file)
 
-placements_path = os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv")
+placements_path = os.path.join(output_dir, "geodata", f"turbine_placements_4326.csv")
 placements = pd.read_csv(placements_path)
 
-report_path = os.path.join(output_dir, f"report_{scenario}.json")
+report_path = os.path.join(output_dir, f"report.json")
 
 ## set the year
 years = range(project_settings["start_year"], project_settings["end_year"] + 1)
@@ -48,6 +46,7 @@ def aachen_onshore_wind_sim(
     placements,
     era5_path,
     newa_100m_path,
+    esa_cci_path,
     output_netcdf_path=os.path.join(output_dir, "wind_power_era5.nc"),
     output_variables=None
 ):
@@ -98,7 +97,7 @@ def aachen_onshore_wind_sim(
     )
 
     ## set roughness for the sea
-    wf.set_roughness(0.0002)
+    wf.estimate_roughness_from_land_cover(path=esa_cci_path, source_type="cci")
 
     ## use log law to project wind speeds to hub height
     wf.logarithmic_projection_of_wind_speeds_to_hub_height(
@@ -157,7 +156,7 @@ def calculate_flh_generation(xds, placements, turbine_availablilty, array_effici
             batch_start_time = time.time()
 
         # find the corresponding placement and update the FLH
-        match_index = placements.ID == xds.ID[location].values
+        match_index = placements.FID == xds.FID[location].values
 
         # calculate the FLH for each placement
         flh = pd.Series(xds.capacity_factor[:, location]).sum()
@@ -195,24 +194,24 @@ for year in years:
     logger.info(f"Simulating the year {year}...")
     # run the simulation
     era5_path = os.path.join(met_data_dir, "ERA5", "processed", f"{year}")
-    xds = aachen_onshore_wind_sim(placements, era5_path, newa_100m_path, output_netcdf_path=os.path.join(output_netcdf_directory, f"wind_power_era5_{year}_{scenario}.nc"))
+    xds = aachen_onshore_wind_sim(placements, era5_path, newa_100m_path, esa_cci_path, output_netcdf_path=os.path.join(output_netcdf_directory, f"wind_power_era5_{year}.nc"))
 
 #######################################################################################
 ############################# CALCULATE FLH  #########################################
 
 for year in years:
     # in case this was run before, we load up the file instead of using the xds variable directly
-    xds = xr.open_dataset(os.path.join(output_netcdf_directory, f"wind_power_era5_{year}_{scenario}.nc"))
+    xds = xr.open_dataset(os.path.join(output_netcdf_directory, f"wind_power_era5_{year}.nc"))
 
     ## calculate the FLH and Generation
     logger.info("Calculating the Full Load Hours and annual Generation per turbine...")
     placements = calculate_flh_generation(xds, placements, turbine_availablilty=0.97, array_efficiency=0.9, year=year)
 
     # save the placements
-    placements.to_csv(os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv"), index=False)
+    placements.to_csv(os.path.join(output_dir, "geodata", f"turbine_placements_4326.csv"), index=False)
 
     # load the placements
-    placements = pd.read_csv(os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv"))
+    placements = pd.read_csv(os.path.join(output_dir, "geodata", f"turbine_placements_4326.csv"))
 
     # calculate the total generation
     total_generation = placements[f"Generation_{year}_MWh"].sum() / 1e6

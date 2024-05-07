@@ -23,7 +23,8 @@ class PerformSimulations(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'PerformSimulations_complete.txt'))
+        output_filename = "wind_power_era5_2016.nc"
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'simulations', output_filename))
     
     def run(self):
         """
@@ -38,9 +39,3 @@ class PerformSimulations(luigi.Task):
 
         ## run the exclusions wrapper bash script
         subprocess.run(['bash', './scripts/simulations/simulations_wrapper.sh'], check=True, shell=True)
-
-        ############ DO NOT CHANGE ############
-        # mark the task as complete
-        #logger.info("ProcessRegionBuffers task complete.")
-        with self.output().open('w') as file:
-            file.write('Complete')
