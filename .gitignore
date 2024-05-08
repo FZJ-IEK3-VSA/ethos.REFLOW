@@ -5,6 +5,9 @@ __pycache__
 /output/*
 *.png
 *.pptx
+/example_workflows/aachen_technical/data/*
+/example_workflows/aachen_technical/output/*
+/example_workflows/aachen_technical/settings/data_paths.json
 
 # Ignore everything under the output directory
 !data/note.txt
