@@ -62,17 +62,17 @@ To start your own new project using REFLOW, follow these steps:
 
 **Optional but recommended - work with GIT:**
 
-4. **Create a New Git Repository**: Navigate into your new project directory and initilize it as a git repository:
+5. **Create a New Git Repository**: Navigate into your new project directory and initilize it as a git repository:
     ```bash
     cd path/to/your-project-name
     git init
     git add .
     git commit -m "Initial commit"
     ```
-5. **Create an Empty Repository on Github** (or any other Git hosting service): Ensure the repository name matches your project's name. 
+6. **Create an Empty Repository on Github** (or any other Git hosting service): Ensure the repository name matches your project's name. 
     Do not initialize the repository with a README, .gitignore or license.
 
-6. **Link your local repository to the remote repository**: Make sure you are in your new project directory and run the following commands:
+7. **Link your local repository to the remote repository**: Make sure you are in your new project directory and run the following commands:
     ```bash
     git remote add origin https://github.com/your-username/your-repo-name.git
     git branch -M main
