@@ -1,0 +1,7 @@
+This is where the output files are stored. This parent directory consists of the following subdirectories:
+    1. 'geodata': This directory contains all the output geodata files, including placements and exclusions_data
+    2. 'logs': This directory contains all the log files generated during the run
+    3. 'plots': Contains, obviously, all the plots generated during the run
+    4. 'simulations': Contains all the output files from the simulations
+
+There is also the final report.json file in this directory: output/report.json

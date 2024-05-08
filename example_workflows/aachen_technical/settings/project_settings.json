@@ -1,0 +1,45 @@
+{
+    "countries": [
+        "DEU"
+    ],
+    "zoom_level": 2,
+    "crs": "EPSG:3035",
+    "gadm_version": "41",
+    "place": "Städteregion Aachen",
+    "place_name_short": "Aachen",
+    "GID_2": "DEU.10.47_1",
+    "OSM_region_name": "koeln-regbez-latest",
+    "start_year": 2016,
+    "end_year": 2016,
+    "wind_speed_height": 100,
+    "landuse_exclusions": [
+        "commercial", 
+        "residential", 
+        "industrial",
+        "landfill",
+        "military", 
+        "forest",
+        "railway",
+        "highway",
+        "street",
+        "water_storage",
+        "reservoir"
+    ],
+    "nature_exclusions": [
+        "wetland",
+        "cliff",
+        "sand",
+        "water"
+    ],
+    "boundary_exclusions": [
+        "national_park",
+        "protected_area"
+    ],
+    "road_exclusions": [
+        "primary", 
+        "secondary", 
+        "tertiary", 
+        "motorway", 
+        "cycleway"
+    ]
+}

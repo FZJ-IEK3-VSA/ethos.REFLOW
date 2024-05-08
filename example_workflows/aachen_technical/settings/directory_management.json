@@ -1,0 +1,26 @@
+{
+  "output": {
+    "geodata": "geodata",
+    "logs": "logs",
+    "plots": "plots",
+    "simulations": "simulations",
+    "report": "report.json"
+  },
+  "data": {
+    "exclusion_data": {
+      "_temp": "_temp",
+      "raw": "raw",
+      "processed": "processed"
+    },
+    "met_data": "met_data",
+    "project_data": "project_data"
+  },
+  "settings": {
+    "era5_settings": "era5_settings.json",
+    "exclusions_settings": "exclusions_settings.json",
+    "technologies": "technologies.json",
+    "project_settings": "project_settings.json"
+  },
+  "scripts": "scripts",
+  "utils": "utils"
+}
