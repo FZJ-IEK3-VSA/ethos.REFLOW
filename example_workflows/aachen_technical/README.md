@@ -114,3 +114,11 @@ The workflow runs the scripts in the following order:
 11. `scripts/visualizations/visualizations_luigi_task.py`:
     - Generates a visualization of the wind speed data using the `report.json` file.
     - Generates the `exclusions_map.png` file in the `output/visualizations` directory.
+
+## License
+
+This project is licensed under the MIT License - see the License in the main REFLOW directory.
+
+## Acknowledgements
+
+The authors would like to thank the German Federal Government, the German State Governments, and the Joint Science Conference (GWK) for their funding and support as part of the NFDI4Ing consortium. Funded by the German Research Foundation (DFG) – 442146713, this work was also supported by the Helmholtz Association as part of the program “Energy System Design”.
