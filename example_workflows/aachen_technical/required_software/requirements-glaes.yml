@@ -1,0 +1,5 @@
+name: reflow-main
+channels:
+  - conda-forge
+dependencies:
+  - conda-forge::glaes

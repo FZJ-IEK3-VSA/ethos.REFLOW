@@ -1,0 +1,84 @@
+{   
+    "vector": {
+        "commercial": {
+            "paths": [],
+            "buffer": 1000
+        },
+        "residential": {
+            "paths": [],
+            "buffer": 1000
+        },
+        "industrial": {
+            "paths": [],
+            "buffer": 1000
+        },
+        "landfill": {
+            "paths": [],
+            "buffer": 200
+        },
+        "military": {
+            "paths": [],
+            "buffer": 200
+        },
+        "national_park": {
+            "paths": [],
+            "buffer": 0
+        },
+        "forest": {
+            "paths": [],
+            "buffer": 200
+        },
+        "railway": {
+            "paths": [],
+            "buffer": 200
+        },
+        "street": {
+            "paths": [],
+            "buffer": 200
+        },
+        "water_storage": {
+            "paths": [],
+            "buffer": 200
+        },
+        "reservoir": {
+            "paths": [],
+            "buffer": 200
+        },
+        "wetland": {
+            "paths": [],
+            "buffer": 200
+        },
+        "cliff": {
+            "paths": [],
+            "buffer": 200
+        },
+        "sand": {
+            "paths": [],
+            "buffer": 200
+        },
+        "water": {
+            "paths": [],
+            "buffer": 200
+        },
+        "primary": {
+            "paths": [],
+            "buffer": 100
+        },
+        "secondary": {
+            "paths": [],
+            "buffer": 50
+        },
+        "tertiary": {
+            "paths": [],
+            "buffer": 10
+        },
+        "motorway": {
+            "paths": [],
+            "buffer": 50
+        },
+        "cycleway": {
+            "paths": [],
+            "buffer": 20
+        }
+    }
+}
