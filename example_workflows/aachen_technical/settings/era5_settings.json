@@ -1,6 +1,6 @@
 {
   "ERA5_ENDPOINT": "https://cds.climate.copernicus.eu/api/v2",
-  "ERA5_API_KEY": "175894:f486dc74-a65c-4a29-94f8-3877788ead6e",
+  "ERA5_API_KEY": "UID:API_key",
   "ERA5_WIND_DATA_TYPES": [
     ["reanalysis-era5-single-levels", "100m_u_component_of_wind"],
     ["reanalysis-era5-single-levels", "100m_v_component_of_wind"],

@@ -21,7 +21,7 @@ class PerformEligibiliyAnalysisPlacements(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'PerformEligibiliyAnalysisPlacements_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'geodata', 'turbine_placements_3035.csv'))
     
     def run(self):
         """
@@ -36,8 +36,3 @@ class PerformEligibiliyAnalysisPlacements(luigi.Task):
 
         ## run the exclusions wrapper bash script
         subprocess.run(['bash', './scripts/exclusions_placements/exclusions_placements_wrapper.sh'], check=True, shell=True)
-
-        ############ DO NOT CHANGE ############
-        # mark the task as complete
-        with self.output().open('w') as file:
-            file.write('Complete')

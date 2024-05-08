@@ -30,5 +30,16 @@
         "cliff",
         "sand",
         "water"
+    ],
+    "boundary_exclusions": [
+        "national_park",
+        "protected_area"
+    ],
+    "road_exclusions": [
+        "primary", 
+        "secondary", 
+        "tertiary", 
+        "motorway", 
+        "cycleway"
     ]
 }

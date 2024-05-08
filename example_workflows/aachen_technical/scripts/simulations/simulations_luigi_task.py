@@ -4,6 +4,7 @@ import subprocess
 from utils.config import ConfigLoader
 from scripts.data_processing.convert_placements import ConvertPlacementsToEPSG4326
 from scripts.data_processing.process_met_data import ProcessERA5WindData
+from scripts.exclusions_placements.exclusions_luigi_task import PerformEligibiliyAnalysisPlacements
 import logging
 import time
 
@@ -16,7 +17,8 @@ class PerformSimulations(luigi.Task):
         """
         This task requires both the PerformEligibiliyAnalysisPlacements and the ProcessERA5WindData tasks to be completed.
         """
-        return [ConvertPlacementsToEPSG4326(),
+        return [PerformEligibiliyAnalysisPlacements(),
+                ConvertPlacementsToEPSG4326(),
                 ProcessERA5WindData()]
     
     def output(self):

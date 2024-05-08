@@ -73,11 +73,11 @@ class DownloadExclusionsData(luigi.Task):
         ##### First we will download the OSM data ####
 
         # Download the OSM data
-        # logger.info(f"Downloading OSM data for {place_name}")
-        # filepath = download_utils.download_file("https://download.geofabrik.de/europe/germany/nordrhein-westfalen/koeln-regbez-latest.osm.pbf", raw_data_dir)
-        # if filepath:
-        #     download_utils.extract_file(filepath, raw_data_dir)
-        # logger.info(f"OSM data downloaded.")
+        logger.info(f"Downloading OSM data for {place_name}")
+        filepath = download_utils.download_file("https://download.geofabrik.de/europe/germany/nordrhein-westfalen/koeln-regbez-latest.osm.pbf", raw_data_dir)
+        if filepath:
+            download_utils.extract_file(filepath, raw_data_dir)
+        logger.info(f"OSM data downloaded.")
 
         ### Now we will download the CCI (satellite land cover) data from Corpernicus ###
         logger.info("Downloading CCI data...")

@@ -44,13 +44,16 @@ class VisualizeExclusionMaps(luigi.Task):
         # Load raster data
         all_exclusions = rasterio.open(os.path.join(output_dir, "geodata", "aachen_exclusions.tif"))
 
+        # Load the placements
+        placements = gpd.read_file(os.path.join(output_dir, "geodata", "aachen_turbine_placements.shp"))
+
         ## open the report.json file 
         with open(os.path.join(output_dir, "report.json"), 'r') as file:
             report = json.load(file)
 
         # Create the figure
         plt.rcParams['axes.labelsize'] = 14  # Set font size for axis labels
-        plt.rcParams['legend.fontsize'] = 14  # Set font size for legend
+        plt.rcParams['legend.fontsize'] = 11  # Set font size for legend
 
         fig, ax = plt.subplots(figsize=(10, 10))
 
@@ -64,13 +67,21 @@ class VisualizeExclusionMaps(luigi.Task):
             cmap = mcolors.ListedColormap(['#023D6B'])
             cmap.set_bad(color='none')  # Set color for masked values (transparent)
             # Plot the masked raster with the specified colormap
-            ax.imshow(masked_raster, cmap=cmap, extent=extent, interpolation='nearest', zorder=1)
+            ax.imshow(masked_raster, cmap=cmap, extent=extent, interpolation='nearest')
 
         # Plot the main polygon
-        aachen.boundary.plot(ax=ax, color="black", linewidth=2, zorder=2)
+        aachen.boundary.plot(ax=ax, color="black", linewidth=2)
+
+        # Plot the placements
+        placements.plot(ax=ax, color="red", markersize=12)
 
         # Create a legend handle for the excluded areas 
         excluded_handles = []
+
+        total_placements = f"Total placements: {report['Items_Number']}"
+        total_placements_handle = Line2D([], [], marker='o', color='r', label=total_placements, 
+                                    markerfacecolor='r', markersize=11, linestyle='None', markeredgecolor='none')
+        
 
         excluded_area_label = f"Excluded: {round(report['Exclude_Percentage'], 2)}%"
         available_area_label = f"Available: {round(report['Eligible_Percentage'], 2)}%"
@@ -78,12 +89,14 @@ class VisualizeExclusionMaps(luigi.Task):
         total_area_handle = Line2D([], [], marker='', color='w', label=total_area_label, 
                                     markerfacecolor='w', markersize=11, linestyle='None', markeredgecolor='none')
         excluded_handles.append(total_area_handle)
+        
         excluded_area_handle = Line2D([], [], marker='o', color='w', label=excluded_area_label, 
                                     markerfacecolor='#023D6B', markersize=11, linestyle='None', markeredgecolor='k')
         excluded_handles.append(excluded_area_handle)
         available_area_handle = Line2D([], [], marker='o', color='w', label=available_area_label, 
                                     markerfacecolor='w', markersize=11, linestyle='None', markeredgecolor='k')
         excluded_handles.append(available_area_handle)
+        excluded_handles.append(total_placements_handle)
 
         # set the extent of the plot to the extent of the north sea polygon
         ax.set_xlim(aachen.total_bounds[[0, 2]])

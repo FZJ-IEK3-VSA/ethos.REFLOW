@@ -137,7 +137,7 @@ ec.save(os.path.join(output_dir, f"aachen_exclusions.tif"), overwrite=True)
 logger.info("Distributing the turbines...")
 t0 = time.time()
 # distribute items
-ec.distributeItems(separation=distance, asArea=True)
+ec.distributeItems(separation=distance, asArea=True)  # we prevent the turbines from being placed on the border of the main region polygon
 t1 = time.time()
 logger.info(f"Turbines distributed in {t1-t0} seconds.")
 ec.saveItems(os.path.join(output_dir, f"aachen_turbine_placements.shp"))
@@ -158,7 +158,7 @@ df_items = pd.DataFrame({
 
 df_items["capacity"] = capacity
 df_items["hub_height"] = hub_height
-df_items["rotor_diameter"] = rotor_diameter
+df_items["rotor_diam"] = rotor_diameter  # do not change this
 
 # save the file
 df_items.to_csv(os.path.join(output_dir, "turbine_placements_3035.csv"), index=False)
