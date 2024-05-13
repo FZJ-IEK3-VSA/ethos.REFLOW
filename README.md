@@ -1,5 +1,7 @@
 # REFLOW: Renewable Energy potentials workFLOW manager
 
+<a href="https://www.fz-juelich.de/en/iek/iek-3"><img src="https://github.com/FZJ-IEK3-VSA/README_assets/blob/main/FJZ_IEK-3_logo.svg?raw=True" alt="Forschungszentrum Juelich Logo" width="300px"></a>
+
 REFLOW is a workflow manager tool designed to streamline and automate tasks related to renewable energy potential analyses. It is built with Luigi and provides an automated, robust framework for data acquisition, processing, land/sea eligibility analysis, technology placements, simulations and visualizations. It is build with transparency and reproducibility in mind. 
 
 ## Requirements

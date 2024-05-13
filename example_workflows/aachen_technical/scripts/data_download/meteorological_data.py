@@ -23,7 +23,7 @@ class DownloadMeterologicalData(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'DownloadMeterologicalData_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("data", "met_data"), 'ERA5', "raw", "2016", 'reanalysis-era5-single-levels.2016.surface_pressure.nc'))
     
     def run(self):
         """
@@ -89,5 +89,3 @@ class DownloadMeterologicalData(luigi.Task):
 
         ## Signal that the task is complete
         logger.info("Downloading Meteorological Data task complete.")
-        with self.output().open('w') as f:
-            f.write('Download Meteorological Data task complete.')

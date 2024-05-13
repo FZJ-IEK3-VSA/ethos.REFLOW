@@ -24,11 +24,8 @@ class ProcessProjectData(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        output_dir = os.path.join(ConfigLoader().get_path("data", "project_data"), "MAIN_REGION_POLYGON")
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("data" "project_data"), 'MAIN_REGION_POLYGON', 'Aachen.shp'))
-
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("data", "project_data"), 'MAIN_REGION_POLYGON', 'Aachen.shp'))
+    
     def run(self):
         """
         Main run method for the task.
@@ -76,3 +73,7 @@ class ProcessProjectData(luigi.Task):
             os.makedirs(main_region_dir)
 
         place_gdf.to_file(os.path.join(main_region_dir, f'{place_short}.shp'))
+
+        ############ DO NOT CHANGE ################
+
+        logger.info("Exclusion data download complete.")

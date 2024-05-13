@@ -74,7 +74,7 @@ The workflow settings are defined in files found in the `settings` directory. Th
 
 It is essential to update the Corpernicus API key in the `era5_settings.json` file before running the workflow. This key is required to download the data from the Copernicus Climate Data Store. You can obtain a free API key by [registering on the Copernicus website](https://cds.climate.copernicus.eu/#!/home). In the `era5_settings.json` file, replace the placeholder "ERA5_API_KEY" with the UID and API key that you receive after registering. This needs to be exactly as "UID:API_KEY". 
 
-The Corpernicus Climate Data Store is used to download both the ERA5 reanalysis and the satellite land cover data. 
+The Corpernicus Climate Data Store is used to download both the ERA5 reanalysis and the satellite land cover data. **NOTE** that the downloading of this data may be a bottleneck in the workflow speed, due to ongoing maintenance and updates of the Copernicus Climate Data Store. 
 
 ## Detailed steps
 The workflow runs the scripts in the following order:
