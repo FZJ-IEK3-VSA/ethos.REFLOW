@@ -12,6 +12,9 @@ class ConfigLoader:
         self.config_path = self.project_root / "settings" / "directory_management.json"
         self.config = self._load_config(self.config_path)
         self.data_paths = self._load_data_paths()
+        self.log_path = self.project_root / "output" / "logs"
+        if not self.log_path.exists():
+            self.log_path.mkdir(parents=True)
 
     def _load_config(self, config_path):
         with open(self.config_path, 'r') as file:
