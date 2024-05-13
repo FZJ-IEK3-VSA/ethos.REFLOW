@@ -303,7 +303,7 @@ class ERA5Downloader():
         '''
         Downloads ERA5 reanalysis data from the Copernicus Climate Data Store using the CDSApi.
         '''
-        years_to_download = 2022
+        years_to_download = [2022]
 
         for YEAR in years_to_download:
             year_path = os.path.join(self.met_data_dir, "CCI", str(YEAR))

@@ -13,7 +13,6 @@ class DownloadExclusionsData(luigi.Task):
     """
     Luigi Task to download the exclusion data.
     """
-    gadm_version = luigi.Parameter(default="41")
 
     def requires(self):
         """
@@ -25,7 +24,7 @@ class DownloadExclusionsData(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'DownloadExclusionsData_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("data", "met_data"), 'CCI', '2022', 'satellite-land-cover.2022.zip'))
     
     def run(self):
         """
@@ -98,5 +97,3 @@ class DownloadExclusionsData(luigi.Task):
         config_loader.update_data_paths()
 
         logger.info("Exclusion data download complete.")
-        with self.output().open('w') as f:
-            f.write('Exclusion data download complete.')
