@@ -15,7 +15,6 @@ __pycache__
 /output/*
 !/output/note.txt
 !/output/logs/note.txt
-!/example_workflows/aachen_technical/output/*
 
 # Include specific note.txt files in other directories
 !data/note.txt
@@ -23,6 +22,7 @@ __pycache__
 !data/exclusion_data/raw/note.txt
 !data/met_data/note.txt
 !data/project_data/note.txt
+!/example_workflows/aachen_technical/output/logs/note.txt
 
 # Miscellaneous rules
 eez_v12*
