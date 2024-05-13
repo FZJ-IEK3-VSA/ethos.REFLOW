@@ -26,13 +26,18 @@ This example workflow demonstrates how to use the REFLOW workflow manager to gen
 git clone https://jugit.fz-juelich.de/iek-3/groups/data-and-model-integration/pelser/reflow-offshore-north-sea.git
 ```
 
-2. Change into the repository directory:
+2. (Optional) Copy the contents of the "aachen_technical" directory to a new directory for easier access. This is not necessary but can be helpful for organization:
+```bash
+cp -r reflow-offshore-north-sea/example_workflows/aachen_technical_wind_potential /path/to/new/directory
+```
+
+3. Change into the repository directory:
 ```bash
 cd reflow-offshore-north-sea
 cd example_workflows/aachen_technical_wind_potential
 ```
 
-3. Create the main REFLOW python environment:
+4. Create the main REFLOW python environment:
 
 If you are using coda:
 ```bash
@@ -43,12 +48,12 @@ If you have mamba installed:
 mamba env create -f required_software/requirements-reflow.yml
 ```
 
-4. Activate the REFLOW environment:
+5. Activate the REFLOW environment:
 ```bash
-conda activate reflow
+conda activate reflow-main
 ```
 
-5. Run the workflow
+6. Run the workflow
 ```bash
 python reflow_workflow.py
 ```
@@ -74,8 +79,9 @@ The Corpernicus Climate Data Store is used to download both the ERA5 reanalysis 
 ## Detailed steps
 The workflow runs the scripts in the following order:
 1. `scripts/environment_setup/env_setup_luigi_task.py`:
-    - Create the additional python environments needed to run the eligibility analysis and placement script (GLAES) and the simulations script (ResKIT).
+    - Create the additional python environments needed to run the eligibility analysis and placement script (GLAES) and the simulations script (RESKit).
     - This script is run first to ensure that the necessary software is available when the tasks that require them are run.
+    - The script will first check if your computer has conda or mamba installed. If mamba, it will use this by default. If not, it will use conda.
 2. `scripts/data_download/project_data.py`: 
     - Downloads the national boundary data for Germany from the GADM database.
 3. `scripts/data_processing/process_project_data.py`: 

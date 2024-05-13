@@ -5,6 +5,8 @@ import requests
 import luigi
 from utils.config import ConfigLoader
 from utils.data_download import ERA5Downloader
+from scripts.environment_setup.env_setup_luigi_task import SetupEnvironments
+from scripts.data_processing.process_project_data import ProcessProjectData
 
 class DownloadMeterologicalData(luigi.Task):
     """
@@ -15,7 +17,7 @@ class DownloadMeterologicalData(luigi.Task):
         """
         This task requires the ProcessRegionBuffers task to be completed.
         """
-        return None
+        return [ProcessProjectData()]
     
     def output(self):
         """
@@ -34,8 +36,12 @@ class DownloadMeterologicalData(luigi.Task):
         config_loader = ConfigLoader()
 
         met_data_dir = config_loader.get_path("data", "met_data")
-        project_data_dir = config_loader.get_path("data", "project_data")
+        # create the met data directory if it does not exist
+        os.makedirs(met_data_dir, exist_ok=True)
 
+        project_data_dir = config_loader.get_path("data", "project_data")
+        # create the project data directory if it does not exist
+        os.makedirs(project_data_dir, exist_ok=True)
         country_settings_path = config_loader.get_path("settings", "country_settings")
 
         # configure logging

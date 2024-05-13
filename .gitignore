@@ -1,24 +1,29 @@
-.dockerignore
+# Ignore caches and non-essential files
 __pycache__
 .pytest_cache
-/data*
-/output/*
 *.png
 *.pptx
+*.log 
+
+# Ignore specific data directories
+/data*
 /example_workflows/aachen_technical/data/*
 /example_workflows/aachen_technical/output/*
 /example_workflows/aachen_technical/settings/data_paths.json
 
-# Ignore everything under the output directory
+# Ignore all contents of output but allow specific note.txt files
+/output/*
+!/output/note.txt
+!/output/logs/note.txt
+!/example_workflows/aachen_technical/output/*
+
+# Include specific note.txt files in other directories
 !data/note.txt
 !data/exclusion_data/processed/note.txt
 !data/exclusion_data/raw/note.txt
 !data/met_data/note.txt
-# Except note.txt at the root of output
-!output/note.txt
-# Except note.txt within the output/project_data
 !data/project_data/note.txt
-# and the note.txt within the output/logs
-!output/logs/note.txt
+
+# Miscellaneous rules
 eez_v12*
 /settings/data_paths.json

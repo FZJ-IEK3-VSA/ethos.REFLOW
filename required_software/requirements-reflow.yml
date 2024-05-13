@@ -14,6 +14,7 @@ dependencies:
   - pyproj
   - gdal
   - cdsapi
+  - pyrosm # for downloading OSM data
   - pip:
     - luigi
     - netcdf4

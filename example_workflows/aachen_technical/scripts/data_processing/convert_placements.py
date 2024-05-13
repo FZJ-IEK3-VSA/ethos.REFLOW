@@ -7,27 +7,26 @@ from scripts.exclusions_placements.exclusions_luigi_task import PerformEligibili
 import luigi
 import json
 
-
-config_loader = ConfigLoader()
-output_dir = config_loader.get_path("output", "geodata")
-project_settings_path = config_loader.get_path("settings", "project_settings")
-with open(project_settings_path, 'r') as file:
-    project_settings = json.load(file)
-
-# configure logging
-log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'ConvertPlacements.log')
-logger = config_loader.setup_task_logging('ConvertPlacements', log_file)
-logger.info("Starting ConvertPlacements task") 
-
 class ConvertPlacementsToEPSG4326(luigi.Task):
     def requires(self):
         return [PerformEligibiliyAnalysisPlacements()]
     
     def output(self):
-        return luigi.LocalTarget(os.path.join(output_dir, f"turbine_placements_4326.csv"))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output", "geodata"), f"turbine_placements_4326.csv"))
     
     def run(self):
         input_file_path = os.path.join(output_dir, f"turbine_placements_3035.csv")
+
+        config_loader = ConfigLoader()
+        output_dir = config_loader.get_path("output", "geodata")
+        project_settings_path = config_loader.get_path("settings", "project_settings")
+        with open(project_settings_path, 'r') as file:
+            project_settings = json.load(file)
+    
+        # configure logging
+        log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'ConvertPlacements.log')
+        logger = config_loader.setup_task_logging('ConvertPlacements', log_file)
+        logger.info("Starting ConvertPlacements task") 
 
         # Load turbine placements
         placements_df = pd.read_csv(input_file_path)
