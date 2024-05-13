@@ -83,10 +83,31 @@ To start your own new project using REFLOW, follow these steps:
 
 You can now start working on your project and push your changes to the remote repository.
 
+## Examples
+
+The example workflows are located in the `example_workflows` directory. Each example contains a README.md file with detailed instructions on how to run the workflow.
+
+We recommend starting with the Aachen technical wind potential example to get a feel for how REFLOW works.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
 
+Copyright (c) 2024 Tristan Pelser (FZJ IEK-3), Jann Michael Weinand (FZJ IEK-3), Patrick Kuckertz (FZJ IEK-3), Detlef Stolten (FZJ IEK-3)
+
+You should have received a copy of the MIT License along with this program.
+If not, see https://opensource.org/licenses/MIT
+
+## About Us
+
+<a href="https://www.fz-juelich.de/en/iek/iek-3"><img src="https://github.com/FZJ-IEK3-VSA/README_assets/blob/main/iek3-square.png?raw=True" alt="Institute image IEK-3" width="280" align="right" style="margin:0px 10px"/></a>
+
+We are the [Complex Energy System Modesl and Data Structures](https://www.fz-juelich.de/en/iek/iek-3/research/integrated-models-and-strategies/complex-energy-system-models-and-data-structures) department at the [Institute of Energy and Climate Research: Techno-economic Systems Analysis (IEK-3)](https://www.fz-juelich.de/en/iek/iek-3), belonging to the Forschungszentrum Jülich. Our interdisciplinary department's research is focusing on energy-related process and systems analyses. Data searches and system simulations are used to determine energy and mass balances, as well as to evaluate performance, emissions and costs of energy systems. The results are used for performing comparative assessment studies between the various systems. Our current priorities include the development of energy strategies, in accordance with the German Federal Government’s greenhouse gas reduction targets, by designing new infrastructures for sustainable and secure energy supply chains and by conducting cost analysis studies for integrating new technologies into future energy market frameworks.
+
 ## Acknowledgements
 
 The authors would like to thank the German Federal Government, the German State Governments, and the Joint Science Conference (GWK) for their funding and support as part of the NFDI4Ing consortium. Funded by the German Research Foundation (DFG) – 442146713, this work was also supported by the Helmholtz Association as part of the program “Energy System Design”.
+
+<p float="left">
+<a href="https://www.helmholtz.de/en/"><img src="https://www.helmholtz.de/fileadmin/user_upload/05_aktuelles/Marke_Design/logos/HG_LOGO_S_ENG_RGB.jpg" alt="Helmholtz Logo" width="200px"></a>
+</p>
