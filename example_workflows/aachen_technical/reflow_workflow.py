@@ -31,8 +31,9 @@ class MainWorkflow(luigi.WrapperTask):
 if __name__ == '__main__':
     # Set up basic logging
     config_loader = ConfigLoader()
-    
-    log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'MainWorkflow.log')
+    log_directory = os.path.join(ConfigLoader().get_path("output"), 'logs')
+    log_file = os.path.join(log_directory, 'MainWorkflow.log')
+
     config_loader.setup_global_logging(log_file)
     logging.info("Starting MainWorkflow")
 
