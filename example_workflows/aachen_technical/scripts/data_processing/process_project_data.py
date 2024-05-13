@@ -24,7 +24,10 @@ class ProcessProjectData(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'ProcessProjectData_complete.txt'))
+        output_dir = os.path.join(ConfigLoader().get_path("data", "project_data"), "MAIN_REGION_POLYGON")
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("data" "project_data"), 'MAIN_REGION_POLYGON', 'Aachen.shp'))
 
     def run(self):
         """
@@ -73,9 +76,3 @@ class ProcessProjectData(luigi.Task):
             os.makedirs(main_region_dir)
 
         place_gdf.to_file(os.path.join(main_region_dir, f'{place_short}.shp'))
-
-        ############ DO NOT CHANGE ############
-        # mark the task as complete
-        logger.info("ProcessProjectData task complete.")
-        with self.output().open('w') as file:
-            file.write('Complete')
