@@ -23,7 +23,10 @@ class DownloadMeterologicalData(luigi.Task):
         Output that signifies that the task has been completed. 
         """
         return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'DownloadMeterologicalData_complete.txt'))
-    
+        ## this creates a file that signifies that the task is complete
+        ## BETTER is to set the output to the actual files that are downloaded (but you first need to download them to know what they are!)
+        ## this will allow future workflows to check if the files exist and skip this task if they do, but also not bug out in case there is a text file which is not the actual output
+        
     def run(self):
         """
         Main logic for the task.
@@ -52,17 +55,14 @@ class DownloadMeterologicalData(luigi.Task):
         # to ensure good logging, remember to pass logger=logger into whichever class you are using
 
         ### 1. Example SIMPLE DOWNLOAD OF meteorological data raster e.g. from Global Wind Atlas or New European Wind Atlas ### 
-        # # Link to information about the data = "https://example-URL.com"
-        # api_url = "https://example-URL.com"
+        
+        # # Link to datasource info: https://globalwindatlas.info/
+        # logger.info("Downloading the New European Wind Atlas data...")
+        # api_url = "https://wps.neweuropeanwindatlas.eu/api/mesoscale-atlas/v1/get-data-bbox?southBoundLatitude=49.001844&northBoundLatitude=52.643063&westBoundLongitude=4.0979&eastBoundLongitude=10.656738&height=100&variable=wind_speed_mean"
 
-        # # specify the filename and directory to save the data
-        # filename = "example_data.tif"
-        # output_dir = os.path.join(met_data_dir, "example-datasource")
-        # local_filename = os.path.join(output_dir, filename)
-
-        # # ensure that the target directory exists
-        # if not os.path.exists(os.path.dirname(output_dir)):
-        #     os.makedirs(os.path.dirname(output_dir))
+        # # Specify the directory and file name for the downloaded data
+        # file_name = "newa_wind_speed_mean_100m.tif"
+        # file_path = os.path.join(met_data_dir, file_name)
 
         # # Perform the API request
         # response = requests.get(api_url)
@@ -70,11 +70,11 @@ class DownloadMeterologicalData(luigi.Task):
         # # Check if the request was successful
         # if response.status_code == 200:
         #     # Write the response content to a file
-        #     with open(local_filename, 'wb') as file:
+        #     with open(file_path, 'wb') as file:
         #         file.write(response.content)
-        #     logging.info("Download successful.")
+        #     logger.info(f"Download of {file_name} successful.")
         # else:
-        #     logging.error(f"Failed to download data. Status code: {response.status_code}")
+        #     logger.error(f"Failed to download data. Status code: {response.status_code}")
 
 
         ### 2. Example DOWNLOAD OF meteorological data from ERA5 API service ###
@@ -85,5 +85,7 @@ class DownloadMeterologicalData(luigi.Task):
 
         ## ASignal that the task is complete
         logger.info("Downloading Meterological Data task complete.")
+
+        ### this creates the text file - delete if you set the output to the actual files downloaded
         with self.output().open('w') as f:
             f.write('Download Meterological Data task complete.')

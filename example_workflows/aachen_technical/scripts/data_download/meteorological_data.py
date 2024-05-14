@@ -55,7 +55,7 @@ class DownloadMeterologicalData(luigi.Task):
 
         ############## 1. Download NEW EUROPEAN WIND ATLAS data ##############
         # Link to datasource info: https://globalwindatlas.info/
-        print("Downloading the New European Wind Atlas data...")
+        logger.info("Downloading the New European Wind Atlas data...")
         api_url = "https://wps.neweuropeanwindatlas.eu/api/mesoscale-atlas/v1/get-data-bbox?southBoundLatitude=49.001844&northBoundLatitude=52.643063&westBoundLongitude=4.0979&eastBoundLongitude=10.656738&height=100&variable=wind_speed_mean"
 
         # Specify the directory and file name for the downloaded data

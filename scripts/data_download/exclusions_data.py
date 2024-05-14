@@ -5,7 +5,7 @@ import zipfile
 import json
 from pathlib import Path
 from utils.config import ConfigLoader
-from utils.data_download import download_gadm_data, download_and_extract
+from utils.data_download import DownloaderUtils, ERA5Downloader
 import logging
 
 class DownloadExclusionsData(luigi.Task):
@@ -32,23 +32,36 @@ class DownloadExclusionsData(luigi.Task):
         """
         ##################### DO NOT CHANGE ######################################
 
-        #### directory management ####
-        config_loader = ConfigLoader()
-
-        raw_output_dir = config_loader.get_path("data", "exclusion_data", "raw")
-        project_data_dir = config_loader.get_path("data", "project_data")
-        project_settings_path = config_loader.get_path("settings", "project_settings")
+         #### directory management ####
+        config_loader = ConfigLoader()       
 
         log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'DownloadExclusionsData.log')
         logger = config_loader.setup_task_logging('DownloadExclusionsData', log_file)
-        logger.info("Starting DownloadExclusionsData task")
+        logger.info("Starting DownloadExclusionsData task")        
 
-        # load the list of countries
-        with open(project_settings_path, 'r') as file:
-            country_settings = json.load(file)
+        raw_data_dir = config_loader.get_path("data", "exclusion_data", "raw")
+        # create the raw data directory if it does not exist
+        os.makedirs(raw_data_dir, exist_ok=True)
 
-        countries = country_settings["countries"]
+        met_data_dir = config_loader.get_path("data", "met_data")
+        # create the met data directory if it does not exist
+        os.makedirs(met_data_dir, exist_ok=True)
+
+        # load the project settings
+        with open(config_loader.get_path("settings", "project_settings"), 'r') as file:
+            project_settings = json.load(file)
+
+        download_utils = DownloaderUtils(logger=logger)
+
+        gadm_version = project_settings["gadm_version"]
+        countries = project_settings["countries"]
         logger.info(f"List of countries: {countries}")
+
+        place_name = project_settings["OSM_region_name"]
+
+        exclusion_data_vector_paths = {}
+        exclusion_data_raster_paths = {}
+
         ###########################################################################
 
         # ############## MAIN WORKFLOW #################

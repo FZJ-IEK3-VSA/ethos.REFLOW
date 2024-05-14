@@ -7,5 +7,21 @@
     "gadm_version": 41,
     "start_year": 2000,
     "end_year": 2001,
-    "wind_speed_height": 100
+    "wind_speed_height": 100,
+    "place": "full_place_name_here",
+    "place_name_short": "short_place_name_here",
+    "GID_2": "GID_2_code_here_optional",
+    "OSM_region_name": "enter_OSM_region_name_here",
+    "landuse_exclusions": [
+        "if_any_enter_here"
+    ],
+    "nature_exclusions": [
+        "if_any_enter_here"
+    ],
+    "boundary_exclusions": [
+        "if_any_enter_here"
+    ],
+    "road_exclusions": [
+        "if_any_enter_here"
+    ]
 }
