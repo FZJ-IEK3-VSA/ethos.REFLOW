@@ -70,7 +70,7 @@ class VisualizeExclusionMaps(luigi.Task):
             ax.imshow(masked_raster, cmap=cmap, extent=extent, interpolation='nearest')
 
         # Plot the main polygon
-        aachen.boundary.plot(ax=ax, color="black", linewidth=2)
+        aachen.boundary.plot(ax=ax, color="black", linewidth=1)
 
         # Plot the placements
         placements.plot(ax=ax, color="red", markersize=12)

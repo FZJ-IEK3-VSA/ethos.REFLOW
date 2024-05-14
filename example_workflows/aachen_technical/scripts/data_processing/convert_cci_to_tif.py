@@ -6,7 +6,7 @@ import json
 import subprocess
 
 class ConvertCCItoTIF(luigi.Task):
-    year = 2016
+    year = 2022
     band_name = "lccs_class"
 
     def requires(self):

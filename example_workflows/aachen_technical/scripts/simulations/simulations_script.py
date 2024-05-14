@@ -10,12 +10,14 @@ import time
 from utils.config import ConfigLoader
 
 ############ directory management and global variables ############
+year_CCI = 2022
+
 config_loader = ConfigLoader()
 output_dir = config_loader.get_path("output")
 
 met_data_dir = config_loader.get_path("data", "met_data")
 newa_100m_path = os.path.join(met_data_dir, "newa_wind_speed_mean_100m.tif")
-esa_cci_path = os.path.join(met_data_dir, "CCI", "2016", "C3S-LC-L4-LCCS-Map-300m-P1Y-2016-v2.1.1.tif")
+esa_cci_path = os.path.join(met_data_dir, "CCI", f"{year_CCI}", f"C3S-LC-L4-LCCS-Map-300m-P1Y-{year_CCI}-v2.1.1.tif")
 project_settings_path = config_loader.get_path("settings", "project_settings")
 
 with open(project_settings_path) as file:

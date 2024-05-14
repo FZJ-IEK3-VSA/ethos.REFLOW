@@ -9,6 +9,17 @@ This example workflow demonstrates how to use the REFLOW workflow manager to gen
 4. Wind resource assessment / simulations
 5. Visualization of results and generation of output report
 
+The final output is two .png files that visualizes the wind potential in the Aachen region, as well as a report.json file that contains the results of the wind potential assessment.
+
+<div style="display: flex; justify-content: space-around;">
+    <div style="margin-right: 10px;">
+        <img src="assets/exlusions_map.png" alt="exclusion_map" width="400px">
+    </div>
+    <div style="margin-left: 10px;">
+        <img src="assets/capacity_factor_map.png" alt="capacity_factor_map" width="400px">
+    </div>
+</div>
+
 ## Getting started
 ### Prerequisites
 - A Unix-like operating system (e.g. Linux, MacOS) or Git Bash on Windows

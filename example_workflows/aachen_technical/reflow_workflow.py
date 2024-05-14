@@ -16,6 +16,7 @@ from scripts.data_processing.convert_placements import ConvertPlacementsToEPSG43
 from scripts.data_processing.convert_cci_to_tif import ConvertCCItoTIF
 from scripts.simulations.simulations_luigi_task import PerformSimulations
 from scripts.visualizations.exclusionsMap import VisualizeExclusionMaps
+from scripts.visualizations.capacity_factor_map import VisualizeCapacityFactorMaps
 
 ## The workflow will run the scripts in the above order.
 ## Since Luigi handles all the dependencies, we only need to call the final task in the workflow below.
@@ -26,7 +27,8 @@ class MainWorkflow(luigi.WrapperTask):
     """
     def requires(self):
         # First task is the download of the exclusion data
-        return [VisualizeExclusionMaps()]
+        return [VisualizeExclusionMaps(),
+                VisualizeCapacityFactorMaps()]
 
 if __name__ == '__main__':
     # Set up basic logging
