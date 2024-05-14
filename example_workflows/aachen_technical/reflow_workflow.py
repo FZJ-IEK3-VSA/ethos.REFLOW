@@ -32,6 +32,7 @@ if __name__ == '__main__':
     # Set up basic logging
     config_loader = ConfigLoader()
     log_directory = os.path.join(ConfigLoader().get_path("output"), 'logs')
+    os.makedirs(log_directory, exist_ok=True) # ensure the directory exists
     log_file = os.path.join(log_directory, 'MainWorkflow.log')
 
     config_loader.setup_global_logging(log_file)
