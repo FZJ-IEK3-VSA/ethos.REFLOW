@@ -144,8 +144,12 @@ class ConfigLoader:
     
     def setup_global_logging(self, log_file):
         """Configure global logging to capture all logs."""
-        logging.basicConfig(filename=log_file, level=logging.INFO,
-                            format='%(asctime)s:%(levelname)s:%(message)s')
+        if not logging.getLogger().hasHandlers():
+            logging.basicConfig(
+                filename=log_file,
+                level=logging.INFO,
+                format='%(asctime)s:%(levelname)s:%(message)s'
+            )
 
     def return_shp_file(self, parent_dir):
         """
