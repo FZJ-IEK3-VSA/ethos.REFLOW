@@ -87,7 +87,7 @@ You can now start working on your project and push your changes to the remote re
 
 The example workflows are located in the `example_workflows` directory. Each example contains a README.md file with detailed instructions on how to run the workflow.
 
-We recommend starting with the Aachen technical wind potential example to get a feel for how REFLOW works.
+We recommend starting with the [Aachen technical wind potential example](example_workflows/aachen_technical/) to get a feel for how REFLOW works.
 
 ## License
 
