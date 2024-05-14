@@ -1,7 +1,6 @@
 # Ignore caches and non-essential files
 __pycache__
 .pytest_cache
-*.png
 *.pptx
 *.log 
 
