@@ -90,7 +90,7 @@ The Corpernicus Climate Data Store is used to download both the ERA5 reanalysis 
 ## Detailed steps
 The workflow runs the scripts in the following order:
 1. `scripts/environment_setup/env_setup_luigi_task.py`:
-    - Create the additional python environments needed to run the eligibility analysis and placement script (GLAES) and the simulations script (RESKit).
+    - Create the additional python environments needed to run the eligibility analysis and placement script [(GLAES)](https://github.com/FZJ-IEK3-VSA/glaes) and the simulations script [(RESKit)](https://github.com/FZJ-IEK3-VSA/RESKit).
     - This script is run first to ensure that the necessary software is available when the tasks that require them are run.
     - The script will first check if your computer has conda or mamba installed. If mamba, it will use this by default. If not, it will use conda.
 2. `scripts/data_download/project_data.py`: 
