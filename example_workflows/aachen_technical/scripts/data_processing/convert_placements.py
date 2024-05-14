@@ -15,11 +15,10 @@ class ConvertPlacementsToEPSG4326(luigi.Task):
         return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output", "geodata"), f"turbine_placements_4326.csv"))
     
     def run(self):
-        input_file_path = os.path.join(output_dir, f"turbine_placements_3035.csv")
-
         config_loader = ConfigLoader()
         output_dir = config_loader.get_path("output", "geodata")
         project_settings_path = config_loader.get_path("settings", "project_settings")
+        input_file_path = os.path.join(output_dir, f"turbine_placements_3035.csv")
         with open(project_settings_path, 'r') as file:
             project_settings = json.load(file)
     

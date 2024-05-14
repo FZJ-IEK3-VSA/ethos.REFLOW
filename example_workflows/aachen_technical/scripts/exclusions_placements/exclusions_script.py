@@ -92,7 +92,9 @@ logger.info(f"Exclusion data paths:\n{formatted_exclusions_settings}")
 logger.info("Initializing the exclusion calculator...")
 
 # initialize the exclusion calculator with the main region polygon
-ec = gl.ExclusionCalculator(main_region_polygon, srs = int(project_crs.split(":")[1]), pixelRes=100, limitOne=False)
+ec = gl.ExclusionCalculator(main_region_polygon, srs=3035, pixelRes=100)
+
+#ec.excludeRegionEdge(200) # we exclude a 50m buffer around the main region polygon
 
 #### Start the exclusions
 
@@ -134,6 +136,12 @@ ec.save(os.path.join(output_dir, f"aachen_exclusions.tif"), overwrite=True)
 
 ################## 2. Distribute the turbines ####################
 
+# reload the exclusion calculator
+
+# ec = gl.ExclusionCalculator(main_region_polygon, srs=3035, pixelRes=100)
+# # load the exclusions
+# ec.excludeRasterType(os.path.join(output_dir, f"aachen_exclusions.tif"))
+
 logger.info("Distributing the turbines...")
 t0 = time.time()
 # distribute items
@@ -141,11 +149,11 @@ ec.distributeItems(separation=distance, asArea=True)  # we prevent the turbines 
 t1 = time.time()
 logger.info(f"Turbines distributed in {t1-t0} seconds.")
 ec.saveItems(os.path.join(output_dir, f"aachen_turbine_placements.shp"))
+logger.info("Turbine placements saved.")
 
-t0 = time.time()
-ec.saveAreas(os.path.join(output_dir, f"aachen_turbine_areas.shp"))
-t1 = time.time()
-logger.info(f"Turbine areas saved in {t1-t0} seconds.")
+# save the Voronoi polygons
+ec.saveAreas(os.path.join(output_dir, f"aachen_area.shp"))
+logger.info("Voronoi polygons saved.") 
 
 ###############################################################################################
 ######################### SAVE THE PLACEMENTS TO A CSV FILE ##################################

@@ -147,7 +147,9 @@ class ERA5Downloader():
         if not main_polygon_fname:
             raise ValueError("Please provide a filename for the main polygon.")
         self.main_region_polygon = os.path.join(self.config_loader.get_path("data", "project_data"), "MAIN_REGION_POLYGON", main_polygon_fname)
-        
+        # check that main region polygon CRS is EPSG:4326
+        main_region_polygon_crs = gpd.read_file(self.main_region_polygon).crs
+
         # do a check to see if the main region polygon exists
         if not os.path.exists(self.main_region_polygon):
             raise ValueError(f"Main region polygon {self.main_region_polygon} does not exist.")
@@ -170,6 +172,10 @@ class ERA5Downloader():
         Get the bounding box of the main region polygon.
         """
         polygon = gpd.read_file(self.main_region_polygon)
+        if polygon != "EPSG:4326":
+            # convert to EPSG:4326
+            self.logger.info(f"Converting {polygon} to EPSG:4326...")
+            polygon = polygon.to_crs("EPSG:4326")
         return polygon.total_bounds
 
     def convert_polygon_extent_to_ERA5(self, expanded_distance=8):

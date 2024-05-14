@@ -174,8 +174,8 @@ class ERA5_RESKitWindProccessor():
         ds_v = xr.open_dataset(os.path.join(self.raw_data_dir, str(year), f"{self.SOURCE_GROUP}.{year}.{self.height}m_v_component_of_wind.nc"))
 
         # Convert longitude for each dataset to the range -180 to 180
-        ds_u = self.convert_longitude(ds_u)
-        ds_v = self.convert_longitude(ds_v)
+        #ds_u = self.convert_longitude(ds_u)
+        #ds_v = self.convert_longitude(ds_v)
 
         # Extract and process data
         data_u = ds_u[f'u{self.height}']
