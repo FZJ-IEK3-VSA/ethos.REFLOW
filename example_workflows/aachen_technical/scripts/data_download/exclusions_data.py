@@ -24,7 +24,7 @@ class DownloadExclusionsData(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("data", "met_data"), 'CCI', '2022', 'satellite-land-cover.2022.zip'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("data", "met_data"), 'CCI', '2022', 'C3S-LC-L4-LCCS-Map-300m-P1Y-2022-v2.1.1.nc'))
     
     def run(self):
         """
