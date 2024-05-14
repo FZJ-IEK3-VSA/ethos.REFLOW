@@ -123,12 +123,15 @@ The workflow runs the scripts in the following order:
         - ensures that the latitude and longitude coordinates are in the correct format.
 9. `scripts/data_processing/convert_placements.py`:
     - Converts the turbine placements from EPSG:3035 to EPSG:4326 so that they can be used in the simulations.
-10. `scripts/simulations/simulations_luigi_task.py`:
+10. `scripts/data_processing/convert_cci_to_tif.py`:
+    - Converts the satellite land cover data from netCDF to a GEOTiff raster file.
+    - This is used in the simulations to estimate the land roughness when extrapolating the wind speed to hub height.
+11. `scripts/simulations/simulations_luigi_task.py`:
     - Runs the RESKIT simulations to estimate the wind speed at hub height for each turbine placement.
     - The RESKIT script is run in a separate python environment to the main reflow environment.
     - Generates the `wind_power_era5_2016.csv` file in the `output` directory.
     - Updates the `report.json` file in the `output` directory with the wind speed data.
-11. `scripts/visualizations/visualizations_luigi_task.py`:
+12. `scripts/visualizations/visualizations_luigi_task.py`:
     - Generates a visualization of the wind speed data using the `report.json` file.
     - Generates the `exclusions_map.png` file in the `output/visualizations` directory.
 
