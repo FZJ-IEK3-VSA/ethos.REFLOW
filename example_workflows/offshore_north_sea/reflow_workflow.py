@@ -4,11 +4,7 @@ import logging
 import os
 
 # Import the tasks
-from scripts.visualizations.exclusions_map import VisualizeExclusionMaps
-from scripts.visualizations.bathymetry import VisualizeBathymetry
-from scripts.visualizations.capacity_factor_maps import VisualizeCapacityFactorMaps
-from scripts.visualizations.annual_generation import VisualizeAnnualGenerationByCountry
-from scripts.exclusions_placements.sensitivity_luigi_task import SensitivityAnalysis
+from scripts.environment_setup.env_setup_luigi_task import SetupEnvironments
 
 class MainWorkflow(luigi.WrapperTask):
     """

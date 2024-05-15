@@ -54,12 +54,7 @@ class DownloadExclusionsData(luigi.Task):
         ###########################################################################
 
         ############## MAIN WORKFLOW #################
-        ######## 1. Download GADM data ########
-        logger.info("Downloading GADM data...")
-        for country in countries:
-            download_utils.download_gadm_data(country)
-
-        ################# 2. Download and extract the VECTOR exclusion data ##################
+        ################# 1 Download and extract the VECTOR exclusion data ##################
         logger.info("Downloading and extracting vector exclusion data...")
         
         ### 2.1. download existing wind farms from EMODnet 
@@ -147,7 +142,7 @@ class DownloadExclusionsData(luigi.Task):
         exclusion_data_vector_paths[folder] = []
         
 
-        ########### 3 Download and extract the RASTER exclusion data ###########
+        ########### 2 Download and extract the RASTER exclusion data ###########
 
         ### 3.1. download shipping lanes from EU (around 1 GB)
         # Link to datasource info: https://emodnet.ec.europa.eu/geonetwork/srv/eng/catalog.search#/metadata/74eef9c6-13fe-4630-b935-f26871c8b661

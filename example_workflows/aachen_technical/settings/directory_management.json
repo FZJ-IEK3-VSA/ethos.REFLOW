@@ -8,7 +8,6 @@
   },
   "data": {
     "exclusion_data": {
-      "_temp": "_temp",
       "raw": "raw",
       "processed": "processed"
     },

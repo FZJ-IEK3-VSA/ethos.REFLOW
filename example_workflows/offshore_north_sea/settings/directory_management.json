@@ -2,7 +2,7 @@
   "output": {
     "geodata": "geodata",
     "logs": "logs",
-    "plots": "plots",
+    "visualizations": "visualizations",
     "simulations": "simulations",
     "report": "report.json"
   },

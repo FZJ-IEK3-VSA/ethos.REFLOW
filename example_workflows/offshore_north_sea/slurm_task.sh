@@ -12,9 +12,7 @@ export OMP_NUM_ATHREADS=1
 export USE_SIMPLE_THREADED_LEVEL3=1                    
 export MKL_NUM_THREADS=1                               
 
-source ~/.bashrc
-
-bash /path/to/this/directory/scripts/environment_setup.sh                                            
+source ~/.bashrc                                  
 
 micromamba activate reflow-main
 
