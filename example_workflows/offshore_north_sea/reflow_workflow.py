@@ -5,23 +5,21 @@ import os
 
 # Import the tasks
 from scripts.environment_setup.env_setup_luigi_task import SetupEnvironments
+from scripts.visualizations.box_plot import VisualizeBoxPlot
 
 class MainWorkflow(luigi.WrapperTask):
     """
     Main workflow to run the full pipeline.
     """
     def requires(self):
-        return [SensitivityAnalysis(),
-                VisualizeExclusionMaps(),
-                VisualizeBathymetry(),
-                VisualizeCapacityFactorMaps(),
-                VisualizeAnnualGenerationByCountry()]  
+        return [VisualizeBoxPlot()]  
     
 if __name__ == '__main__':
-    # Set up basic logging
     config_loader = ConfigLoader()
-    
-    log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'MainWorkflow.log')
+    log_directory = os.path.join(ConfigLoader().get_path("output"), 'logs')
+    os.makedirs(log_directory, exist_ok=True) # ensure the directory exists
+    log_file = os.path.join(log_directory, 'MainWorkflow.log')
+
     config_loader.setup_global_logging(log_file)
     logging.info("Starting MainWorkflow")
 
