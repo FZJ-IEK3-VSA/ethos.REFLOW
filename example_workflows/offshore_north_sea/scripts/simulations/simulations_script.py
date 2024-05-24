@@ -163,7 +163,7 @@ def calculate_flh_generation(xds, placements, turbine_availablilty, array_effici
         flh = pd.Series(xds.capacity_factor[:, location]).sum()
 
         # update the FLH for the placement (including the loss factor)
-        placements.loc[match_index, f"FLH_{year}"] = flh #* total_loss_factor
+        placements.loc[match_index, f"FLH_{year}"] = flh * total_loss_factor
 
         # Calculate the generation for each turbine, Generation = FLH * Capacity
         placements.loc[match_index, f"Generation_{year}_MWh"] = (flh * placements.loc[match_index, 'capacity']) / 1000

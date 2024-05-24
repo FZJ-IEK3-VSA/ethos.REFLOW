@@ -6,13 +6,14 @@ import os
 # Import the tasks
 from scripts.environment_setup.env_setup_luigi_task import SetupEnvironments
 from scripts.visualizations.box_plot import VisualizeBoxPlot
+from scripts.visualizations.monthly_cf_distr import VisualizeMonthlyDistribution
 
 class MainWorkflow(luigi.WrapperTask):
     """
     Main workflow to run the full pipeline.
     """
     def requires(self):
-        return [VisualizeBoxPlot()]  
+        return [VisualizeMonthlyDistribution()]  
     
 if __name__ == '__main__':
     config_loader = ConfigLoader()

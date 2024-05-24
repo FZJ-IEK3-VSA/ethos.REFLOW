@@ -70,7 +70,7 @@ class VisualizeBoxPlot(luigi.Task):
         # Set plot labels and title
         plt.xlabel('Month', fontsize=14)
         plt.ylabel('Capacity Factor [ % ]', fontsize=14)
-        plt.title('Distribution of Capacity Factors by Month (2013-2023)', fontsize=16)
+        #plt.title('Distribution of Capacity Factors by Month (2013-2023)', fontsize=16)
         plt.grid(True)
 
         # Add legend
