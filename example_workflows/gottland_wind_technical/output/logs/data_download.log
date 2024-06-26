@@ -1,8 +1,0 @@
-2024-03-18 15:34:16,355:INFO:Using GADM version 41.
-2024-03-18 15:34:16,355:INFO:Downloading data for USA...
-2024-03-18 15:34:16,355:INFO:https://geodata.ucdavis.edu/gadm/gadm4.1/shp/gadm41_USA_shp.zip
-2024-03-18 15:35:16,272:INFO:Processed USA.
-2024-03-18 15:39:13,929:INFO:Using GADM version 41.
-2024-03-18 15:39:13,929:INFO:Downloading data for CYP...
-2024-03-18 15:39:13,929:INFO:https://geodata.ucdavis.edu/gadm/gadm4.1/shp/gadm41_CYP_shp.zip
-2024-03-18 15:39:52,019:INFO:Processed CYP.
