@@ -1,0 +1,28 @@
+# Ignore caches and non-essential files
+__pycache__
+.pytest_cache
+*.pptx
+*.log 
+
+# Ignore specific data directories
+/data*
+/example_workflows/aachen_technical/data/*
+/example_workflows/aachen_technical/output/*
+/example_workflows/aachen_technical/settings/data_paths.json
+
+# Ignore all contents of output but allow specific note.txt files
+/output/*
+!/output/note.txt
+!/output/logs/note.txt
+
+# Include specific note.txt files in other directories
+!data/note.txt
+!data/exclusion_data/processed/note.txt
+!data/exclusion_data/raw/note.txt
+!data/met_data/note.txt
+!data/project_data/note.txt
+!/example_workflows/aachen_technical/output/logs/note.txt
+
+# Miscellaneous rules
+eez_v12*
+/settings/data_paths.json

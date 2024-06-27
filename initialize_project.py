@@ -59,6 +59,8 @@ def main():
         os.path.join(current_directory, 'LICENSE.txt'),
         os.path.join(current_directory, '__pycache__'),
         os.path.join(current_directory, 'initialize_project.py'),
+        os.path.join(current_directory, 'CODE_OF_CONDUCT.md'),
+        os.path.join(current_directory, 'CONTRIBUTING.md'),
         os.path.join(current_directory, 'README.md'),
         os.path.join(current_directory, '.git')  
     ]
