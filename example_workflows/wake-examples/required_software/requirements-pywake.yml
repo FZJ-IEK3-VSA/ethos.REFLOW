@@ -1,0 +1,5 @@
+name: pywake
+channels:
+  - conda-forge
+dependencies:
+  - conda-forge::pywake
