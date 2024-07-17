@@ -1,21 +1,36 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+title: ETHOS.REFLOW
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
 authors:
-  - family-names: Pelser
-    given-names: Tristan
-    orcid: https://orcid.org/0009-0006-0424-4784
-  - family-names: Weinand
-    given-names: Jann Michael
-    orcid: https://orcid.org/0000-0003-2948-876X
+  - given-names: Tristan
+    family-names: Pelser
+    email: t.pelser@fz-juelich.de
+    affiliation: Forschungszentrum Jülich (ICE-2)
+    orcid: 'https://orcid.org/0009-0006-0424-4784'
+  - given-names: Jann Michael
+    family-names: Weinand
+    affiliation: Forschungszentrum Jülich (ICE-2)
+    orcid: 'https://orcid.org/0000-0003-2948-876X'
   - family-names: Kuckertz
     given-names: Patrick
-    orcid: https://orcid.org/0000-0002-2314-7107
-  - family-names: Stolten
-    given-names: Detlef
-    orcid: https://orcid.org/0000-0002-1671-3262
-title: "ETHOS.REFLOW"
+    affiliation: Forschungszentrum Jülich (ICE-2)
+    orcid: 'https://orcid.org/0000-0002-2314-7107'
+  - given-names: Detlef
+    family-names: Stolten
+    affiliation: Forschungszentrum Jülich (ICE-2)
+    orcid: 'https://orcid.org/0000-0002-1671-3262'
+repository-code: 'https://github.com/FZJ-IEK3-VSA/ethos.REFLOW'
+abstract: >-
+  REFLOW is a workflow manager tool designed to streamline
+  and automate tasks related to renewable energy potential
+  analyses. It is built with Luigi and provides an
+  automated, robust framework for data acquisition,
+  processing, land/sea eligibility analysis, technology
+  placements, simulations and visualizations. It is build
+  with transparency and reproducibility in mind.
+license: MIT
 version: 1.0.0
-identifiers:
-  - type: doi
-    value: 10.5281/zenodo.1234
-date-released: 2021-08-11
+date-released: '2024-07-14'
