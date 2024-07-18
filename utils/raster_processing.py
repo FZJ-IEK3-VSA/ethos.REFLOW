@@ -112,6 +112,58 @@ class RasterProcesser:
         with rasterio.open(output_path, "w", **out_meta) as dest:
             dest.write(summed_data)
         self.logger.info(f"Monthly rasters merged and saved to {output_path}")
+    
+    def reproject_raster(self, input_raster_path, output_dir=None, output_filename=None, target_crs=None):
+        """
+        Reads a TIFF raster and reprojects it to a given CRS.
+        
+        :param input_raster_path: Path to the input TIFF raster file.
+        :param target_crs: The target CRS to reproject the raster to (e.g., 'EPSG:4326').
+        :return: A memory file containing the reprojected raster.
+        """
+        
+        self.logger.info("Reprojecting raster...")
+        if target_crs == None:
+            target_crs = self.default_crs
+
+        with rasterio.open(input_raster_path) as src:
+            # Calculate the transformation and dimensions for the target CRS
+            transform, width, height = calculate_default_transform(
+                src.crs, target_crs, src.width, src.height, *src.bounds)
+            kwargs = src.meta.copy()
+            kwargs.update({
+                'crs': target_crs,
+                'transform': transform,
+                'width': width,
+                'height': height
+            })
+            
+            # Create a memory file for the reprojected raster
+            with rasterio.MemoryFile() as memfile:
+                with memfile.open(**kwargs) as dest:
+                    # Perform the reprojection
+                    reproject(
+                        source=rasterio.band(src, 1),
+                        destination=rasterio.band(dest, 1),
+                        src_transform=src.transform,
+                        src_crs=src.crs,
+                        dst_transform=transform,
+                        dst_crs=target_crs,
+                        resampling=Resampling.nearest)
+                    self.logger.info("Raster reprojected successfully.")
+            
+                    # Save the reprojected raster to a file
+                    if output_dir:
+                        output_path = os.path.join(output_dir, output_filename)
+                    else:
+                        output_path = os.path.join(output_filename)
+                        
+                    out_meta = dest.meta.copy()
+                    with rasterio.open(output_path, "w", **out_meta) as final_dest:
+                        final_dest.write(dest.read())
+                    
+                    self.logger.info(f"Reprojected raster saved to {output_path}")
+
 
     def reproject_clip_raster(self, input_raster_path, gdf, output_dir=None, output_filename=None):
         """
