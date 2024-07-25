@@ -32,7 +32,14 @@ class SetupEnvironments(luigi.Task):
         logger = config_loader.setup_task_logging('EnvSetup', log_file)
 
         ## run the exclusions wrapper bash script
-        result = subprocess.run(['bash', './scripts/environment_setup/env_setup.sh'], check=True, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(
+        ['bash', './scripts/environment_setup/env_setup.sh'],
+        check=True,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+        )
+        
         logger.info("STDOUT: {}".format(result.stdout.decode()))
         logger.info("STDERR: {}".format(result.stderr.decode()))
 

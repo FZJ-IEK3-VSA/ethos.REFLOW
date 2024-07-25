@@ -1,12 +1,31 @@
 #!/bin/bash
 
-# make sure to find the correct conda installation
-source /c/ProgramData/miniforge3/etc/profile.d/conda.sh
-source /c/ProgramData/miniforge3/etc/profile.d/mamba.sh
-conda activate
+# Ensure the script exits on any error
+set -e
+
+# Function to log messages
+log() {
+    echo "[`date +'%Y-%m-%dT%H:%M:%S%z'`] $1"
+}
+
+# Make sure to find the correct conda installation
+log "Sourcing Conda and Mamba initialization scripts"
+if ! source /c/ProgramData/miniforge3/etc/profile.d/conda.sh; then
+    log "Failed to source conda.sh"
+    exit 1
+fi
+
+if ! source /c/ProgramData/miniforge3/etc/profile.d/mamba.sh; then
+    log "Failed to source mamba.sh"
+    exit 1
+fi
+
+# Activate the base environment or a specific environment
+conda activate base
 
 # Base directory for requirements files
 cd required_software || exit
+ls
 
 # Paths to requirements files
 declare -A REQUIREMENTS=(
@@ -20,13 +39,13 @@ manager="mamba"
 # Function to check and use Mamba, Micromamba, or fall back to Conda
 ensure_mamba() {
     if command -v mamba >/dev/null 2>&1; then
-        echo "Mamba is available. Continuing with Mamba."
+        log "Mamba is available. Continuing with Mamba."
         manager="mamba"
     elif command -v micromamba >/dev/null 2>&1; then
-        echo "Micromamba is available. Continuing with Micromamba."
+        log "Micromamba is available. Continuing with Micromamba."
         manager="micromamba"
     else
-        echo "Neither Mamba nor Micromamba is available. Will use Conda."
+        log "Neither Mamba nor Micromamba is available. Will use Conda."
         manager="conda"
     fi
 }
@@ -36,8 +55,7 @@ ensure_mamba
 
 # Function to check if the environment already exists
 env_exists() {
-    # Check if the environment already exists
-    env_name=$1
+    local env_name=$1
     if $manager env list | grep -q "$env_name"; then
         echo "1"
     else
@@ -51,21 +69,19 @@ for env_key in "${!REQUIREMENTS[@]}"; do
 
     # Use the key directly as the environment name
     env_name=$env_key
-    echo "Checking environment: $env_name"
-    if [[ $(env_exists $env_name) -eq 1 ]]; then
-        echo "Environment $env_name already exists. Skipping creation."
+    log "Checking environment: $env_name"
+    if [[ $(env_exists "$env_name") -eq 1 ]]; then
+        log "Environment $env_name already exists. Skipping creation."
         continue
     fi
 
-    echo "Creating environment: $env_name from $file"
-    $manager env create -f $file -n $env_name
-
-    if [ $? -eq 0 ]; then
-        echo "Successfully created/updated the $env_name environment."
+    log "Creating environment: $env_name from $file"
+    if $manager env create -f "$file" -n "$env_name"; then
+        log "Successfully created/updated the $env_name environment."
     else
-        echo "Failed to create/update the $env_name environment."
+        log "Failed to create/update the $env_name environment."
         exit 1
     fi
 done
 
-echo "Environments created."
+log "Environments created."

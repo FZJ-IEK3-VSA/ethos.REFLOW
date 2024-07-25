@@ -25,8 +25,8 @@ class DownloadProjectData(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        # return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("data" "project_data"), 'gadm', 'DEU', 'gadm41_DEU', 'gadm41_DEU_2.shp'))
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'DownloadProjectData_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("data", "project_data"), 'gadm', 'DEU', 'gadm41_DEU', 'gadm41_DEU_2.shp'))
+        # return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'DownloadProjectData_complete.txt'))
     
     def run(self):
         """
@@ -65,13 +65,8 @@ class DownloadProjectData(luigi.Task):
         for country in countries:
             download_utils.download_gadm_data(country) 
 
-        # to ensure good logging, remember to pass logger=logger into whichever class you are using 
-
-        # update the project data paths
         # update data paths
         config_loader.update_data_paths()
 
         ## Signal that the task is complete
         logger.info("Project data download complete.")
-        with self.output().open('w') as f:
-            f.write('Download Project Data task complete.')
