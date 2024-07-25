@@ -5,10 +5,14 @@ __pycache__
 *.log 
 
 # Ignore specific data directories
-/data*
+/data
 /example_workflows/aachen_technical/data/*
 /example_workflows/aachen_technical/output/*
 /example_workflows/aachen_technical/settings/data_paths.json
+
+/example_workflows/offshore_north_sea/data/*
+/example_workflows/offshore_north_sea/output/*
+/example_workflows/offshore_north_sea/settings/data_paths.json
 
 # Ignore all contents of output but allow specific note.txt files
 /output/*

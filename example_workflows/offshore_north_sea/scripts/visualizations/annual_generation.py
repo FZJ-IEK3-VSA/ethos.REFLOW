@@ -9,7 +9,8 @@ from scripts.simulations.simulations_luigi_task import PerformSimulations
 
 class VisualizeAnnualGenerationByCountry(luigi.Task):
     def requires(self):
-        return [PerformSimulations()]
+        # return [PerformSimulations()]
+        return None
     
     def output(self):
         return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'visualizations', 'annual_generation_by_country.png'))
@@ -30,10 +31,22 @@ class VisualizeAnnualGenerationByCountry(luigi.Task):
         plt.rcParams['ytick.labelsize'] = 12
         
         # Define an earthy color palette
-        earthy_colors = ['#8c510a', '#d8b365', '#f6e8c3', '#5ab4ac', '#01665e', '#543005', '#bf812d', '#dfc27d']
+        earthy_colors = ['#8c510a', '#1aa675', '#f6e8c3', '#5ab4ac', '#01665e', '#543005', '#bf812d', '#dfc27d']
 
         # Creating a figure and axes for the subplots
         fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(18, 7), sharey=True)
+
+        # Country code to name mapping
+        country_name_mapping = {
+            "BEL": "Belgium",
+            "FRA": "France",
+            "SWE": "Sweden",
+            "DEU": "Germany",
+            "DNK": "Denmark",
+            "NLD": "Netherlands",
+            "NOR": "Norway",
+            "GBR": "United Kingdom"
+        }
 
         for ax, scenario in zip(axs, scenarios):
             df = pd.read_csv(os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv"))
@@ -47,19 +60,17 @@ class VisualizeAnnualGenerationByCountry(luigi.Task):
             data_for_plotting = data_by_country_year.transpose()
             data_for_plotting.index = years  # Ensure years are integers
 
-            #print(data_for_plotting.head())
-
             # Extract generation data as a list of lists
             generation_data = data_for_plotting.transpose().values.tolist()
 
-            # Extract labels for each country
-            labels = data_for_plotting.columns.tolist()
+            # Extract labels for each country (keep the 3-letter codes for processing)
+            country_codes = data_for_plotting.columns.tolist()
 
             # Plotting on the specific subplot axis
-            ax.stackplot(years, generation_data, labels=labels, colors=earthy_colors, alpha=0.8)
+            ax.stackplot(years, generation_data, labels=country_codes, colors=earthy_colors, alpha=0.8)
             ax.set_xlim(years[0], years[-1])  # Remove white space by setting x-axis limits
             ax.set_xticks(years)  # Mark every year on the x-axis
-            ax.set_title(f'{scenario.replace("_", " ").title()} Scenario')
+            ax.set_title(f'{scenario.replace("_", " ").title()} Scenario', fontsize=16)
             ax.set_xlabel('Year')
             if ax is axs[0]:  # Only add ylabel to the first subplot to avoid repetition
                 ax.set_ylabel('Generation (TWh)')  # Adjust label for TWh
@@ -69,7 +80,7 @@ class VisualizeAnnualGenerationByCountry(luigi.Task):
                 scenario_report = json.load(file)
 
             # calculate mean, min and max generation for each country
-            for country in labels:
+            for country in country_codes:
                 country_data = {
                     'mean_generation': data_by_country_year.loc[country].mean(),
                     'max_generation': data_by_country_year.loc[country].max(),
@@ -103,32 +114,31 @@ class VisualizeAnnualGenerationByCountry(luigi.Task):
                 y_positions[country] = new_value
 
             # Add country code labels to the right of the plots
-            for label, y_pos in zip(labels, y_positions.values()):
+            for code, y_pos in zip(country_codes, y_positions.values()):
+                full_label = country_name_mapping.get(code, code)
                 if scenario == "1000m_depth":
-                    if label in ["BEL", "FRA"]:
+                    if full_label in ["Belgium", "France"]:
                         continue
                     else:
-                        # Add the labels
-                        ax.text(years[1], y_pos, label, va='center', ha='right', fontsize=9, color='black', fontweight='bold')
+                        ax.text(years[1] - 0.85, y_pos, full_label, va='center', ha='left', fontsize=10, color='black', fontweight='bold')
                 elif scenario == "50m_depth":
-                    if label in ["BEL", "FRA", "SWE"]:
+                    if full_label in ["Belgium", "France", "Sweden"]:
                         continue
                     else:
-                        # Add the labels
-                        ax.text(years[1], y_pos, label, va='center', ha='right', fontsize=9, color='black', fontweight='bold')
+                        ax.text(years[1] - 0.85, y_pos, full_label, va='center', ha='left', fontsize=10, color='black', fontweight='bold')
         
         handles, labels = ax.get_legend_handles_labels()
 
-        # Filter out 'BEL' and 'FRA' from the legend
+        # Filter out 'BEL' and 'FRA' from the legend and replace with full names
         filtered_handles = []
         filtered_labels = []
         for handle, label in zip(handles, labels):
             if label not in ['BEL', 'FRA']:
                 filtered_handles.append(handle)
-                filtered_labels.append(label)
+                filtered_labels.append(country_name_mapping.get(label, label))
 
         # Add a legend outside the rightmost subplot
-        axs[1].legend(filtered_handles, filtered_labels, loc='upper left', bbox_to_anchor=(0.8, 1), title="Countries", title_fontsize=14)
+        axs[1].legend(filtered_handles, filtered_labels, loc='upper left', bbox_to_anchor=(0.7, 1), title="Countries", title_fontsize=14)
 
         plt.tight_layout(rect=[0, 0, 0.9, 1])  # Adjust the layout to make room for the legend
 

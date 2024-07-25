@@ -70,7 +70,7 @@ class DownloadExclusionsData(luigi.Task):
         exclusion_data_vector_paths[folder] = []
         
         ### 2.2. download existing military areas from EMODnet
-        # Link to datasource info: https://ows.emodnet-humanactivities.eu/geonetwork/srv/api/records/579e4a3b-95e4-48c6-8352-914ebae0ae1d/attachments/EMODnet_HA_MilitaryAreas_20221216.zip 
+        # Link to datasource info: https://ows.emodnet-humanactivities.eu/geonetwork/srv/api/records/579e4a3b-95e4-48c6-8352-914ebae0ae1d
         url = "https://ows.emodnet-humanactivities.eu/geonetwork/srv/api/records/579e4a3b-95e4-48c6-8352-914ebae0ae1d/attachments/EMODnet_HA_MilitaryAreas_20221216.zip"
         folder = "military_areas"
         download_utils.download_and_extract(url, folder)

@@ -17,7 +17,7 @@ import math
 
 class VisualizeCapacityFactorMaps(luigi.Task):
     def requires(self):
-        return [PerformSimulations()]
+        return None
     
     def output(self):
         return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'visualizations', 'capacity_factor_map.png'))
@@ -53,14 +53,14 @@ class VisualizeCapacityFactorMaps(luigi.Task):
 
         axs = axs.flatten()
 
-        plt.rcParams['axes.labelsize'] = 14  # Set font size for axis labels
-        plt.rcParams['legend.fontsize'] = 14  # Set font size for legend
+        plt.rcParams['axes.labelsize'] = 16  # Set font size for axis labels
+        plt.rcParams['legend.fontsize'] = 16  # Set font size for legend
 
         for index, scenario in enumerate(scenarios):
 
             # Load the vector data
             
-            turbine_locations = gpd.read_file(os.path.join(output_dir, f"geodata/turbine_locations_{scenario}/turbine_locations_{scenario}.shp"))
+            turbine_locations = gpd.read_file(os.path.join(output_dir, f"geodata/turbine_locations_{scenario}/default.shp"))
             turbine_areas = gpd.read_file(os.path.join(output_dir, f"geodata/turbine_areas_{scenario}.shp"))
             placements = pd.read_csv(os.path.join(output_dir, f"geodata/turbine_placements_4326_{scenario}.csv"))
             
@@ -83,7 +83,6 @@ class VisualizeCapacityFactorMaps(luigi.Task):
             turbine_areas = turbine_areas.merge(merged_points[columns_list], left_index=True, right_on='FID', how='left')
 
             # STEP 2: Calculate the % capacity factor for each year
-            print("Calculating the Capacity Factor...")
             for year in years:
                 # calculate the capacity factor for each year
                 turbine_areas[f'capacity_factor_{year}'] = (turbine_areas[f'FLH_{year}'] / 8760) * 100
@@ -96,12 +95,15 @@ class VisualizeCapacityFactorMaps(luigi.Task):
             min_mean_capacity_factor = turbine_areas['mean_capacity_factor'].min()
             max_mean_capacity_factor = turbine_areas['mean_capacity_factor'].max()
 
+            print(f"Min mean capacity factor in {scenario}: {min_mean_capacity_factor}")
+            print(f"Max mean capacity factor: {max_mean_capacity_factor}")
+
             # round the min and max capacity factors to the nearest 5
-            rounded_min_mean_capacity_factor = 45
-            rounded_max_mean_capacity_factor = 70
+            rounded_min_mean_capacity_factor = 40
+            rounded_max_mean_capacity_factor = 60
 
             # STEP 4: Plot the data
-
+            print("Plotting the data...")
             # Set global font sizes using rcParams
             plt.rcParams['axes.labelsize'] = 14  # Set font size for axis labels
             plt.rcParams['legend.fontsize'] = 14  # Set font size for legend
@@ -121,22 +123,19 @@ class VisualizeCapacityFactorMaps(luigi.Task):
             coastlines_polygon.plot(ax=axs[index], color="#b2ab8c", edgecolor="black", linewidth=0.5)
 
             turbine_areas.plot(column='mean_capacity_factor', 
-                            ax=axs[index], 
-                            legend=True,
-                            legend_kwds={
-                                'label': "Capacity Factor (%)", 
-                                'orientation': "vertical",
-                                'shrink': 0.75,
-                                },
-                            cmap=custom_cmap, 
-                            vmin=rounded_min_mean_capacity_factor, 
-                            vmax=rounded_max_mean_capacity_factor,
-                            transform=ccrs.epsg(3035))  
+                        ax=axs[index], 
+                        legend=True, 
+                        legend_kwds={'label': "Capacity Factor (%)", 'orientation': "vertical", 'shrink': 0.75},
+                        cmap=custom_cmap, 
+                        vmin=rounded_min_mean_capacity_factor, 
+                        vmax=rounded_max_mean_capacity_factor,
+                        transform=ccrs.epsg(3035))
+
             # set map limits
             axs[index].set_xlim(north_sea_polygon.total_bounds[[0,2]])
             axs[index].set_ylim(north_sea_polygon.total_bounds[[1,3]])
 
-            axs[index].set_title(f"Scenario: {scenario}")
+            axs[index].set_title(f"Scenario: {scenario}", fontsize=18)
 
             legend_handles = []
 
@@ -152,7 +151,7 @@ class VisualizeCapacityFactorMaps(luigi.Task):
                         representative_point = row.geometry.representative_point()
                         axs[index].text(representative_point.x, representative_point.y, country_code, 
                                 horizontalalignment='center', verticalalignment='center',
-                                transform=ccrs.epsg(3035), fontsize=12, color='black')
+                                transform=ccrs.epsg(3035), fontsize=14, color='black')
 
             # After all plotting commands for the subplot, add the label
             label = chr(97 + index)  # 97 is the ASCII code for 'a'
@@ -171,6 +170,9 @@ class VisualizeCapacityFactorMaps(luigi.Task):
             std_dev_cf_column_name = f'std_dev_cf_{scenario}'
             turbine_areas[std_dev_cf_column_name] = (turbine_areas[std_dev_column_name] / 8760) * 100
 
+            print(f"Min standard deviation capacity factor in {scenario}: {turbine_areas[std_dev_cf_column_name].min()}")
+            print(f"Max standard deviation capacity factor: {turbine_areas[std_dev_cf_column_name].max()}")
+
             # Plot the variability for the current scenario
             variability_plot_index = index + 2  # This will use the third (c) and fourth (d) subplot positions
 
@@ -178,13 +180,13 @@ class VisualizeCapacityFactorMaps(luigi.Task):
             coastlines_polygon.plot(ax=axs[variability_plot_index], color="#b2ab8c", edgecolor="black", linewidth=0.5)
 
             turbine_areas.plot(column=std_dev_cf_column_name, 
-                            ax=axs[variability_plot_index], 
-                            legend=True, 
-                            legend_kwds={'label': "Variability (Standard Deviation) [ CF % ]", 'orientation': "vertical", 'shrink': 0.75},
-                            cmap=custom_cmap, 
-                            vmin=6, 
-                            vmax=12,
-                            transform=ccrs.epsg(3035))
+                        ax=axs[variability_plot_index], 
+                        legend=True, 
+                        legend_kwds={'label': "Variability (Standard Deviation) [ CF % ]", 'orientation': "vertical", 'shrink': 0.75},
+                        cmap=custom_cmap, 
+                        vmin=6, 
+                        vmax=9,
+                        transform=ccrs.epsg(3035))
 
             ## plot the EEZ boundaries
             for country_code in countries:
@@ -198,7 +200,7 @@ class VisualizeCapacityFactorMaps(luigi.Task):
                         representative_point = row.geometry.representative_point()
                         axs[variability_plot_index].text(representative_point.x, representative_point.y, country_code, 
                                 horizontalalignment='center', verticalalignment='center',
-                                transform=ccrs.epsg(3035), fontsize=12, color='black')
+                                transform=ccrs.epsg(3035), fontsize=14, color='black')
             # set map limits
             axs[variability_plot_index].set_xlim(north_sea_polygon.total_bounds[[0,2]])
             axs[variability_plot_index].set_ylim(north_sea_polygon.total_bounds[[1,3]])
@@ -208,7 +210,7 @@ class VisualizeCapacityFactorMaps(luigi.Task):
             axs[variability_plot_index].text(0.02, 0.98, label, transform=axs[variability_plot_index].transAxes, fontsize=20, fontweight='bold', va='top', ha='left')
 
             # Set the title for the variability plots
-            axs[variability_plot_index].set_title(f"Variability of Scenario: {scenario}")
+            axs[variability_plot_index].set_title(f"Scenario: {scenario}", fontsize=18)
 
         # Set common labels and adjustments
         for ax in axs:

@@ -15,7 +15,7 @@ from matplotlib import cm
 
 class VisualizeBathymetry(luigi.Task):
     def requires(self):
-        return [ProcessExclusionsData()]
+        return None
     
     def output(self):
         return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'visualizations', 'bathymetry_and_wind_farms.png'))
@@ -84,7 +84,7 @@ class VisualizeBathymetry(luigi.Task):
 
         ## Adjust the colormap and normalization
         # Define the depth range and interval
-        min_depth = -700
+        min_depth = -800
         max_depth = 0
         depth_interval = 50
         levels = np.arange(min_depth, max_depth + depth_interval, depth_interval)
@@ -103,7 +103,7 @@ class VisualizeBathymetry(luigi.Task):
         sm.set_array([])
 
         # Define ticks at every 100m depth
-        tick_values = np.arange(-700, 0 + 100, 100)
+        tick_values = np.arange(-800, 0 + 100, 100)
 
         cbar = plt.colorbar(sm, ax=ax, orientation='vertical', label='Depth (m)', shrink=0.7, aspect=17, ticks=tick_values)
         # Remove minor ticks by setting them to an empty list
@@ -120,9 +120,9 @@ class VisualizeBathymetry(luigi.Task):
         # Get a subset of colors from the "tab20" colormap
         
         wind_farm_colors = [
-            "#228B22",  #green - production
-            "#FFA500",  #orange - approved/construction
-            "#7393B3"  #grey - planned
+            "#ff4500"  #production
+            "#ffd700",  #approved/construction
+            "#006400",  #planned
         ]
         
         colormap = LinearSegmentedColormap.from_list("wind_farm_colors", wind_farm_colors, N=len(wind_farm_colors))

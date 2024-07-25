@@ -3,6 +3,8 @@
         "capacity": 5500,
         "rotor_diameter": 130,
         "turbine_spacing": 1200,
-        "turbine_name": "Theoretical_Turbine"
+        "turbine_name": "Theoretical_Turbine",
+        "availability": 0.95,
+        "array_efficiency": 0.9
     }
 }
