@@ -55,7 +55,7 @@ class ProcessExclusionsData(luigi.Task):
         with open(exclusion_settings_path, 'r') as file:
             exclusion_settings = json.load(file)
 
-        ## only update the name of the file to chnage for your area of interest ##
+        ## only update the name of the file to change for your area of interest ##
         main_polygon_fname = "north_sea_polygon.shp"
         main_polygon_dir = os.path.join(config_loader.get_path("data", "project_data"), "MAIN_REGION_POLYGON")
         main_polygon_path = os.path.join(main_polygon_dir, main_polygon_fname)

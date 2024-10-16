@@ -68,7 +68,22 @@ class VisualizeExclusionMaps(luigi.Task):
         
         # Display only pixels with value 0 from the all_exclusions raster on axs[1]
         with rasterio.open(os.path.join(output_dir, f"geodata/north_sea_exclusions_{scenario}.tif")) as src:
-            extent = [src.bounds.left, src.bounds.right, src.bounds.bottom, src.bounds.top]
+            raster_extent = [src.bounds.left, src.bounds.right, src.bounds.bottom, src.bounds.top]
+
+            # Downsample the raster data by a factor of 50
+            downsample_factor = 50
+            downsampled_raster = downscale_local_mean(masked_raster, (downsample_factor, downsample_factor))
+
+            # Update the extent accordingly
+            new_extent = (
+                raster_extent[0],
+                raster_extent[0] + (raster_extent[1] - raster_extent[0]) * downsampled_raster.shape[1] / masked_raster.shape[1],
+                raster_extent[2],
+                raster_extent[2] + (raster_extent[3] - raster_extent[2]) * downsampled_raster.shape[0] / masked_raster.shape[0],
+            )
+
+            # Plot the downsampled raster
+            ax.imshow(downsampled_raster, cmap=cmap, extent=new_extent, interpolation='nearest')
             raster_img = src.read(1)
 
             # Create a masked array where only the pixels with value 0 are unmasked

@@ -77,83 +77,83 @@ exclusion_report = {
     "raster_exclusions": {}
 }
 
-# append the processed directory path to the paths in the exclusions_settings dictionary:
-for category in ["vector", "raster"]:
-    for key, value in exclusions_settings[category].items():
-        updated_paths = [os.path.join(processed_dir, path) for path in value["paths"]]
-        exclusions_settings[category][key]["paths"] = updated_paths
+# # append the processed directory path to the paths in the exclusions_settings dictionary:
+# for category in ["vector", "raster"]:
+#     for key, value in exclusions_settings[category].items():
+#         updated_paths = [os.path.join(processed_dir, path) for path in value["paths"]]
+#         exclusions_settings[category][key]["paths"] = updated_paths
 
-# perform exclusions 
-for category in ["vector", "raster"]:
-    if category == "vector":
-        for key, exclusion_info in exclusions_settings[category].items():
-            logger.info(f"Processing vector exclusion {key}...")
-            t0 = time.time()
+# # perform exclusions 
+# for category in ["vector", "raster"]:
+#     if category == "vector":
+#         for key, exclusion_info in exclusions_settings[category].items():
+#             logger.info(f"Processing vector exclusion {key}...")
+#             t0 = time.time()
 
-            for path in exclusion_info["paths"]:
-                # check if "where" is provided
-                if "where" in exclusion_info:
-                    try:
-                        ec.excludeVectorType(
-                            path,
-                            where=exclusions_settings[category][key]["where"],
-                            buffer=exclusions_settings[category][key]["buffer"],
-                            bufferMethod="area"
-                            )
-                    except Exception as e:
-                        logger.error(f"Error excluding {key} with where clause: {e}")
-                        continue
-                else:
-                    try:
-                        ec.excludeVectorType(
-                            path,
-                            buffer=exclusions_settings[category][key]["buffer"],
-                            bufferMethod="area"
-                        )
-                    except Exception as e:
-                        logger.error(f"Error excluding {key}: {e}")
-                        continue
+#             for path in exclusion_info["paths"]:
+#                 # check if "where" is provided
+#                 if "where" in exclusion_info:
+#                     try:
+#                         ec.excludeVectorType(
+#                             path,
+#                             where=exclusions_settings[category][key]["where"],
+#                             buffer=exclusions_settings[category][key]["buffer"],
+#                             bufferMethod="area"
+#                             )
+#                     except Exception as e:
+#                         logger.error(f"Error excluding {key} with where clause: {e}")
+#                         continue
+#                 else:
+#                     try:
+#                         ec.excludeVectorType(
+#                             path,
+#                             buffer=exclusions_settings[category][key]["buffer"],
+#                             bufferMethod="area"
+#                         )
+#                     except Exception as e:
+#                         logger.error(f"Error excluding {key}: {e}")
+#                         continue
 
-            t1 = time.time()
-            logger.info(f"Exclusion {key} processed in {t1-t0} seconds.")
+#             t1 = time.time()
+#             logger.info(f"Exclusion {key} processed in {t1-t0} seconds.")
 
-    elif category == "raster":
-        for key, exclusion_info in exclusions_settings[category].items():
-            logger.info(f"Processing raster exclusion {key}...")
-            t0 = time.time()
+#     elif category == "raster":
+#         for key, exclusion_info in exclusions_settings[category].items():
+#             logger.info(f"Processing raster exclusion {key}...")
+#             t0 = time.time()
 
-            for path in exclusion_info["paths"]:
-                try:
-                    ec.excludeRasterType(
-                        path,
-                        value=exclusions_settings[category][key]["value"],
-                        buffer=exclusions_settings[category][key]["buffer"],
-                        bufferMethod="area"
-                    )
-                except Exception as e:
-                    logger.error(f"Error excluding {key}: {e}")
-                    continue
+#             for path in exclusion_info["paths"]:
+#                 try:
+#                     ec.excludeRasterType(
+#                         path,
+#                         value=exclusions_settings[category][key]["value"],
+#                         buffer=exclusions_settings[category][key]["buffer"],
+#                         bufferMethod="area"
+#                     )
+#                 except Exception as e:
+#                     logger.error(f"Error excluding {key}: {e}")
+#                     continue
 
-            t1 = time.time()
-            logger.info(f"Exclusion {key} processed in {t1-t0} seconds.")
+#             t1 = time.time()
+#             logger.info(f"Exclusion {key} processed in {t1-t0} seconds.")
 
 # save the exclusions
 ec.save(os.path.join(output_dir, f"north_sea_exclusions_{scenario}.tif"), overwrite=True)
 
 ######## 2. DISTRIBUTE THE TURBINES #########
 
-logger.info("Distributing the turbines...")
-t0 = time.time()
-# distribute items
-ec.distributeItems(separation=distance, asArea=True)
-t1 = time.time()
-logger.info(f"Turbines distributed in {t1-t0} seconds.")
-ec.saveItems(os.path.join(output_dir, f"turbine_placements_{scenario}", f"turbine_placements_{scenario}.shp"))
+# logger.info("Distributing the turbines...")
+# t0 = time.time()
+# # distribute items
+# ec.distributeItems(separation=distance, asArea=True)
+# t1 = time.time()
+# logger.info(f"Turbines distributed in {t1-t0} seconds.")
+# ec.saveItems(os.path.join(output_dir, f"turbine_placements_{scenario}", f"turbine_placements_{scenario}.shp"))
 
-t0 = time.time()
-ec.saveAreas(os.path.join(output_dir, f"turbine_areas_{scenario}.shp"))
-t1 = time.time()
-logger.info(f"Voronoi polygons distributed in {t1-t0} seconds.")
+# t0 = time.time()
+# ec.saveAreas(os.path.join(output_dir, f"turbine_areas_{scenario}.shp"))
+# t1 = time.time()
+# logger.info(f"Voronoi polygons distributed in {t1-t0} seconds.")
 
 ###############################################################################################################
 #####################  SAVE THE PLACEMENTS TO A CSV FILE ##############################################

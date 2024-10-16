@@ -366,11 +366,21 @@ class VectorProcessor:
                     continue
         
                 if file_extension == '.gdb':
-                    self.gbd_clip_to_shp_file(full_path_to_vector, region_gdf, output_folder_path)
+                    try:
+                        self.gbd_clip_to_shp_file(full_path_to_vector, region_gdf, output_folder_path)
+                    except Exception as e:
+                        self.logger.error(f"Error processing {key}: {e}")
+                        continue
                 elif file_extension == '.shp':
-                    self.clip_and_save_shp_file(full_path_to_vector, region_gdf, output_folder_path)
+                    try:
+                        self.clip_and_save_shp_file(full_path_to_vector, region_gdf, output_folder_path)
+                    except Exception as e:
+                        self.logger.error(f"Error processing {key}: {e}")
+                        continue
                 else:
                     self.logger.info(f"Unsupported file format for {key}: {file_extension}")
+                    continue
+
 
     def extract_subpolygon(self, vector_data, attribute, value):
         """

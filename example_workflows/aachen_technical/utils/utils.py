@@ -132,5 +132,36 @@ def populate_exclusion_data_paths(base_dir, exclusion_data_paths, file_exts=None
 
     return exclusion_data_paths
 
+def raster_to_polygons(raster_path, value=None):
+    """
+    Convert raster to polygons. Optionally, only extract polygons where the raster has a specific value.
     
+    Parameters:
+    -----------
+    raster_path : str
+        Path to the raster file.
+    value : int or float, optional
+        Value to filter the polygons. Only polygons where the raster has this value will be extracted.
+    
+    Returns:
+    --------
+    geoms : list of shapely.geometry.Polygon
+        List of polygon geometries extracted from the raster.
+    """
+    geoms = []
+    with rasterio.open(raster_path) as src:
+        image = src.read(1)  # Read the first band
+        
+        # Create a mask based on the value if provided
+        if value is not None:
+            mask = image == value
+        else:
+            mask = None
+        
+        # Extract shapes (polygons) from the raster
+        for geom, val in rasterio.features.shapes(image, mask=mask, transform=src.transform):
+            # Convert to shapely geometry and append to the list
+            geoms.append(shape(geom))
+    
+    return geoms    
 

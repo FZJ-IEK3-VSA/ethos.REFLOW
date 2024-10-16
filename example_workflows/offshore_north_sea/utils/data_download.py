@@ -171,8 +171,9 @@ class ERA5Downloader():
         """
         polygon = gpd.read_file(self.main_region_polygon)
         return polygon.total_bounds
+    
 
-    def convert_polygon_extent_to_ERA5(self, expanded_distance=8):
+    def convert_polygon_extent_to_ERA5(self, expanded_distance=10):
         """
         Converts a bounding box to an extent that can be used for the ERA5 API. 
         Expands the bounding box by the specified distance in degrees.
@@ -200,13 +201,14 @@ class ERA5Downloader():
 
         return formatted_extent
     
-    def download_ERA5_data(self, expanded_distance=8):
+    def download_ERA5_data(self, expanded_distance=10):
         '''
         Downloads ERA5 reanalysis data from the Copernicus Climate Data Store using the CDSApi.
         '''
         years_to_download = np.arange(self.start_year, self.end_year + 1, 1)
 
         area_to_download = self.convert_polygon_extent_to_ERA5(expanded_distance)
+        self.logger.info(f"Downloading ERA5 data for the area: {area_to_download}")
 
         wind_data_types = self.era5_config["ERA5_WIND_DATA_TYPES"]
 

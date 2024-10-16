@@ -22,6 +22,7 @@ class ConfigLoader:
     def _load_data_paths(self):
         """
         Load the data_paths.json file if it exists, otherwise create a default structure.
+        Handle the case where the file is empty or contains invalid JSON.
         """
         data_paths_file = self.project_root / "settings" / "data_paths.json"
         if not data_paths_file.exists():
@@ -32,8 +33,16 @@ class ConfigLoader:
                 json.dump(default_data_paths, file, indent=4)
             return default_data_paths
         else:
-            with open(data_paths_file, 'r') as file:
-                return json.load(file)
+            try:
+                with open(data_paths_file, 'r') as file:
+                    content = file.read().strip()
+                    if not content:  # Check if file is empty
+                        logging.warning(f"{data_paths_file} is empty. Returning default data paths.")
+                        return {}
+                    return json.loads(content)
+            except json.JSONDecodeError:
+                logging.error(f"Invalid JSON format in {data_paths_file}. Returning default data paths.")
+                return {}
 
     def get_path(self, *keys):
         path_accumulator = self.project_root
