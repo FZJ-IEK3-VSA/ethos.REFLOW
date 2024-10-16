@@ -19,7 +19,7 @@ We highly recommend starting with the example workflow to get a feel for how REF
 To run this analysis, follow these steps:
 1. Clone this repository to your local machine using:
     ```bash
-    git clone https://jugit.fz-juelich.de/iek-3/groups/data-and-model-integration/pelser/reflow.git
+    git clone https://github.com/FZJ-IEK3-VSA/ethos.REFLOW.git
     ```
 
 2. Navigate to the example project directory:
