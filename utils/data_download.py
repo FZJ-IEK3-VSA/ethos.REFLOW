@@ -199,7 +199,6 @@ class ERA5Downloader():
         # do a check to see if the main region polygon exists
         if not os.path.exists(self.main_region_polygon):
             raise ValueError(f"Main region polygon {self.main_region_polygon} does not exist.")
-            logger.error(f"Main region polygon {self.main_region_polygon} does not exist.")
 
         ## open settings files
         self.project_settings_path = self.config_loader.get_path("settings", "project_settings")
@@ -248,14 +247,16 @@ class ERA5Downloader():
 
         return formatted_extent
     
-    def download_ERA5_data(self, expanded_distance=8):
+    def download_ERA5_data(self, expanded_distance=8, year=None):
         '''
         Downloads ERA5 reanalysis data from the Copernicus Climate Data Store using the CDSApi.
         '''
-        years_to_download = np.arange(self.start_year, self.end_year + 1, 1)
+        if year:
+            years_to_download = [year]
+        else:
+            years_to_download = np.arange(self.start_year, self.end_year + 1, 1)
 
         area_to_download = self.convert_polygon_extent_to_ERA5(expanded_distance)
-
         wind_data_types = self.era5_config["ERA5_WIND_DATA_TYPES"]
 
         for YEAR in years_to_download:
@@ -283,14 +284,15 @@ class ERA5Downloader():
                         t0 = time.time()
                         c = cdsapi.Client(url = self.era5_config["ERA5_ENDPOINT"], key = self.era5_config["ERA5_API_KEY"])
                         c.retrieve(SOURCE,
-                                {'product_type': 'reanalysis',
-                                    'area': area_to_download,
-                                    'variable': [VARIABLE,],
-                                    'year': str(YEAR),
+                                {'product_type': ['reanalysis'],
+                                    'variable': VARIABLE,
+                                    'year': [str(YEAR)],
                                     'month': months,
                                     'day': days,
                                     'time': hours,
-                                    'format': 'netcdf',
+                                    'data_format': 'netcdf',
+                                    'download_format': 'unarchived',
+                                    'area': area_to_download,
                                     },
                                     OUTPUT
                                 )
@@ -299,9 +301,9 @@ class ERA5Downloader():
                     except Exception as e:
                         self.logger.error(f"Failed to download {VARIABLE} for {YEAR}. Error: {str(e)}")
 
-    def download_CCI_data(self, expanded_distance=8):
+    def download_CCI_data(self, expanded_distance=10):
         '''
-        Downloads ERA5 reanalysis data from the Copernicus Climate Data Store using the CDSApi.
+        Downloads satellite land use data from the Copernicus Climate Data Store using the CDSApi.
         '''
         years_to_download = [2022]
 
@@ -329,7 +331,7 @@ class ERA5Downloader():
                     c.retrieve(SOURCE,
                             {
                                 'year': str(YEAR),
-                                'version': 'v2.1.1',
+                                'version': 'v2_1_1',
                                 'variable': 'all',
                                 'format': 'zip',
                                 },
