@@ -35,7 +35,7 @@ To start your own new project using REFLOW, follow these steps:
 
 1. Clone this repository to your local machine using:
     ```bash
-    git clone https://jugit.fz-juelich.de/iek-3/groups/data-and-model-integration/pelser/reflow.git
+    git clone https://github.com/FZJ-IEK3-VSA/ethos.REFLOW.git
     ```
 
 2. **Initialize a new Project:** Navigate to the **main REFLOW repo (this repo)** and run the initialize_project.py script by executing:
