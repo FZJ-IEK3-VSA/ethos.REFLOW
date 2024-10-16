@@ -50,7 +50,7 @@ class ERA5_RESKitWindProccessor():
         if filename.endswith('.nc') and filename.startswith(self.SOURCE_GROUP):
             year_in_filename = filename.split('.')[1]
             if year_in_filename != str(year):
-                print(f"Warning: Year in filename {filename} does not match source_year {year}")
+                self.logger.warning(f"Warning: Year in filename {filename} does not match source_year {year}")
                 return None
             variable = filename.split('.')[2]
             return variable
@@ -169,34 +169,61 @@ class ERA5_RESKitWindProccessor():
         '''
         Process the ERA5 wind data.  
         '''
+        self.logger.info(f"Starting wind data processing for year {year}.")
+
         # Load datasets as xarray Datasets
+        self.logger.info(f"Loading u and v wind component datasets for year {year}.")
         ds_u = xr.open_dataset(os.path.join(self.raw_data_dir, str(year), f"{self.SOURCE_GROUP}.{year}.{self.height}m_u_component_of_wind.nc"))
         ds_v = xr.open_dataset(os.path.join(self.raw_data_dir, str(year), f"{self.SOURCE_GROUP}.{year}.{self.height}m_v_component_of_wind.nc"))
 
-        # Convert longitude for each dataset to the range -180 to 180
-        #ds_u = self.convert_longitude(ds_u)
-        #ds_v = self.convert_longitude(ds_v)
+        # Check if 'time' or 'valid_time' exists in the dataset and use accordingly
+        time_coord_u = 'time' if 'time' in ds_u.coords else 'valid_time'
+        time_coord_v = 'time' if 'time' in ds_v.coords else 'valid_time'
+
+        if time_coord_u != 'time' or time_coord_v != 'time':
+            self.logger.warning(f"'time' not found in dataset for year {year}, using 'valid_time' instead.")
 
         # Extract and process data
+        self.logger.info(f"Extracting u and v wind components for year {year}.")
         data_u = ds_u[f'u{self.height}']
         data_v = ds_v[f'v{self.height}']
+
+        self.logger.info(f"Calculating wind speed and direction for year {year}.")
         wind_speed = self.process_wind_speed(data_u.values, data_v.values)
         wind_dir = self.process_wind_direction(data_u.values, data_v.values)
 
-        # Wrap processed data in xarray.DataArray, preserving geographical coordinates
+        # Ensure that the time coordinate matches the DataArray dimensions, renaming 'valid_time' to 'time'
+        self.logger.info(f"Renaming 'valid_time' to 'time' in the dataset for year {year}.")
+        if time_coord_u == 'valid_time':
+            ds_u = ds_u.rename({'valid_time': 'time'})
+        if time_coord_v == 'valid_time':
+            ds_v = ds_v.rename({'valid_time': 'time'})
+
+        # Create DataArray for wind speed and direction with "time" as the coordinate
+        self.logger.info(f"Creating wind speed DataArray for year {year}.")
         wind_speed_da = xr.DataArray(wind_speed, dims=['time', 'latitude', 'longitude'],
                                     coords={'time': ds_u['time'], 'latitude': ds_u['latitude'], 'longitude': ds_u['longitude']})
+        
+        self.logger.info(f"Creating wind direction DataArray for year {year}.")
         wind_dir_da = xr.DataArray(wind_dir, dims=['time', 'latitude', 'longitude'],
                                 coords={'time': ds_v['time'], 'latitude': ds_v['latitude'], 'longitude': ds_v['longitude']})
 
+        self.logger.info(f"Creating target directories for processed data for year {year}.")
         create_target_directories(self.output_dir, year)
         
         # Write output datasets
+        self.logger.info(f"Saving processed wind speed data to NetCDF for year {year}.")
         filename = f"{self.SOURCE_GROUP}.{year}.{self.height}m_wind_speed.processed.nc"
         self.make_windvar_nc(ds_u, filename, wind_speed_da, year, is_winddir=False)
 
+        self.logger.info(f"Saving processed wind direction data to NetCDF for year {year}.")
         filename = f"{self.SOURCE_GROUP}.{year}.{self.height}m_wind_direction.processed.nc"
         self.make_windvar_nc(ds_u, filename, wind_dir_da, year, is_winddir=True)
 
         # Copy the other files
+        self.logger.info(f"Processing other non-wind component files for year {year}.")
         self.process_other_files(year)
+
+        self.logger.info(f"Wind data processing for year {year} completed.")
+
+    
