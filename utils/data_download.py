@@ -259,47 +259,54 @@ class ERA5Downloader():
         area_to_download = self.convert_polygon_extent_to_ERA5(expanded_distance)
         wind_data_types = self.era5_config["ERA5_WIND_DATA_TYPES"]
 
+        # Extract the source and variables
+        SOURCE = wind_data_types[0][0]  # Assumes all variables come from the same source (e.g., "reanalysis-era5-single-levels")
+        VARIABLES = [item[1] for item in wind_data_types]  # List of all variables
+
         for YEAR in years_to_download:
             year_path = os.path.join(self.met_data_dir, "ERA5", "raw", str(YEAR))
             os.makedirs(year_path, exist_ok=True)
             self.logger.info(f"Processing {YEAR}...")
 
-            # access the settings from the config file
+            # Access the settings from the config file
             months = self.era5_config["ERA5_SETTINGS"]["months_to_download"]
             days = self.era5_config["ERA5_SETTINGS"]["days_to_download"]
             hours = self.era5_config["ERA5_SETTINGS"]["hours_to_download"]
 
-            for item in wind_data_types:
-                SOURCE, VARIABLE = item
-                filename = f"{SOURCE}.{YEAR}.{VARIABLE}.nc"
-                OUTPUT = os.path.join(year_path, filename)
+            # Construct the output file name for the combined request
+            filename = f"{SOURCE}.{YEAR}.combined_variables.nc"
+            OUTPUT = os.path.join(year_path, filename)
 
-                if os.path.exists(OUTPUT):
-                    self.logger.info(f"ERA5 data for {YEAR} already exists. Skipping...")
-                    continue
-                else:
-                    try:
-                        # download and save the data using ERA5 cdsapi
-                        self.logger.info(f"Downloading {VARIABLE} for {YEAR}...")
-                        t0 = time.time()
-                        c = cdsapi.Client(url = self.era5_config["ERA5_ENDPOINT"], key = self.era5_config["ERA5_API_KEY"])
-                        c.retrieve(SOURCE,
-                                {'product_type': ['reanalysis'],
-                                    'variable': VARIABLE,
-                                    'year': [str(YEAR)],
-                                    'month': months,
-                                    'day': days,
-                                    'time': hours,
-                                    'data_format': 'netcdf',
-                                    'download_format': 'unarchived',
-                                    'area': area_to_download,
-                                    },
-                                    OUTPUT
-                                )
-                        t1 = time.time()
-                        self.logger.info(f"Downloaded {VARIABLE} in {t1-t0} seconds.")
-                    except Exception as e:
-                        self.logger.error(f"Failed to download {VARIABLE} for {YEAR}. Error: {str(e)}")
+            if os.path.exists(OUTPUT):
+                self.logger.info(f"ERA5 data for {YEAR} already exists. Skipping...")
+                continue
+            else:
+                try:
+                    # Prepare the API request parameters, now including all variables
+                    request_params = {
+                        'product_type': ['reanalysis'],
+                        'variable': VARIABLES,  # Send all variables as a list
+                        'year': [str(YEAR)],
+                        'month': months,
+                        'day': days,
+                        'time': hours,
+                        'data_format': 'netcdf',
+                        'download_format': 'unarchived',
+                        'area': area_to_download,
+                    }
+
+                    # Log the exact API request details
+                    self.logger.info(f"API Request for {YEAR}: {request_params}")
+
+                    # Download and save the data using ERA5 cdsapi
+                    self.logger.info(f"Downloading combined variables for {YEAR}...")
+                    t0 = time.time()
+                    c = cdsapi.Client(url=self.era5_config["ERA5_ENDPOINT"], key=self.era5_config["ERA5_API_KEY"])
+                    c.retrieve(SOURCE, request_params, OUTPUT)
+                    t1 = time.time()
+                    self.logger.info(f"Downloaded combined variables in {t1-t0} seconds.")
+                except Exception as e:
+                    self.logger.error(f"Failed to download data for {YEAR}. Error: {str(e)}")
 
     def download_CCI_data(self, expanded_distance=10):
         '''
