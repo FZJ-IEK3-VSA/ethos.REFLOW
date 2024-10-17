@@ -131,4 +131,3 @@ def populate_exclusion_data_paths(base_dir, exclusion_data_paths, file_exts=None
         exclusion_data_paths[key] = found_files
 
     return exclusion_data_paths
-

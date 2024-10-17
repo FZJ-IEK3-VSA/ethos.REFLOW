@@ -4,7 +4,7 @@ import numpy as np
 import json
 import xarray as xr
 from utils.config import ConfigLoader
-from utils.utils import check_files_exist, create_target_directories
+from utils.utils import create_target_directories
 
 
 class ERA5_RESKitWindProccessor():
@@ -144,6 +144,88 @@ class ERA5_RESKitWindProccessor():
         # Close the reference dataset
         ref_ds.close()
 
+    # def process_other_files(self, year):
+    #     """
+    #     Converts latitute and then moves processed files that are not u_component or v_component to the target directory.
+    #     """
+    #     year = str(year)
+    #     for filename in os.listdir(os.path.join(self.raw_data_dir, year)):
+    #         if filename.endswith('.nc') and 'u_component' not in filename and 'v_component' not in filename:
+    #             # construct the full file path
+    #             file_path = os.path.join(self.raw_data_dir, year, filename)
+    #             # load the dataset
+    #             ds = xr.open_dataset(file_path)
+    #             # convert the longitude if necessary
+    #             ds_processed = self.convert_longitude(ds)
+    #             # construct the target file path
+    #             target_path = os.path.join(self.output_dir, year, filename.rsplit('.', 1)[0] + ".processed.nc")
+    #             # save the processed dataset
+    #             ds_processed.to_netcdf(target_path)
+    #             # ensure resources are released
+    #             ds.close()
+    #             ds_processed.close()
+
+    # def process_wind(self, year):
+    #     '''
+    #     Process the ERA5 wind data.  
+    #     '''
+    #     self.logger.info(f"Starting wind data processing for year {year}.")
+
+    #     # Load datasets as xarray Datasets
+    #     self.logger.info(f"Loading u and v wind component datasets for year {year}.")
+    #     ds_u = xr.open_dataset(os.path.join(self.raw_data_dir, str(year), f"{self.SOURCE_GROUP}.{year}.{self.height}m_u_component_of_wind.nc"))
+    #     ds_v = xr.open_dataset(os.path.join(self.raw_data_dir, str(year), f"{self.SOURCE_GROUP}.{year}.{self.height}m_v_component_of_wind.nc"))
+
+    #     # Check if 'time' or 'valid_time' exists in the dataset and use accordingly
+    #     time_coord_u = 'time' if 'time' in ds_u.coords else 'valid_time'
+    #     time_coord_v = 'time' if 'time' in ds_v.coords else 'valid_time'
+
+    #     if time_coord_u != 'time' or time_coord_v != 'time':
+    #         self.logger.warning(f"'time' not found in dataset for year {year}, using 'valid_time' instead.")
+
+    #     # Extract and process data
+    #     self.logger.info(f"Extracting u and v wind components for year {year}.")
+    #     data_u = ds_u[f'u{self.height}']
+    #     data_v = ds_v[f'v{self.height}']
+
+    #     self.logger.info(f"Calculating wind speed and direction for year {year}.")
+    #     wind_speed = self.process_wind_speed(data_u.values, data_v.values)
+    #     wind_dir = self.process_wind_direction(data_u.values, data_v.values)
+
+    #     # Ensure that the time coordinate matches the DataArray dimensions, renaming 'valid_time' to 'time'
+    #     self.logger.info(f"Renaming 'valid_time' to 'time' in the dataset for year {year}.")
+    #     if time_coord_u == 'valid_time':
+    #         ds_u = ds_u.rename({'valid_time': 'time'})
+    #     if time_coord_v == 'valid_time':
+    #         ds_v = ds_v.rename({'valid_time': 'time'})
+
+    #     # Create DataArray for wind speed and direction with "time" as the coordinate
+    #     self.logger.info(f"Creating wind speed DataArray for year {year}.")
+    #     wind_speed_da = xr.DataArray(wind_speed, dims=['time', 'latitude', 'longitude'],
+    #                                 coords={'time': ds_u['time'], 'latitude': ds_u['latitude'], 'longitude': ds_u['longitude']})
+        
+    #     self.logger.info(f"Creating wind direction DataArray for year {year}.")
+    #     wind_dir_da = xr.DataArray(wind_dir, dims=['time', 'latitude', 'longitude'],
+    #                             coords={'time': ds_v['time'], 'latitude': ds_v['latitude'], 'longitude': ds_v['longitude']})
+
+    #     self.logger.info(f"Creating target directories for processed data for year {year}.")
+    #     create_target_directories(self.output_dir, year)
+        
+    #     # Write output datasets
+    #     self.logger.info(f"Saving processed wind speed data to NetCDF for year {year}.")
+    #     filename = f"{self.SOURCE_GROUP}.{year}.{self.height}m_wind_speed.processed.nc"
+    #     self.make_windvar_nc(ds_u, filename, wind_speed_da, year, is_winddir=False)
+
+    #     self.logger.info(f"Saving processed wind direction data to NetCDF for year {year}.")
+    #     filename = f"{self.SOURCE_GROUP}.{year}.{self.height}m_wind_direction.processed.nc"
+    #     self.make_windvar_nc(ds_u, filename, wind_dir_da, year, is_winddir=True)
+
+    #     # Copy the other files
+    #     self.logger.info(f"Processing other non-wind component files for year {year}.")
+    #     self.process_other_files(year)
+
+    #     self.logger.info(f"Wind data processing for year {year} completed.")
+
     def process_wind(self, year):
         '''
         Process the ERA5 wind data from a single combined file.  
@@ -206,24 +288,35 @@ class ERA5_RESKitWindProccessor():
         """
         Process other variables (blh, t2m, sp) from the combined file and save them separately.
         """
+        # Mapping of variable names to more descriptive output names
+        var_name_mapping = {
+            'sp': 'surface_pressure',
+            'blh': 'boundary_layer_height',
+            't2m': '2m_temperature'
+        }
+
         variables_to_process = ['blh', 't2m', 'sp']
-        
+
         for var in variables_to_process:
             self.logger.info(f"Processing variable {var} for year {year}.")
+            
             # Extract the data for the variable
             data = ds[var]
 
             # Create a new xarray DataArray
             da = xr.DataArray(data.values, dims=['time', 'latitude', 'longitude'],
-                              coords={'time': ds['time'], 'latitude': ds['latitude'], 'longitude': ds['longitude']},
-                              name=var)
+                            coords={'time': ds['time'], 'latitude': ds['latitude'], 'longitude': ds['longitude']},
+                            name=var)
 
-            # Construct the filename for the processed file
-            output_name = f"{self.SOURCE_GROUP}.{year}.{var}.processed.nc"
+            # Get the descriptive output name for the variable
+            descriptive_name = var_name_mapping.get(var, var)
+
+            # Construct the filename for the processed file with descriptive names
+            output_name = f"{self.SOURCE_GROUP}.{year}.{descriptive_name}.processed.nc"
             target_path = os.path.join(self.output_dir, str(year), output_name)
 
             # Save the processed data to a NetCDF file
-            self.logger.info(f"Saving processed {var} data to {target_path}.")
+            self.logger.info(f"Saving processed {var} data as {descriptive_name} to {target_path}.")
             da.to_netcdf(target_path)
         
         self.logger.info(f"Processing of other variables completed for year {year}.")

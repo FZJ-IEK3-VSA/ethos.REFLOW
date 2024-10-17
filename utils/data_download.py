@@ -246,7 +246,7 @@ class ERA5Downloader():
         formatted_extent = [lat_max_corrected, lon_min_corrected, lat_min_corrected, lon_max_corrected]
 
         return formatted_extent
-    
+
     def download_ERA5_data(self, expanded_distance=8, year=None):
         '''
         Downloads ERA5 reanalysis data from the Copernicus Climate Data Store using the CDSApi.
@@ -338,7 +338,7 @@ class ERA5Downloader():
                     c.retrieve(SOURCE,
                             {
                                 'year': str(YEAR),
-                                'version': 'v2_1_1',
+                                'version': 'v2.1.1',
                                 'variable': 'all',
                                 'format': 'zip',
                                 },

@@ -12,6 +12,8 @@ class ConfigLoader:
         self.config_path = self.project_root / "settings" / "directory_management.json"
         self.config = self._load_config(self.config_path)
         self.data_paths = self._load_data_paths()
+        self.log_path = self.project_root / "output" / "logs"
+        self.log_path.mkdir(parents=True, exist_ok=True)
 
     def _load_config(self, config_path):
         with open(self.config_path, 'r') as file:
@@ -20,6 +22,7 @@ class ConfigLoader:
     def _load_data_paths(self):
         """
         Load the data_paths.json file if it exists, otherwise create a default structure.
+        Handle the case where the file is empty or contains invalid JSON.
         """
         data_paths_file = self.project_root / "settings" / "data_paths.json"
         if not data_paths_file.exists():
@@ -30,8 +33,16 @@ class ConfigLoader:
                 json.dump(default_data_paths, file, indent=4)
             return default_data_paths
         else:
-            with open(data_paths_file, 'r') as file:
-                return json.load(file)
+            try:
+                with open(data_paths_file, 'r') as file:
+                    content = file.read().strip()
+                    if not content:  # Check if file is empty
+                        logging.warning(f"{data_paths_file} is empty. Returning default data paths.")
+                        return {}
+                    return json.loads(content)
+            except json.JSONDecodeError:
+                logging.error(f"Invalid JSON format in {data_paths_file}. Returning default data paths.")
+                return {}
 
     def get_path(self, *keys):
         path_accumulator = self.project_root
@@ -142,8 +153,12 @@ class ConfigLoader:
     
     def setup_global_logging(self, log_file):
         """Configure global logging to capture all logs."""
-        logging.basicConfig(filename=log_file, level=logging.INFO,
-                            format='%(asctime)s:%(levelname)s:%(message)s')
+        if not logging.getLogger().hasHandlers():
+            logging.basicConfig(
+                filename=log_file,
+                level=logging.INFO,
+                format='%(asctime)s:%(levelname)s:%(message)s'
+            )
 
     def return_shp_file(self, parent_dir):
         """
