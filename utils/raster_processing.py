@@ -10,6 +10,7 @@ import geopandas as gpd
 import json
 from utils.config import ConfigLoader
 
+gpd.options.io_engine = "fiona"
 
 class RasterProcessor:
     def __init__(self, logger=None):

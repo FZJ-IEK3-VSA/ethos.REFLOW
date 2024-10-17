@@ -1,25 +1,20 @@
 import os
 import time 
 import logging
-import numpy as np
-import rasterio
 from pyproj import Transformer
-from shapely.geometry import box, Polygon, MultiPolygon, LineString, Point, GeometryCollection
-from rasterio.merge import merge
-from rasterio.warp import calculate_default_transform, reproject, Resampling
-from rasterio.mask import mask
+from shapely.geometry import box, Polygon, MultiPolygon
 import geopandas as gpd
 import pandas as pd
 import time
 import json
 from utils.config import ConfigLoader
-from utils.utils import check_files_exist, create_target_directories, rename_files_in_folder
+from utils.utils import check_files_exist, rename_files_in_folder
 import fiona
 import logging
-from collections import Counter
 import fiona
-from fiona.crs import from_epsg
-import xarray as xr
+
+# set geopandas to use the fiona library
+gpd.options.io_engine = "fiona"
 
 class VectorProcessor:
     def __init__(self, logger=None):

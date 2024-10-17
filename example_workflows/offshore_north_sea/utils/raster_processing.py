@@ -2,17 +2,17 @@ import os
 import logging
 import numpy as np
 import rasterio
-from shapely.geometry import box
+from shapely.geometry import box, shape
 from rasterio.merge import merge
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.mask import mask
 import geopandas as gpd
 import json
 from utils.config import ConfigLoader
-from utils.utils import check_files_exist, create_target_directories
 
+gpd.options.io_engine = "fiona"
 
-class RasterProcesser:
+class RasterProcessor:
     def __init__(self, logger=None):
         """
         Initializes the RasterProcessor with a the CRS.
@@ -113,6 +113,58 @@ class RasterProcesser:
             dest.write(summed_data)
         self.logger.info(f"Monthly rasters merged and saved to {output_path}")
 
+
+    def reproject_raster(self, input_raster_path, output_dir=None, output_filename=None, target_crs=None):
+        """
+        Reads a TIFF raster and reprojects it to a given CRS.
+        
+        :param input_raster_path: Path to the input TIFF raster file.
+        :param target_crs: The target CRS to reproject the raster to (e.g., 'EPSG:4326').
+        :return: A memory file containing the reprojected raster.
+        """
+        
+        self.logger.info("Reprojecting raster...")
+        if target_crs == None:
+            target_crs = self.default_crs
+
+        with rasterio.open(input_raster_path) as src:
+            # Calculate the transformation and dimensions for the target CRS
+            transform, width, height = calculate_default_transform(
+                src.crs, target_crs, src.width, src.height, *src.bounds)
+            kwargs = src.meta.copy()
+            kwargs.update({
+                'crs': target_crs,
+                'transform': transform,
+                'width': width,
+                'height': height
+            })
+            
+            # Create a memory file for the reprojected raster
+            with rasterio.MemoryFile() as memfile:
+                with memfile.open(**kwargs) as dest:
+                    # Perform the reprojection
+                    reproject(
+                        source=rasterio.band(src, 1),
+                        destination=rasterio.band(dest, 1),
+                        src_transform=src.transform,
+                        src_crs=src.crs,
+                        dst_transform=transform,
+                        dst_crs=target_crs,
+                        resampling=Resampling.nearest)
+                    self.logger.info("Raster reprojected successfully.")
+            
+                    # Save the reprojected raster to a file
+                    if output_dir:
+                        output_path = os.path.join(output_dir, output_filename)
+                    else:
+                        output_path = os.path.join(output_filename)
+                        
+                    out_meta = dest.meta.copy()
+                    with rasterio.open(output_path, "w", **out_meta) as final_dest:
+                        final_dest.write(dest.read())
+                    
+                    self.logger.info(f"Reprojected raster saved to {output_path}")
+
     def reproject_clip_raster(self, input_raster_path, gdf, output_dir=None, output_filename=None):
         """
         Reads a TIFF raster, reprojects it to a given CRS, clips it to the extent of a GeoPandas DataFrame,
@@ -169,7 +221,7 @@ class RasterProcesser:
                     final_dest.write(out_image)
                 self.logger.info(f"Reprojected and clipped raster saved to {output_path}")
 
-    def process_and_save_bathymetry(self, bathymetry_path_dict, main_region_polygon, bbox, filename=None):
+    def process_and_save_bathymetry(self, bathymetry_path_dict, bbox, main_region_polygon=None, filename=None):
         """
         Processes bathymetry raster files by clipping to a bounding box, merging, reprojecting, and clipping to a GeoDataFrame extent.
     
@@ -206,9 +258,18 @@ class RasterProcesser:
     
         # Reproject, clip and save the final raster
         final_output_path = os.path.join(bathymetry_output_dir, filename)
-        self.reproject_clip_raster(merged_raster_path, main_region_polygon, output_dir=bathymetry_output_dir, output_filename=filename)
+        if main_region_polygon is not None:
+            self.logger.info("Reprojecting and clipping final bathymetry raster to the vector polygon of the region...")
+            self.reproject_clip_raster(merged_raster_path, main_region_polygon, output_dir=bathymetry_output_dir, output_filename=filename)
+        else:
+            self.logger.info("Reprojecting final bathymetry raster...")
+            self.reproject_raster(merged_raster_path, output_dir=bathymetry_output_dir, output_filename=filename)
     
         self.logger.info(f"Final bathymetry raster processed and saved to {final_output_path}")
+        os.remove(merged_raster_path)
+
+        for key, path in bathymetry_path_dict.items():
+            os.remove(os.path.join(bathymetry_output_dir, key + ".tif"))
 
     
     def process_and_save_shipping_lanes(self, input_paths, main_region_polygon, filename=None):
@@ -216,9 +277,7 @@ class RasterProcesser:
         Processes shipping lanes raster files by clipping to a bounding box, merging, reprojecting, and clipping to a GeoDataFrame extent.
     
         :param input_paths: List of paths to the monthly shipping lanes raster files.
-        :param crs: Target Coordinate Reference System to use for the datasets.
         :param main_region_polygon: GeoDataFrame representing the study region.
-        :param output_folder: Folder where the final processed raster will be saved.
         :param filename: Name of the saved raster file.
         """
 
@@ -239,3 +298,75 @@ class RasterProcesser:
     
         final_output_path = os.path.join(shipping_output_dir, filename)
         self.logger.info(f"Annual shipping lanes raster processed and saved to {final_output_path}")
+
+        # delete the unprojected merged raster
+        os.remove(merged_raster_path)
+
+    def raster_to_polygons(self, raster_path, value=None, scale_factor=None):
+        """
+        Convert raster to polygons. Optionally, only extract polygons where the raster has a specific value.
+        
+        Parameters:
+        -----------
+        raster_path : str
+            Path to the raster file.
+        value : int or float, optional
+            Value to filter the polygons. Only polygons where the raster has this value will be extracted.
+        scale_factor: int, optional
+            Factor by which to reduce the resolution (default is 10 for reducing 100m to 1km).
+        
+        Returns:
+        --------
+        geoms : list of shapely.geometry.Polygon
+            List of polygon geometries extracted from the raster.
+        """
+        geoms = []
+        
+        with rasterio.open(raster_path) as src:
+            # Original resolution
+            image = src.read(1)  # Read the first band
+            
+            if scale_factor:
+                # Calculate the new shape (downsampled resolution)
+                new_shape = (int(src.height / scale_factor), int(src.width / scale_factor))
+                
+                # Resample the image data to reduce resolution
+                resampled_image = src.read(
+                    1, 
+                    out_shape=new_shape,
+                    resampling=Resampling.nearest  # You can also use Resampling.average for averaging
+                )
+                
+                # Adjust transform to match the new resolution
+                new_transform = src.transform * src.transform.scale(
+                    (src.width / resampled_image.shape[-1]),  # Scale for width
+                    (src.height / resampled_image.shape[-2])   # Scale for height
+                )
+                
+                # Print diagnostics about the resampled raster
+                print(f"Original size: {src.height}x{src.width}, Resampled size: {new_shape}")
+                print(f"Resampled raster min: {resampled_image.min()}, max: {resampled_image.max()}")
+                print(f"Unique values in resampled raster: {np.unique(resampled_image)}")
+                
+            else:
+                resampled_image = image
+                new_transform = src.transform
+                
+                # Print diagnostics about the original raster
+                print(f"Original size: {src.height}x{src.width}")
+                print(f"Raster min: {image.min()}, max: {image.max()}")
+                print(f"Unique values in original raster: {np.unique(image)}")
+                
+            # Create a mask based on the value if provided
+            if value is not None:
+                mask = resampled_image == value
+                print(f"Mask applied for value {value}. Number of matching pixels: {np.sum(mask)}")
+            else:
+                mask = None
+            
+            # Extract shapes (polygons) from the resampled raster
+            for geom, val in rasterio.features.shapes(resampled_image, mask=mask, transform=new_transform):
+                # Convert to shapely geometry and append to the list
+                geoms.append(shape(geom))
+        
+        return geoms
