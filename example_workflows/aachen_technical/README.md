@@ -31,7 +31,7 @@ The final output is two .png files that visualizes the wind potential in the Aac
 - A Copernicus Climate Data Store API key added to the `era5_settings.json` file (see below). [Register here.](https://cds.climate.copernicus.eu/#!/home)
 
 
-### Installation and running the workflow
+### Initial installation
 1. Clone the repository:
 ```bash
 git clone https://jugit.fz-juelich.de/iek-3/groups/data-and-model-integration/pelser/reflow-offshore-north-sea.git
@@ -59,12 +59,28 @@ If you have mamba installed:
 mamba env create -f required_software/requirements-reflow.yml
 ```
 
-5. Activate the REFLOW environment:
+
+### Before running the workflow
+
+1. Add your Corpernicus API key in the `era5_settings.json` file before running the workflow. This key is required to download the data from the Copernicus Climate Data Store. You can obtain a free API key by [registering on the Copernicus website](https://cds.climate.copernicus.eu/#!/home). In the `era5_settings.json` file, replace the placeholder "ERA5_API_KEY" with your API key that you receive after registering.
+
+2. Update paths to your `conda.sh` file. 
+
+    2.1. Find the path to your *conda.sh* file. The installation directory of your conda manager can be found by typing `which conda` in your bash terminal. The *conda.sh* file is usually located in  `path/to/conda/installation/etc/profile.d/conda.sh`
+
+    2.2. Copy this path and add replace the conda.sh paths with your path in the following files:
+    * scripts/environment_setup/env_setup.sh
+    * scripts/exclusions_placements/exclusions_placements_wrapper.sh
+    * scripts/simulations/simulations_wrapper.sh
+
+
+### Running the workflow
+1. Activate the REFLOW environment:
 ```bash
 conda activate reflow-main
 ```
 
-6. Run the workflow
+2. Run the workflow
 ```bash
 python reflow_workflow.py
 ```
