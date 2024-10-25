@@ -65,10 +65,13 @@ mamba env create -f required_software/requirements-reflow.yml
 1. Add your Corpernicus API key in the `era5_settings.json` file before running the workflow. This key is required to download the data from the Copernicus Climate Data Store. You can obtain a free API key by [registering on the Copernicus website](https://cds.climate.copernicus.eu/#!/home). In the `era5_settings.json` file, replace the placeholder "ERA5_API_KEY" with your API key that you receive after registering.
 
 2. Update paths to your `conda.sh` file. 
+If you have a `~/.bashrc` file you can skip the next steps as the bash scripts will find this for you. 
+
+    **If you dont have a `~/.bashrc` file:**
 
     2.1. Find the path to your *conda.sh* file. The installation directory of your conda manager can be found by typing `which conda` in your bash terminal. The *conda.sh* file is usually located in  `path/to/conda/installation/etc/profile.d/conda.sh`
 
-    2.2. Copy this path and add replace the conda.sh paths with your path in the following files:
+    2.2. Copy this path and add replace the `source ~/.bashrc` line with `source /path/to/your/conda/install/` in the following files:
     * scripts/environment_setup/env_setup.sh
     * scripts/exclusions_placements/exclusions_placements_wrapper.sh
     * scripts/simulations/simulations_wrapper.sh
