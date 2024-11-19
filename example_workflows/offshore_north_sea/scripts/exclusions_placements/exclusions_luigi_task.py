@@ -21,7 +21,7 @@ class PerformEligibiliyAnalysisPlacements(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'PerformEligibiliyAnalysisPlacements_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'completed_tasks', 'PerformEligibiliyAnalysisPlacements_complete.txt'))
     
     def run(self):
         """
@@ -29,13 +29,14 @@ class PerformEligibiliyAnalysisPlacements(luigi.Task):
         """
         #### directory management ####
         config_loader = ConfigLoader()
-
+      
         # configure logging
         log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'PerformEligibiliyAnalysisPlacements.log')
-        logger = config_loader.setup_task_logging('PerformEligibiliyAnalysisPlacements', log_file)
-
-        ## run the exclusions wrapper bash script
-        subprocess.run(['bash', './scripts/exclusions_placements/exclusions_placements_wrapper.sh'], check=True, shell=True)
+        logger = config_loader.setup_task_logging('PerformEligibiliyAnalysisPlacements', log_file)        
+        
+        result = subprocess.run(['/usr/bin/bash', './scripts/exclusions_placements/exclusions_placements_wrapper.sh'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        logger.info(f"STDOUT: {result.stdout}")
+        logger.info(f"STDERR: {result.stderr}")
 
         ############ DO NOT CHANGE ############
         # mark the task as complete

@@ -18,12 +18,12 @@ class PerformSimulations(luigi.Task):
         """
         return [ConvertAndExtractPlacements(),
                 ProcessERA5WindData()]
-    
+
     def output(self):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'PerformSimulations_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'completed_tasks', 'PerformSimulations_complete.txt'))
     
     def run(self):
         """
@@ -36,8 +36,10 @@ class PerformSimulations(luigi.Task):
         log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'PerformSimulations.log')
         logger = config_loader.setup_task_logging('PerformSimulations', log_file)
 
-        ## run the exclusions wrapper bash script
-        subprocess.run(['bash', './scripts/simulations/simulations_wrapper.sh'], check=True, shell=True)
+        result = subprocess.run(['/usr/bin/sbatch', './scripts/simulations/simulations_wrapper.sh'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        
+        logger.info(f"STDOUT: {result.stdout}")
+        logger.info(f"STDERR: {result.stderr}")
 
         ############ DO NOT CHANGE ############
         # mark the task as complete

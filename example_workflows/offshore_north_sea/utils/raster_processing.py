@@ -6,13 +6,14 @@ from shapely.geometry import box, shape
 from rasterio.merge import merge
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.mask import mask
+from rasterio.enums import Resampling
+import rasterio.features
 import geopandas as gpd
 import json
 from utils.config import ConfigLoader
 
-gpd.options.io_engine = "fiona"
 
-class RasterProcessor:
+class RasterProcesser:
     def __init__(self, logger=None):
         """
         Initializes the RasterProcessor with a the CRS.
@@ -113,7 +114,6 @@ class RasterProcessor:
             dest.write(summed_data)
         self.logger.info(f"Monthly rasters merged and saved to {output_path}")
 
-
     def reproject_raster(self, input_raster_path, output_dir=None, output_filename=None, target_crs=None):
         """
         Reads a TIFF raster and reprojects it to a given CRS.
@@ -164,6 +164,7 @@ class RasterProcessor:
                         final_dest.write(dest.read())
                     
                     self.logger.info(f"Reprojected raster saved to {output_path}")
+
 
     def reproject_clip_raster(self, input_raster_path, gdf, output_dir=None, output_filename=None):
         """
@@ -221,7 +222,7 @@ class RasterProcessor:
                     final_dest.write(out_image)
                 self.logger.info(f"Reprojected and clipped raster saved to {output_path}")
 
-    def process_and_save_bathymetry(self, bathymetry_path_dict, bbox, main_region_polygon=None, filename=None):
+    def process_and_save_bathymetry(self, bathymetry_path_dict, main_region_polygon, bbox, filename=None):
         """
         Processes bathymetry raster files by clipping to a bounding box, merging, reprojecting, and clipping to a GeoDataFrame extent.
     
@@ -258,18 +259,9 @@ class RasterProcessor:
     
         # Reproject, clip and save the final raster
         final_output_path = os.path.join(bathymetry_output_dir, filename)
-        if main_region_polygon is not None:
-            self.logger.info("Reprojecting and clipping final bathymetry raster to the vector polygon of the region...")
-            self.reproject_clip_raster(merged_raster_path, main_region_polygon, output_dir=bathymetry_output_dir, output_filename=filename)
-        else:
-            self.logger.info("Reprojecting final bathymetry raster...")
-            self.reproject_raster(merged_raster_path, output_dir=bathymetry_output_dir, output_filename=filename)
+        self.reproject_raster(merged_raster_path, output_dir=bathymetry_output_dir, output_filename=filename)
     
         self.logger.info(f"Final bathymetry raster processed and saved to {final_output_path}")
-        os.remove(merged_raster_path)
-
-        for key, path in bathymetry_path_dict.items():
-            os.remove(os.path.join(bathymetry_output_dir, key + ".tif"))
 
     
     def process_and_save_shipping_lanes(self, input_paths, main_region_polygon, filename=None):
@@ -277,7 +269,9 @@ class RasterProcessor:
         Processes shipping lanes raster files by clipping to a bounding box, merging, reprojecting, and clipping to a GeoDataFrame extent.
     
         :param input_paths: List of paths to the monthly shipping lanes raster files.
+        :param crs: Target Coordinate Reference System to use for the datasets.
         :param main_region_polygon: GeoDataFrame representing the study region.
+        :param output_folder: Folder where the final processed raster will be saved.
         :param filename: Name of the saved raster file.
         """
 
@@ -294,13 +288,10 @@ class RasterProcessor:
         self.merge_monthly_rasters(input_paths, merged_raster_path)
     
         # Reproject the raster and clip to the North Sea EEZ after merging
-        self.reproject_clip_raster(merged_raster_path, main_region_polygon, shipping_output_dir, filename)
+        self.reproject_raster(merged_raster_path, shipping_output_dir, filename)
     
         final_output_path = os.path.join(shipping_output_dir, filename)
         self.logger.info(f"Annual shipping lanes raster processed and saved to {final_output_path}")
-
-        # delete the unprojected merged raster
-        os.remove(merged_raster_path)
 
     def raster_to_polygons(self, raster_path, value=None, scale_factor=None):
         """

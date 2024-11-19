@@ -24,7 +24,7 @@ class ProcessProjectData(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'ProcessProjectData_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'completed_tasks', 'ProcessProjectData_complete.txt'))
 
     def run(self):
         """
@@ -81,27 +81,64 @@ class ProcessProjectData(luigi.Task):
         north_sea_processed.to_file(output_filepath)
         logger.info(f"Saved merged and flattened vector to {output_filepath}")
 
+        #### 2. save the polygons for each country
+        # load the eez polygon shapefile
+
+        # Load the North Sea polygon 
+        north_sea_path = os.path.join(project_data_dir, "MAIN_REGION_POLYGON", "north_sea_polygon.shp")
+        north_sea_polygon = gpd.read_file(north_sea_path)
+
+        eez_path = os.path.join(project_data_dir, "World_EEZ_v12_20231025", "eez_v12.shp")
+        eez_data = gpd.read_file(eez_path)
+
+        # Ensure CRS compatibility and reproject if needed
+        if eez_data.crs != crs:
+            logger.info("Reprojecting EEZ data to match project CRS")
+            eez_data = eez_data.to_crs(crs)
+
+        national_eez_dir = os.path.join(project_data_dir, "national_EEZ")
+        os.makedirs(national_eez_dir, exist_ok=True)
+
+        # Extract, clip, and save each country's EEZ
+        for country_code in countries:
+            country_eez = eez_data[eez_data["ISO_TER1"] == country_code]
+            
+            if country_eez.empty:
+                logger.warning(f"No EEZ found for country code {country_code}")
+                continue
+
+            # Clip the country's EEZ to the North Sea polygon
+            country_eez_clipped = gpd.overlay(country_eez, north_sea_polygon, how='intersection')
+
+            if country_eez_clipped.empty:
+                logger.warning(f"No intersection found for {country_code} within the North Sea region.")
+                continue
+
+            # Save the clipped EEZ polygon
+            country_eez_path = os.path.join(national_eez_dir, f"{country_code}_eez.shp")
+            country_eez_clipped.to_file(country_eez_path)
+            logger.info(f"Saved clipped EEZ for {country_code} to {country_eez_path}")
 
         ###### 2. Create the coastal buffers ######
-        # 1. process all the country shapefiles
-        logger.info("Processing coastal buffers")
-        all_coastlines, all_coastal_buffers = vector_processor.clip_buffer_merge_vector_data(country_paths, north_sea_processed, buffer_distance)
+        # # 1. process all the country shapefiles
+        # logger.info("Processing coastal buffers")
+        # all_coastlines, all_coastal_buffers = vector_processor.clip_buffer_merge_vector_data(country_paths, north_sea_processed, buffer_distance)
 
-        #2. save the coastline polygons
-        os.makedirs(os.path.join(project_data_dir, "north_sea_coasts"), exist_ok=True)
-        coastlines_path = os.path.join(project_data_dir, "north_sea_coasts", "north_sea_coastlines.shp")
-        all_coastlines.to_file(coastlines_path)
-        logger.info(f"Saved coastlines to {coastlines_path}")
+        # #2. save the coastline polygons
+        # os.makedirs(os.path.join(project_data_dir, "north_sea_coasts"), exist_ok=True)
+        # coastlines_path = os.path.join(project_data_dir, "north_sea_coasts", "north_sea_coastlines.shp")
+        # all_coastlines.to_file(coastlines_path)
+        # logger.info(f"Saved coastlines to {coastlines_path}")
 
-        #3. save the processed polygons
-        os.makedirs(os.path.join(processed_data_dir, "north_sea_coastal_buffers"), exist_ok=True)
-        # Save GeoDataFrames to shapefiles
-        buffers_path = os.path.join(processed_data_dir, "north_sea_coastal_buffers", f"north_sea_coastal_buffers_{buffer_distance // 1000}km.shp")
-        all_coastal_buffers.to_file(buffers_path)
-        logger.info(f"Saved coastal buffers to {buffers_path}")
+        # #3. save the processed polygons
+        # os.makedirs(os.path.join(processed_data_dir, "north_sea_coastal_buffers"), exist_ok=True)
+        # # Save GeoDataFrames to shapefiles
+        # buffers_path = os.path.join(processed_data_dir, "north_sea_coastal_buffers", f"north_sea_coastal_buffers_{buffer_distance // 1000}km.shp")
+        # all_coastal_buffers.to_file(buffers_path)
+        # logger.info(f"Saved coastal buffers to {buffers_path}")
 
-        # update data paths
-        config_loader.update_data_paths()
+        # # update data paths
+        # config_loader.update_data_paths()
 
         ############ DO NOT CHANGE ############
         # mark the task as complete

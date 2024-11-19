@@ -8,6 +8,7 @@ declare -A REQUIREMENTS=(
     ["reflow-main"]="requirements-reflow.yml"
     ["reskit"]="requirements-reskit.yml"
     ["glaes"]="requirements-glaes.yml"
+    ["reflow-plotting"]="requirements-plotting.yml"
 )
 
 # Set the package manager to use
@@ -73,3 +74,5 @@ for env_key in "${!REQUIREMENTS[@]}"; do
 done
 
 echo "To activate the main environment, use: micromamba activate $ENV_NAME"
+
+which bash

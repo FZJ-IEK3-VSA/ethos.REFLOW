@@ -1,10 +1,16 @@
-#!/bin/bash
+#!/usr/bin/bash
+
+echo "Starting the script"
+
+source ~/.bashrc
 
 # Activate the Glaes conda environment
-source activate glaes
+mamba activate glaes
 
 # Execute the Python task
 python -m scripts.exclusions_placements.sensitivity_script "$@"
 
 # Deactivate the environment
-conda activate reflow-main
+mamba activate reflow-main
+
+echo "Finished!"

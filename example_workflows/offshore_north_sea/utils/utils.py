@@ -41,6 +41,7 @@ def rename_files_in_folder(folder_path):
                 os.rename(original_filepath, new_filepath)
                 print(f"Renamed '{filename}' to '{normalized_filename}' in '{root}'")
 
+
 def create_target_directories(output_dir, year):
     """
     Create the target directories for the year.
@@ -131,3 +132,24 @@ def populate_exclusion_data_paths(base_dir, exclusion_data_paths, file_exts=None
         exclusion_data_paths[key] = found_files
 
     return exclusion_data_paths
+
+def calculate_weibull_params(wind_speed_data):
+    """
+    Fits a Weibull distribution to wind speed data and returns the shape and scale parameters.
+
+    Parameters
+    ----------
+    wind_speed_data : array-like
+        Wind speed data for which Weibull parameters are to be calculated.
+
+    Returns
+    -------
+    shape : float
+        Weibull shape parameter (k).
+    scale : float
+        Weibull scale parameter (λ).
+    """
+    wind_speed_data = wind_speed_data[np.isfinite(wind_speed_data)]
+    shape, loc, scale = stats.weibull_min.fit(wind_speed_data, floc=0)  # Setting location to zero
+    return shape, scale
+

@@ -29,7 +29,7 @@ class ProcessExclusionsData(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'ProcessExclusionsData_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'completed_tasks', 'ProcessExclusionsData_complete.txt'))
 
     def run(self):
         """
@@ -55,7 +55,7 @@ class ProcessExclusionsData(luigi.Task):
         with open(exclusion_settings_path, 'r') as file:
             exclusion_settings = json.load(file)
 
-        ## only update the name of the file to change for your area of interest ##
+        ## only update the name of the file to chnage for your area of interest ##
         main_polygon_fname = "north_sea_polygon.shp"
         main_polygon_dir = os.path.join(config_loader.get_path("data", "project_data"), "MAIN_REGION_POLYGON")
         main_polygon_path = os.path.join(main_polygon_dir, main_polygon_fname)
@@ -64,11 +64,11 @@ class ProcessExclusionsData(luigi.Task):
         ############## MAIN WORKFLOW #################
         #### 1. Process all the vector exclusion data
 
-        with open(os.path.join(raw_data_dir, "exclusion_data_vector_paths.json"), 'r') as file:
-            vector_path_dict = json.load(file)
+        # with open(os.path.join(raw_data_dir, "exclusion_data_vector_paths.json"), 'r') as file:
+        #     vector_path_dict = json.load(file)
 
-        # iterate through all the raw data, clip the datasets to the main polygon and save
-        vector_processor.clip_and_save_vector_datasets(vector_path_dict, main_polygon_path)
+        # # iterate through all the raw data, clip the datasets to the main polygon and save
+        # vector_processor.clip_and_save_vector_datasets(vector_path_dict, main_polygon_path)
 
         #### 2. Process all the raster exclusion data
 
@@ -80,7 +80,7 @@ class ProcessExclusionsData(luigi.Task):
 
         main_polygon = gpd.read_file(main_polygon_path)
         
-        bbox = vector_processor.calculate_and_transform_bbox(main_polygon, expand_size=0.5)
+        bbox = vector_processor.calculate_and_transform_bbox(main_polygon, expand_size=3)
         
         logger.info(f"Bounding box for the main region: {bbox}")
 

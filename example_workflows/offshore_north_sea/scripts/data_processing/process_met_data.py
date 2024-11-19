@@ -20,7 +20,7 @@ class ProcessERA5WindData(luigi.Task):
         """
         Output that signifies that the task has been completed. 
         """
-        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'ProcessERA5WindData_complete.txt'))
+        return luigi.LocalTarget(os.path.join(ConfigLoader().get_path("output"), 'logs', 'completed_tasks', 'ProcessERA5WindData_complete.txt'))
     
     def run(self):
         """

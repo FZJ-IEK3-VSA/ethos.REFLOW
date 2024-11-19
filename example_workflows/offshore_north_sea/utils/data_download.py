@@ -32,54 +32,6 @@ class DownloaderUtils():
         with open(self.era5_settings_path, 'r') as file:
             self.era5_config = json.load(file)
 
-
-    def download_file(self, url, folder_name, filename=None):
-        """
-        Downloads a file from the given URL to the specified folder.
-        """
-        folder = os.path.join(self.raw_output_dir, folder_name)
-        
-        # Ensure the folder exists
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        
-        # Determine the filename
-        if not filename:
-            filename = url.split('/')[-1] or "default_filename.zip"
-        local_filename = os.path.join(folder, filename)
-        
-        # Download the file
-        try:
-            self.logger.info(f"Downloading {url} to {local_filename}...")
-            with requests.get(url, stream=True) as r:
-                r.raise_for_status()
-                with open(local_filename, 'wb') as f:
-                    for chunk in r.iter_content(chunk_size=8192):
-                        f.write(chunk)
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Failed to download {url}. Error: {e}")
-            return None
-        
-        self.logger.info(f"File downloaded to {local_filename}")
-        return local_filename
-
-    def extract_file(self, filepath, folder):
-        """
-        Checks if the file at 'filepath' is a zip file and extracts it to 'folder'.
-        """
-        # Check if the file is a zip file and extract
-        if zipfile.is_zipfile(filepath):
-            try:
-                with zipfile.ZipFile(filepath, 'r') as zip_ref:
-                    zip_ref.extractall(folder)
-                os.remove(filepath)
-                self.logger.info(f"Extracted {filepath} to {folder}")
-            except zipfile.BadZipFile as e:
-                self.logger.error(f"Failed to extract {filepath}. Error: {e}")
-                return None
-        else:
-            self.logger.info(f"No extraction needed for {filepath}")
-
     def download_and_extract(self, url, folder_name, filename=None):
         """
         Downloads a file from the given URL to the specified folder.
@@ -150,7 +102,7 @@ class DownloaderUtils():
         zip_path = f"gadm{self.gadm_version}_{country_abrv}_shp.zip"
         
         # Download the ZIP file
-        response = requests.get(url, timeout=30)
+        response = requests.get(url)
         if response.status_code == 200:
             with open(zip_path, 'wb') as file:
                 file.write(response.content)
@@ -307,46 +259,3 @@ class ERA5Downloader():
                     self.logger.info(f"Downloaded combined variables in {t1-t0} seconds.")
                 except Exception as e:
                     self.logger.error(f"Failed to download data for {YEAR}. Error: {str(e)}")
-
-    def download_CCI_data(self, expanded_distance=10):
-        '''
-        Downloads satellite land use data from the Copernicus Climate Data Store using the CDSApi.
-        '''
-        years_to_download = [2022]
-
-        for YEAR in years_to_download:
-            year_path = os.path.join(self.met_data_dir, "CCI", str(YEAR))
-            os.makedirs(year_path, exist_ok=True)
-            self.logger.info(f"Processing {YEAR}...")
-
-            SOURCE = 'satellite-land-cover'
-
-            filename = f"{SOURCE}.{YEAR}.zip"
-            OUTPUT = os.path.join(year_path, filename)
-
-            downloader_utils = DownloaderUtils(logger=self.logger)
-
-            if os.path.exists(OUTPUT):
-                self.logger.info(f"CCI data for {YEAR} already exists. Skipping...")
-                continue
-            else:
-                try:
-                    # download and save the data using Corpernicus cdsapi
-                    self.logger.info(f"Downloading {SOURCE} for {YEAR}...")
-                    t0 = time.time()
-                    c = cdsapi.Client(url = self.era5_config["ERA5_ENDPOINT"], key = self.era5_config["ERA5_API_KEY"])
-                    c.retrieve(SOURCE,
-                            {
-                                'year': str(YEAR),
-                                'version': 'v2.1.1',
-                                'variable': 'all',
-                                'format': 'zip',
-                                },
-                                OUTPUT
-                            )
-                    t1 = time.time()
-                    self.logger.info(f"Downloaded {SOURCE} in {t1-t0} seconds.")
-                    downloader_utils.extract_file(OUTPUT, year_path)
-                except Exception as e:
-                    self.logger.error(f"Failed to download {SOURCE} for {YEAR}. Error: {str(e)}")
-                    

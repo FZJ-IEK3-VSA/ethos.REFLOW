@@ -3,8 +3,11 @@
         "capacity": 15000,
         "rotor_diameter": 236,
         "turbine_spacing": 2360,
-        "turbine_spacing_downwind": "SET_TURBINE_SPACING_DOWNWIND_AS_INTEGER_IN_METERS",
-        "turbine_spacing_crosswind": "SET_TURBINE_SPACING_CROSSWIND_AS_INTEGER_IN_METERS",
+        "turbine_availability_50m_depth": 0.92,
+        "turbine_availability_1000m_depth": 0.87,
+        "array_efficiency": 0.88,
+        "cut_in_wind_speed": 3,
+        "cut_out_wind_speed": 31,
         "turbine_name": "Vestas V236-15MW"
     },
     "solar": {

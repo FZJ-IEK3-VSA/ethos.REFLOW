@@ -120,9 +120,9 @@ class VisualizeBathymetry(luigi.Task):
         # Get a subset of colors from the "tab20" colormap
         
         wind_farm_colors = [
-            "#ff4500"  #production
-            "#ffd700",  #approved/construction
-            "#006400",  #planned
+            "#3e705f",  # green
+            "#FFA500",  # orange 
+            "#ff6961"   # red 
         ]
         
         colormap = LinearSegmentedColormap.from_list("wind_farm_colors", wind_farm_colors, N=len(wind_farm_colors))

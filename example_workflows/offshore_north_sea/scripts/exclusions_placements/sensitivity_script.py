@@ -129,6 +129,7 @@ for category in ["vector", "raster"]:
 
                 bathymetry_scenarios = {
                     "1000m_depth": "[--1000)",
+                    "750m_depth": "[--750)",
                     "50m_depth": "[--50)"        
                     }
                 for scenario, max_depth in bathymetry_scenarios.items():
@@ -192,3 +193,4 @@ report_path = os.path.join(output, f"sensitivity_analysis.json")
 # Save the updated report back to the JSON file
 with open(report_path, 'w') as file:
     json.dump(sensitivity_report, file, indent=4)
+

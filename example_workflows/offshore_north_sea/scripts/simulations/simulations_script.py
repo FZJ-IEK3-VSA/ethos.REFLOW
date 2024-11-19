@@ -1,42 +1,49 @@
 import reskit as rk
-import os
 from reskit.wind.workflows.wind_workflow_manager import WindWorkflowManager
-from reskit import weather as rk_weather
-import numpy as np
+import os
 import pandas as pd
-import xarray as xr
 import json
-import time
 from utils.config import ConfigLoader
+import numpy as np
+import json
+from utils.reskit_code import calculate_weibull_params
+from utils.synthetic_power_curve import SyntheticPowerCurve
+import argparse
+
+##########################################################################################
+parser = argparse.ArgumentParser(description='Run the NEWA simulations')
+parser.add_argument('--scenario', type=str, help='The scenario to run the simulations for')
+
+scenario = parser.parse_args().scenario 
 
 ############ directory management and global variables ############
 config_loader = ConfigLoader()
 output_dir = config_loader.get_path("output")
 
 met_data_dir = config_loader.get_path("data", "met_data")
-newa_100m_path = os.path.join(met_data_dir, "newa_wind_speed_mean_100m.tif")
 project_settings_path = config_loader.get_path("settings", "project_settings")
 
 with open(project_settings_path) as file:
     project_settings = json.load(file)
 
-##### running multiple scenarios for exlucsions
-scenario = project_settings["scenario"]
-
 # configure logging
-log_file = os.path.join(ConfigLoader().get_path("output"), 'logs', 'PerformSimulations.log')
+log_file = os.path.join(config_loader.get_path("output"), 'logs', 'PerformSimulations.log')
 logger = config_loader.setup_task_logging('PerformSimulations', log_file)
-logger.info("Starting PerformSimulations task")  
 
+logger.info("Starting PerformSimulations task")  
 
 exclusions_settings_path = config_loader.get_path("settings", "exclusions_settings")
 with open(exclusions_settings_path, 'r') as file:
     exclusions_settings = json.load(file)
 
-placements_path = os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv")
-placements = pd.read_csv(placements_path)
+technology_settings_path = config_loader.get_path("settings", "technologies")
+with open(technology_settings_path, 'r') as file:
+    technology_settings = json.load(file)
 
-report_path = os.path.join(output_dir, f"report_{scenario}.json")
+capacity = technology_settings["wind"]["capacity"] 
+rotor_diam = technology_settings["wind"]["rotor_diameter"]
+cutin = technology_settings["wind"]["cut_in_wind_speed"]
+cutout = technology_settings["wind"]["cut_out_wind_speed"]
 
 ## set the year
 years = range(project_settings["start_year"], project_settings["end_year"] + 1)
@@ -44,13 +51,24 @@ years = range(project_settings["start_year"], project_settings["end_year"] + 1)
 ##########################################################################################
 ############################ DEFINE THE RESKIT WORKFLOW ##############################
 
+# Example input data of wind speed to capacity factor pairs for the synthetic power curve
+input_data = [
+    (8.0, 0.4566), (8.5, 0.5023), (9.0, 0.5403), (9.5, 0.5860),
+    (10.0, 0.6240), (10.5, 0.6545), (11.0, 0.6773), (11.5, 0.7141),
+    (12.0, 0.7509), (12.5, 0.7877), (13.0, 0.8245), (13.5, 0.8612),
+    (14.0, 0.8980), (14.5, 0.9348), (15.0, 0.9716), (15.5, 1.0)
+]
+
 def north_sea_offshore_wind_sim(
     placements,
+    year,
     era5_path,
     newa_100m_path,
     output_netcdf_path=os.path.join(output_dir, "wind_power_era5.nc"),
-    output_variables=None
-):
+    turbine_availablilty=0.88,
+    array_efficiency=0.9,
+    report_path=None,
+    ):
     """
     Simulates offshore wind generation using NASA's ERA5 database [1].
 
@@ -64,6 +82,12 @@ def north_sea_offshore_wind_sim(
         Path to a directory to put the output files, by default None
     output_variables : str, optional
         Restrict the output variables to these variables, by default None
+    turbine_availablilty : float, optional
+        The availability of the turbines, by default 0.88
+    array_efficiency : float, optional
+        The efficiency of the array, by default 0.9
+    report_path : str, optional
+        Path to the report file, by default None
 
     Returns
     -------
@@ -75,192 +99,263 @@ def north_sea_offshore_wind_sim(
     [1] European Centre for Medium-Range Weather Forecasts. (2024). ERA5 dataset. https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5.
 
     """
+    report = {}
+
+    logger.info(f"Initializing simulation for year {year}...")
+    parent_dir = os.path.dirname(report_path)
+    sim_dir = os.path.join(parent_dir, "simulations", "ERA5_timeseries")
+    if not os.path.exists(sim_dir):
+        os.makedirs(sim_dir)
+
+    # Step 1: Initialize a single SyntheticPowerCurve
+    logger.debug("Initializing synthetic power curve...")
+    synthetic_curve = SyntheticPowerCurve(
+        specificCapacity=None,
+        capacity=placements['capacity'][0], 
+        rotordiam=placements['rotor_diam'][0],  
+        cutin=3,    
+        cutout=31,
+        input_points=input_data
+    )
+    synthetic_curve = synthetic_curve.convolute_by_gaussian(scaling=0.01, base=0.00)
+    logger.debug("Synthetic power curve initialized successfully.") 
+
+    # Step 2: Initialize the Workflow Manager    
+    logger.debug("Initializing Wind Workflow Manager...")
     wf = WindWorkflowManager(placements)
 
-    wf.read(
-        variables=[
-            "elevated_wind_speed",
-            "surface_pressure",
-            "surface_air_temperature",
-            "boundary_layer_height"
-        ],
-        source_type="ERA5",
-        source=era5_path,
-        set_time_index=True,
-        verbose=False,
-    )
+    try:
+        wf.read(
+            variables=[
+                "elevated_wind_speed",
+                "surface_pressure",
+                "surface_air_temperature",
+                "boundary_layer_height"
+            ],
+            source_type="ERA5",
+            source=era5_path,
+            set_time_index=True,
+            verbose=False,
+        )
+        logger.info(f"Data successfully read from ERA5 for year {year}.")
+    except Exception as e:
+        logger.error(f"Error reading ERA5 data: {e}")
+        raise
 
-    wf.adjust_variable_to_long_run_average(
-        variable='elevated_wind_speed',
-        source_long_run_average=rk_weather.Era5Source.LONG_RUN_AVERAGE_WINDSPEED,
-        real_long_run_average=newa_100m_path,
-        spatial_interpolation="average"
-    )
+    ## Step 3: Adjust the wind speeds to the long run average
+    logger.info("Adjusting wind speeds to the long-run average...")
+    try:
+        wf.adjust_variable_to_long_run_average(
+            variable='elevated_wind_speed',
+            source_long_run_average=os.path.join(met_data_dir, "ERA5_wind_speed_100m_mean.tiff"),
+            real_long_run_average=newa_100m_path,
+            spatial_interpolation="average"
+        )
+        logger.info("Wind speed adjustment completed successfully.")
+    except Exception as e:
+        logger.error(f"Error during wind speed adjustment: {e}")
+        raise
 
-    ## set roughness for the sea
-    wf.set_roughness(0.0002)
+    ## Step 4: Extrapolate the wind speeds vertically
+    logger.info("Extrapolating wind speeds vertically to hub height...")
+    try:
+        wf.set_roughness(0.0002)
+        wf.logarithmic_projection_of_wind_speeds_to_hub_height(
+            consider_boundary_layer_height=True
+        )
+        wf.apply_air_density_correction_to_wind_speeds()
+        logger.info("Extrapolation and corrections applied successfully.")
+    except Exception as e:
+        logger.error(f"Error during wind speed extrapolation: {e}")
+        raise
 
-    ## use log law to project wind speeds to hub height
-    wf.logarithmic_projection_of_wind_speeds_to_hub_height(
-        consider_boundary_layer_height=True
-    )
+    # Step 5: Calculate Weibull parameters
+    logger.info("Calculating Weibull parameters...")
+    try:
+        wind_speed_hub = wf.sim_data['elevated_wind_speed']  # Extract hub height wind speed
+        shape, scale = calculate_weibull_params(wind_speed_hub.flatten())
+        mean_wind_speed = wind_speed_hub.mean().item()
+        logger.info(f"Weibull shape: {shape}, scale: {scale}, mean wind speed: {mean_wind_speed:.2f} m/s")
+    except Exception as e:
+        logger.error(f"Error calculating Weibull parameters: {e}")
+        raise
 
-    wf.apply_air_density_correction_to_wind_speeds()
+    # Step X: Aggregate Weibull parameters and wind speed distribution per country
+    logger.info("Aggregating Weibull parameters and wind speed distribution per country...")
     
-    # gaussian convolution of the power curve to account for statistical events in wind speed
-    wf.convolute_power_curves(
-        scaling=0.01,  # standard deviation of gaussian equals scaling*v + base
-        base=0.00,  # values are derived from validation with real wind turbine data
-    )
+    try:
+        report["country_stats"] = {}
+        
+        for country, group in placements.groupby("country"):
+            # Initialize stats for the country
+            if country not in report["country_stats"]:
+                report["country_stats"][country] = []
+            
+            # Extract wind speeds for the country group
+            wind_speeds_country = wf.sim_data['elevated_wind_speed'][:, group.index].flatten()
+            
+            # Calculate Weibull parameters
+            shape_country, scale_country = calculate_weibull_params(wind_speeds_country)
+            mean_speed_country = np.mean(wind_speeds_country)
+            
+            # Calculate wind speed distribution
+            wind_speed_bins = np.arange(0, 40, 1)  # Bins from 0 to 40 m/s
+            wind_speed_hist_country, _ = np.histogram(wind_speeds_country, bins=wind_speed_bins, density=True)
+            wind_speed_distribution_country = wind_speed_hist_country.tolist()
+            
+            # Add stats to the report
+            report["country_stats"][country].append({
+                "weibull_shape": shape_country,
+                "weibull_scale": scale_country,
+                "mean_wind_speed": mean_speed_country,
+                "wind_speed_distribution": wind_speed_distribution_country
+            })
 
-    wf.simulate()
-
-    return wf.to_xarray(
-        output_netcdf_path=output_netcdf_path, output_variables=None
-    )
-
-
-##########################################################################################
-############################ DEFINE THE FUNCTION TO CALCULATE FLH ##############################
-## based on Stanely Risch work
-
-def calculate_flh_generation(xds, placements, turbine_availablilty, array_efficiency, year):
-    '''
-    Calculate Full Load Hours for wind turbine placements based on capacity factors.
+            output_fname = os.path.join(sim_dir, country)
+            if not os.path.exists(output_fname):
+                os.makedirs(output_fname)
+            try:
+                with open(os.path.join(output_fname, f"wind_power_era5_{year}.json"), "w") as file:
+                    json.dump(report, file, indent=4)
+                logger.info(f"Saved Weibull stats report to {output_fname}")
+            except Exception as e:
+                logger.error(f"Error saving Weibull stats report: {e}")
+                raise
+            
+        logger.info("Weibull parameters and wind speed distributions aggregated successfully.")
+    except Exception as e:
+        logger.error(f"Error aggregating Weibull parameters and wind speed distributions: {e}")
+        raise
     
-    Parameters:
-    -----------
-    xds : xarray.Dataset
-        The wind power production data. Must be hourly time series data.
-    placements : pandas DataFrame 
-        The placements of the wind turbines.
-    year : int
-        The year for which to calculate the Full Load Hours.
+    # Step 6: Simulate power output
+    logger.info("Simulating power output...")
+    try:
+        total_loss_factor = turbine_availablilty * array_efficiency
+        total_loss_factor = 1 - total_loss_factor
+        capacity_factor_array = synthetic_curve.simulate(wf.sim_data['elevated_wind_speed'])
+        wf.sim_data['capacity_factor'] = capacity_factor_array
+        wf.apply_loss_factor(total_loss_factor)
+        logger.info("Power output simulation completed.")
+    except Exception as e:
+        logger.error(f"Error during power output simulation: {e}")
+        raise
 
-    Returns:
-    --------
-    placements: pandas DataFrame
-        A DataFrame with the Full Load Hours for each placement.
-    '''
-    placements[f"FLH_{year}"] = 0.0
-    placements[f"Generation_{year}_MWh"] = 0.0
+    # Step 7: Calculate FLH and AEY
+    logger.info("Calculating FLH and AEY metrics...")
+    try:
+        flh_array = np.sum(capacity_factor_array, axis=0)
+        aey_array = (flh_array * wf.placements['capacity'].iloc[0]) / 1000
+        placements[f"FLH_{year}"] = flh_array
+        placements[f"AEY_{year}_MWh"] = aey_array
+        logger.info("FLH, AEY, and Generation metrics calculated successfully.")
+    except Exception as e:
+        logger.error(f"Error calculating FLH and AEY metrics: {e}")
+        raise
 
-    total_locations = len(xds.location)
+    # Step 9: Save results to NetCDF
+    logger.info(f"Saving results to NetCDF at {output_netcdf_path}...")
+    try:
+        xds = wf.to_xarray(output_netcdf_path=output_netcdf_path)
+    except Exception as e:
+        logger.error(f"Error saving results to NetCDF: {e}")
+        raise
 
-    ## calculate the total loss factor from the turbine availability and array0 efficiency
-    total_loss_factor = turbine_availablilty * array_efficiency
+    return xds, placements
 
-    for index, location in enumerate(xds.location):
-        if index % 1000 == 0:
-            current_time = time.strftime("%H:%M:%S", time.localtime())
-            logger.info(f"Processing locations {index}-{min(index+999, total_locations-1)} started at: {current_time}")
-            batch_start_time = time.time()
 
-        # find the corresponding placement and update the FLH
-        match_index = placements.ID == xds.ID[location].values
+def calculate_country_generation_stats(report_path, placements, start_year, end_year):
+    years = range(start_year, end_year + 1)
 
-        # calculate the FLH for each placement
-        flh = pd.Series(xds.capacity_factor[:, location]).sum()
+    data_by_country_year = placements.groupby("country").agg({f"AEY_{year}_MWh": 'sum' for year in years})
 
-        # update the FLH for the placement (including the loss factor)
-        placements.loc[match_index, f"FLH_{year}"] = flh #* total_loss_factor
+    # Convert MWh to TWh
+    data_by_country_year = data_by_country_year / 1e6
 
-        # Calculate the generation for each turbine, Generation = FLH * Capacity
-        placements.loc[match_index, f"Generation_{year}_MWh"] = (flh * placements.loc[match_index, 'capacity']) / 1000
+    # Prepare data for stacked area chart
+    data_for_plotting = data_by_country_year.transpose()
 
-        if (index + 1) % 1000 == 0 or index == total_locations - 1: # After completing each batch or the last location
-            batch_time = time.time() - batch_start_time
-            logger.info(f"Batch {index-999}-{index} processed in {batch_time:.2f} seconds.")
+    # Extract labels for each country (keep the 3-letter codes for processing)
+    country_codes = data_for_plotting.columns.tolist()
 
-            # Estimate remaining time
-            locations_left = total_locations - (index + 1)
-            batches_left = locations_left / 1000
-            estimated_time_left = batches_left * batch_time
-            logger.info(f"Estimated time left: {estimated_time_left:.2f} seconds.")
+    # open the scenario report file
+    with open(report_path, 'r') as file:
+        scenario_report = json.load(file)
 
-    logger.info("All locations processed.")
+    # calculate mean, min and max generation for each country
+    for country in country_codes:
+        country_data = {
+            'number of turbines': placements[placements["country"] == country].shape[0],
+            'installable_capacity': placements[placements["country"] == country].shape[0] * 15 / 1000,
+            'mean_generation': data_by_country_year.loc[country].mean(),
+            'max_generation': data_by_country_year.loc[country].max(),
+            'min_generation': data_by_country_year.loc[country].min()
+        }
+        if country in scenario_report:
+            scenario_report[country].update(country_data)
+        else:
+            scenario_report[country] = country_data
 
-    return placements
+    # save the updated scenario report
+    with open(os.path.join(output_dir, f'report_{scenario}.json'), 'w') as file:
+        json.dump(scenario_report, file, indent=4)
+
+    logger.info("Country generation statistics saved to the report.json file.")
+
 
 ########################################################################################
 ########################### RUN THE SIMULATION  #########################################
 
-logger.info("Running the simulation...")
+# ##logger.info("Running the simulation...")
 output_netcdf_directory = os.path.join(output_dir, "simulations")
-# make sure that the output directory exists
+
+## make sure that the output directory exists
 if not os.path.exists(output_netcdf_directory):
     os.makedirs(output_netcdf_directory)
+
+report_path = os.path.join(output_dir, f"report_{scenario}.json")
+
+placements_path = os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv")
+placements = pd.read_csv(placements_path)
 
 for year in years:
     logger.info(f"Simulating the year {year}...")
     # run the simulation
     era5_path = os.path.join(met_data_dir, "ERA5", "processed", f"{year}")
-    xds = north_sea_offshore_wind_sim(placements, era5_path, newa_100m_path, output_netcdf_path=os.path.join(output_netcdf_directory, f"wind_power_era5_{year}_{scenario}.nc"))
+    newa_100m_path = os.path.join(met_data_dir, "newa_wind_speed_mean_100m.tif")
+    xds, placements = north_sea_offshore_wind_sim(placements,
+                                                    year,            
+                                                    era5_path, 
+                                                    newa_100m_path, 
+                                                    output_netcdf_path=os.path.join(output_netcdf_directory, f"wind_power_era5_{year}_{scenario}.nc"),
+                                                    turbine_availablilty=technology_settings["wind"][f"turbine_availability_{scenario}"],
+                                                    array_efficiency=technology_settings["wind"][f"array_efficiency"],
+                                                    report_path=report_path
+                                                    )
 
-#######################################################################################
-############################# CALCULATE FLH  #########################################
+placements.to_csv(placements_path, index=False)
 
 for year in years:
-    # in case this was run before, we load up the file instead of using the xds variable directly
-    xds = xr.open_dataset(os.path.join(output_netcdf_directory, f"wind_power_era5_{year}_{scenario}.nc"))
+    logger.info("Updating and saving the report...")
+    try:
+        with open(report_path, "r") as file:
+            report = json.load(file)
+        report[f"Total_Generation_{year}_TWh"] = placements[f"AEY_{year}_MWh"].sum() / 1e6
+        report[f"Mean_Capacity_Factor_{year}"] = (placements[f"FLH_{year}"].mean() / 8760) * 100
+        with open(report_path, 'w') as file:
+            json.dump(report, file, indent=4)
+        logger.info("Report updated and saved successfully.")
+    except Exception as e:
+        logger.error(f"Error updating/saving the report: {e}")
+        raise
 
-    ## calculate the FLH and Generation
-    logger.info("Calculating the Full Load Hours and annual Generation per turbine...")
-    placements = calculate_flh_generation(xds, placements, turbine_availablilty=0.97, array_efficiency=0.9, year=year)
+#################### GENERATE REPORTS FOR EACH COUNTRY ##############################
 
-    # save the placements
-    placements.to_csv(os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv"), index=False)
+placements_path = os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv")
+placements = pd.read_csv(placements_path)
 
-    # load the placements
-    placements = pd.read_csv(os.path.join(output_dir, "geodata", f"turbine_placements_4326_{scenario}.csv"))
+#################### GENERATE COUNTRY GENERATION STATS ##############################
 
-    # calculate the total generation
-    total_generation = placements[f"Generation_{year}_MWh"].sum() / 1e6
+logger.info("Calculating country-level generation statistics...")
+calculate_country_generation_stats(report_path, placements, project_settings["start_year"], project_settings["end_year"])
 
-    # calculate the mean capacity factor
-    mean_capacity_factor = (placements[f"FLH_{year}"].mean() / 8760) * 100
-
-    # add the results to the output report
-    with open(report_path, "r") as file:
-        report = json.load(file)
-
-    # add the new columns
-    report[f"Total_Generation_{year}_TWh"] = total_generation
-    report[f"Mean_Capacity_Factor_{year}"] = mean_capacity_factor
-
-    # Save the updated report back to report.json
-    with open(report_path, 'w') as file:
-        json.dump(report, file, indent=4)
-
-# calculate the OVERALL mean CF and generation - do this outside the main loop in case certain years are calculated separately
-        
-# initialize the sums
-total_generation_sum = 0
-mean_capacity_factor_sum = 0
-total_generation_count = 0
-mean_capacity_factor_count = 0
-
-# add the results to the output report
-with open(report_path, "r") as file:
-    report = json.load(file)
-
-# Iterate through report keys and sum values for matching patterns
-for key, value in report.items():
-    if "Total_Generation" in key and "Overall_Mean_Total_Generation_TWh" not in key:
-        total_generation_sum += value
-        total_generation_count += 1
-    elif "Mean_Capacity_Factor" in key and "Overall_Mean_Capacity_Factor" not in key:
-        mean_capacity_factor_sum += value
-        mean_capacity_factor_count += 1
-
-# Calculate the mean values
-if total_generation_count > 0:
-    report["Overall_Mean_Total_Generation_TWh"] = total_generation_sum / total_generation_count
-if mean_capacity_factor_count > 0:
-    report["Overall_Mean_Capacity_Factor"] = mean_capacity_factor_sum / mean_capacity_factor_count
-
-logger.info("Results saved to the report.json file.")
-
-# Save the updated report back to report.json
-with open(report_path, 'w') as file:
-    json.dump(report, file, indent=4)
+logger.info("Simulation completed successfully. Final reports generated.")

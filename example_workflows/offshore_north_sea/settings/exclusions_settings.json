@@ -9,7 +9,7 @@
     },
     "desalination_plants": {
         "paths": ["desalination_plants/Locations_Desalination_Plants_20210830_point.shp"], 
-        "buffer": 200
+        "buffer": 1000
     },
     "dumped_munitions": {
         "paths": [
@@ -32,18 +32,18 @@
     },
     "military_areas_points": {
         "paths": ["military_areas/EMODnet_HA_MilitaryAreas_pt_20221216_point.shp"], 
-        "buffer": 400
+        "buffer": 10000
     },
     "military_areas_polygon": {
         "paths": ["military_areas/EMODnet_HA_MilitaryAreas_pg_20221216_polygon.shp"], 
-        "buffer": 0
+        "buffer": 10000
     },
     "ocean_energy_projects": {
         "paths": [
             "ocean_energy_projects/EMODnet_HA_OceanEnergy_Projects_Locations_20231120_point.shp",
             "ocean_energy_projects/EMODnet_HA_OceanEnergy_TestSites_20231120_polygon.shp"
         ], 
-        "buffer": 500
+        "buffer": 1500
     },
     "oil_and_gas": {
         "paths": ["oil_and_gas/EMODnet_HA_OG_Active_Licences_20230228_polygon.shp"],
@@ -63,7 +63,7 @@
     },
     "protected_areas": {
         "paths": ["protected_areas/EMODnet_HA_Environment_WDPA_Sep2023_20230911_multipolygon.shp"],
-        "buffer": 1000
+        "buffer": 3000
     },
     "telecommunication_cables": {
         "paths": [
@@ -85,7 +85,7 @@
     "shipping_lanes": {
         "paths": ["shipping_lanes/north_sea_shipping_lanes_2022.tif"],
         "value": "[-0],[1000-]",
-        "buffer": 500
+        "buffer": 3000
     }
 }
 }

@@ -33,23 +33,30 @@ class ExtractMonthlyData(luigi.Task):
         
         scenarios = ["1000m_depth", "50m_depth"]
 
-        def extract_monthly_data(ds):
+        def extract_monthly_data(ds, scenario):
             # Ensure time is in a datetime format
             ds['time'] = pd.to_datetime(ds['time'].values)
             
             # Extract capacity factor data and add month and year columns
-            df = ds['capacity_factor'].to_dataframe().reset_index()
+            # Modify the extraction to include 'country' as a separate column based on location
+            df = ds[['capacity_factor']].to_dataframe().reset_index()
+
+            # Add 'country' information from the dataset by merging on location, as 'country' is a location-based variable
+            df = df.merge(ds[['country']].to_dataframe().reset_index(), on='location', how='left')
+
             df['month'] = df['time'].dt.month
             df['year'] = df['time'].dt.year
             
             # Group by year, month, and location, then calculate the mean capacity factor for each group
-            monthly_mean = df.groupby(['year', 'month', 'location'])['capacity_factor'].mean().reset_index()
+            # Include "country" in the groupby
+            monthly_mean = df.groupby(['year', 'month', 'location', 'country'])['capacity_factor'].mean().reset_index()
             
-            return monthly_mean
+            return monthly_mean 
+
 
         for scenario in scenarios:
             # List of file paths (one per year)
-            file_paths = [f'wind_power_era5_{year}_{scenario}.nc' for year in range(2013, 2024)]
+            file_paths = [f'wind_power_era5_{year}_{scenario}.nc' for year in range(2014, 2019)]
 
             # Initialize a list to collect all data points
             all_data = []
@@ -58,14 +65,15 @@ class ExtractMonthlyData(luigi.Task):
             for file_path in file_paths:
                 logger.info(f'Processing file: {file_path}')
                 ds = xr.open_dataset(os.path.join(output_dir, "simulations", file_path))
-                yearly_data = extract_monthly_data(ds)
+                yearly_data = extract_monthly_data(ds, scenario)
                 all_data.append(yearly_data)
 
             logger.info('All files processed. Concatenating data...')    
             all_data = pd.concat(all_data, ignore_index=True)
 
             # Pivot the data so that each location has its own row and each column is a month-year combination
-            pivoted_data = all_data.pivot_table(index='location', columns=['year', 'month'], values='capacity_factor')
+            # When pivoting, include "country" as an index
+            pivoted_data = all_data.pivot_table(index=['location', 'country'], columns=['year', 'month'], values='capacity_factor')
 
             # Flatten the MultiIndex columns
             pivoted_data.columns = [f'{month:02d}-{year}' for year, month in pivoted_data.columns]
